@@ -20,10 +20,9 @@
         <!-- Seção 1 — Identificação do App -->
         <v-card class="mb-6 app-card" variant="flat">
           <v-card-title class="d-flex align-center ga-2 pa-5 pb-1">
-            <v-icon
-              color="primary"
-              size="small"
-            >mdi-card-account-details-outline</v-icon>
+            <v-icon color="primary" size="small"
+              >mdi-card-account-details-outline</v-icon
+            >
             Identificação do App
           </v-card-title>
           <v-card-text class="pa-5 pt-4">
@@ -35,14 +34,32 @@
                 <v-text-field
                   v-model="newApp.name"
                   autofocus
+                  :color="nameCheckColor"
                   density="comfortable"
-                  hide-details
+                  :error-messages="nameError ? [nameError] : []"
+                  :loading="nameChecking"
                   placeholder="meu-tcc-2024"
                   variant="outlined"
-                />
+                  @update:model-value="onNameInput"
+                >
+                  <template
+                    v-if="nameAvailable === true && !nameChecking && !nameError"
+                    #append-inner
+                  >
+                    <v-icon color="success" size="20">mdi-check-circle</v-icon>
+                  </template>
+                  <template
+                    v-else-if="nameAvailable === false && !nameChecking"
+                    #append-inner
+                  >
+                    <v-icon color="error" size="20">mdi-close-circle</v-icon>
+                  </template>
+                </v-text-field>
               </v-col>
               <v-col class="pl-3" cols="auto">
-                <span class="text-body-2 text-medium-emphasis">.class.fabricadesoftware.ifc.edu.br</span>
+                <span class="text-body-2 text-medium-emphasis"
+                  >.class.fabricadesoftware.ifc.edu.br</span
+                >
               </v-col>
             </v-row>
             <div class="text-caption text-medium-emphasis mt-1">
@@ -132,10 +149,9 @@
                 @update:search="handleRepoSearch"
               >
                 <template #chip="{ item }">
-                  <v-icon
-                    class="mr-1"
-                    size="small"
-                  >mdi-source-repository</v-icon>
+                  <v-icon class="mr-1" size="small"
+                    >mdi-source-repository</v-icon
+                  >
                   {{ item.raw.full_name }}
                 </template>
                 <template #item="{ item, props: itemProps }">
@@ -215,7 +231,9 @@
               <v-expansion-panel-title class="pa-5">
                 <div class="d-flex align-center ga-2">
                   <v-icon color="primary" size="small">mdi-key-variant</v-icon>
-                  <span class="text-subtitle-1 font-weight-medium">Variáveis de Ambiente</span>
+                  <span class="text-subtitle-1 font-weight-medium"
+                    >Variáveis de Ambiente</span
+                  >
                   <v-chip
                     v-if="envVars.length > 0"
                     color="primary"
@@ -281,11 +299,9 @@
                 </v-table>
 
                 <div v-else class="text-center py-4">
-                  <v-icon
-                    class="mb-2"
-                    color="grey"
-                    size="32"
-                  >mdi-variable</v-icon>
+                  <v-icon class="mb-2" color="grey" size="32"
+                    >mdi-variable</v-icon
+                  >
                   <p class="text-body-2 text-medium-emphasis">
                     Nenhuma variável adicionada ainda.
                   </p>
@@ -302,7 +318,9 @@
               <v-expansion-panel-title class="pa-5">
                 <div class="d-flex align-center ga-2">
                   <v-icon color="primary" size="small">mdi-cog-outline</v-icon>
-                  <span class="text-subtitle-1 font-weight-medium">Configurações de Build (Opcional)</span>
+                  <span class="text-subtitle-1 font-weight-medium"
+                    >Configurações de Build (Opcional)</span
+                  >
                 </div>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
@@ -349,7 +367,9 @@
             <v-divider />
             <v-card-text class="pa-5">
               <div class="d-flex justify-space-between mb-3">
-                <span class="text-body-2 text-medium-emphasis">Repositório</span>
+                <span class="text-body-2 text-medium-emphasis"
+                  >Repositório</span
+                >
                 <span
                   class="text-body-2 font-weight-medium text-truncate ml-3"
                   style="max-width: 180px"
@@ -365,7 +385,9 @@
                 </span>
               </div>
               <div class="d-flex justify-space-between mb-3">
-                <span class="text-body-2 text-medium-emphasis">Visibilidade</span>
+                <span class="text-body-2 text-medium-emphasis"
+                  >Visibilidade</span
+                >
                 <span class="text-body-2 font-weight-medium">
                   <v-icon size="x-small">{{ summaryVisibilityIcon }}</v-icon>
                   {{ summaryVisibility }}
@@ -376,7 +398,9 @@
                 class="d-flex justify-space-between mb-3"
               >
                 <span class="text-body-2 text-medium-emphasis">Variáveis</span>
-                <span class="text-body-2 font-weight-medium">{{ envVars.length }} configurada(s)</span>
+                <span class="text-body-2 font-weight-medium"
+                  >{{ envVars.length }} configurada(s)</span
+                >
               </div>
               <div
                 v-if="canCustomize && customDokkuName.trim()"
@@ -445,10 +469,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="dialogAddEnvVar = false"
-          >Cancelar</v-btn>
+          <v-btn variant="text" @click="dialogAddEnvVar = false"
+            >Cancelar</v-btn
+          >
           <v-btn
             color="primary"
             :disabled="!tempEnvVar.key || !tempEnvVar.value"
@@ -489,10 +512,9 @@ PORT=3000"
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="dialogImportEnv = false"
-          >Cancelar</v-btn>
+          <v-btn variant="text" @click="dialogImportEnv = false"
+            >Cancelar</v-btn
+          >
           <v-btn
             color="primary"
             :disabled="!envFileContent"
@@ -507,311 +529,376 @@ PORT=3000"
 </template>
 
 <script setup lang="ts">
-  import type { GitRepo } from '@/interfaces'
+import type { GitRepo } from "@/interfaces";
 
-  import { computed, onMounted, ref, watch } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-  import {
-    useAppStore,
-    useAuthStore,
-    useGitStore,
-    useProjectStore,
-  } from '@/stores'
+import AppsService from "@/services/apps";
+import {
+  useAppStore,
+  useAuthStore,
+  useGitStore,
+  useProjectStore,
+} from "@/stores";
 
-  const route = useRoute()
-  const router = useRouter()
-  const projectId = (route.params as { projectId: string }).projectId || ''
+const route = useRoute();
+const router = useRouter();
+const projectId = (route.params as { projectId: string }).projectId || "";
 
-  const appStore = useAppStore()
-  const authStore = useAuthStore()
-  const gitStore = useGitStore()
-  const projectStore = useProjectStore()
+const appStore = useAppStore();
+const authStore = useAuthStore();
+const gitStore = useGitStore();
+const projectStore = useProjectStore();
 
-  // Permissão de nome personalizado
-  const canCustomize = computed(() => {
-    return authStore.user?.is_fabric || authStore.user?.is_superuser || false
-  })
+// Permissão de nome personalizado
+const canCustomize = computed(() => {
+  return authStore.user?.is_fabric || authStore.user?.is_superuser || false;
+});
 
-  // Estado principal
-  const sourceMode = ref<'github' | 'manual'>('github')
-  const creating = ref(false)
-  const customDokkuName = ref('')
-  const newApp = ref({ name: '', git: '', branch: '' })
-  const selectedRepo = ref<GitRepo | null>(null)
-  const selectedBranch = ref('')
+// Estado principal
+const sourceMode = ref<"github" | "manual">("github");
+const creating = ref(false);
+const customDokkuName = ref("");
+const newApp = ref({ name: "", git: "", branch: "" });
+const selectedRepo = ref<GitRepo | null>(null);
+const selectedBranch = ref("");
 
-  // Build
-  const buildPreset = ref('Node.js')
-  const buildCommand = ref('')
-  const frameworkPresets = [
-    'Node.js',
-    'Python',
-    'Django',
-    'React',
-    'Vue.js',
-    'Next.js',
-    'Nuxt.js',
-    'Outro',
-  ]
+// --- Verificação de nome em tempo real ---
+const nameChecking = ref(false);
+const nameAvailable = ref<boolean | null>(null);
+const nameError = ref("");
+let nameCheckTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const buildCommandPlaceholder = computed(() => {
-    const map: Record<string, string> = {
-      'Node.js': 'npm run build',
-      'Python': 'pip install -r requirements.txt',
-      'Django': 'python manage.py collectstatic --noinput',
-      'React': 'npm run build',
-      'Vue.js': 'npm run build',
-      'Next.js': 'npm run build',
-      'Nuxt.js': 'npm run build',
-      'Outro': '',
-    }
-    return map[buildPreset.value] || ''
-  })
+const nameCheckColor = computed(() => {
+  if (nameChecking.value) return "primary";
+  if (nameAvailable.value === true) return "success";
+  if (nameAvailable.value === false) return "error";
+  return undefined;
+});
 
-  // Variáveis de ambiente
-  const envVars = ref<Array<{ key: string, value: string }>>([])
-  const dialogAddEnvVar = ref(false)
-  const tempEnvVar = ref({ key: '', value: '' })
-  const dialogImportEnv = ref(false)
-  const envFileContent = ref('')
-  const importError = ref('')
+function onNameInput(value: string) {
+  // Limpa timer anterior (debounce)
+  if (nameCheckTimer) clearTimeout(nameCheckTimer);
+  nameAvailable.value = null;
+  nameError.value = "";
 
-  // Breadcrumbs
-  const breadcrumbs = computed(() => [
-    { title: 'Dashboard', to: '/dashboard' },
-    { title: 'Projetos', to: '/projects' },
-    {
-      title: projectStore.currentProject?.name || 'Projeto',
-      to: `/projects/${projectId}`,
-    },
-    { title: 'Novo App', disabled: true },
-  ])
-
-  // Branch options (quando repo selecionado)
-  const branchOptions = computed(() => {
-    if (selectedRepo.value?.default_branch) {
-      return [selectedRepo.value.default_branch]
-    }
-    return ['main', 'master', 'develop']
-  })
-
-  // Resumo computado
-  const summaryRepo = computed(() => {
-    if (sourceMode.value === 'github' && selectedRepo.value) {
-      return selectedRepo.value.full_name
-    }
-    if (sourceMode.value === 'manual' && newApp.value.git) {
-      try {
-        const url = new URL(newApp.value.git)
-        return url.pathname.replace(/^\//, '').replace(/\.git$/, '')
-      } catch {
-        return newApp.value.git
-      }
-    }
-    return '—'
-  })
-
-  const summaryBranch = computed(() => {
-    if (sourceMode.value === 'github') {
-      return selectedBranch.value || selectedRepo.value?.default_branch || 'main'
-    }
-    return newApp.value.branch || 'main'
-  })
-
-  const summaryVisibility = computed(() => {
-    if (sourceMode.value === 'github' && selectedRepo.value) {
-      return selectedRepo.value.private ? 'Privado' : 'Público'
-    }
-    return 'Público'
-  })
-
-  const summaryVisibilityIcon = computed(() => {
-    if (sourceMode.value === 'github' && selectedRepo.value?.private) {
-      return 'mdi-lock'
-    }
-    return 'mdi-earth'
-  })
-
-  const canDeploy = computed(() => {
-    if (!newApp.value.name.trim()) return false
-    if (sourceMode.value === 'github') return !!selectedRepo.value
-    return !!newApp.value.git.trim()
-  })
-
-  // Carregar dados iniciais
-  onMounted(async () => {
-    if (!projectStore.currentProject) {
-      await projectStore.fetchProject(projectId)
-    }
-    if (gitStore.repos.length === 0) {
-      gitStore.fetchRepos()
-    }
-  })
-
-  // Sincronizar branch quando selecionar repo
-  function handleRepoSearch () {
-    if (gitStore.repos.length === 0) {
-      gitStore.fetchRepos()
-    }
+  const name = (value || "").trim().toLowerCase();
+  if (!name) {
+    nameChecking.value = false;
+    return;
+  }
+  // Validação local rápida
+  if (name.length < 2) {
+    nameError.value = "Nome deve ter pelo menos 2 caracteres.";
+    nameAvailable.value = false;
+    return;
+  }
+  if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(name) && name.length > 1) {
+    nameError.value = "Use apenas letras minúsculas, números e hífens.";
+    nameAvailable.value = false;
+    return;
   }
 
-  // Mascarar valor de variável
-  function maskValue (value: string) {
-    if (value.length <= 4) return '••••'
-    return value.slice(0, 4) + '••••••'
-  }
-
-  // Env vars
-  function buildVariables (): Record<string, string> | undefined {
-    if (envVars.value.length === 0) return undefined
-    const variables: Record<string, string> = {}
-    for (const envVar of envVars.value) {
-      variables[envVar.key] = envVar.value
-    }
-    return variables
-  }
-
-  function confirmAddEnvVar () {
-    if (!tempEnvVar.value.key || !tempEnvVar.value.value) return
-    envVars.value.push({ ...tempEnvVar.value })
-    dialogAddEnvVar.value = false
-    tempEnvVar.value = { key: '', value: '' }
-  }
-
-  function importEnvFile () {
-    importError.value = ''
-    if (!envFileContent.value.trim()) {
-      importError.value = 'Por favor, cole o conteúdo do arquivo .env'
-      return
-    }
-
+  // Debounce de 400ms antes de chamar o backend
+  nameChecking.value = true;
+  nameCheckTimer = setTimeout(async () => {
     try {
-      const lines = envFileContent.value.split('\n')
-      let importedCount = 0
-
-      for (const line of lines) {
-        const trimmed = line.trim()
-        if (!trimmed || trimmed.startsWith('#')) continue
-
-        const equalIndex = trimmed.indexOf('=')
-        if (equalIndex === -1) continue
-
-        const key = trimmed.slice(0, equalIndex).trim()
-        let value = trimmed.slice(equalIndex + 1).trim()
-
-        if (
-          (value.startsWith('\'') && value.endsWith('\''))
-          || (value.startsWith('"') && value.endsWith('"'))
-        ) {
-          value = value.slice(1, -1)
-        }
-
-        if (key && value) {
-          const existingIndex = envVars.value.findIndex(v => v.key === key)
-          if (existingIndex === -1) {
-            envVars.value.push({ key, value })
-          } else {
-            const existing = envVars.value[existingIndex]
-            if (existing) existing.value = value
-          }
-          importedCount++
-        }
+      const result = await AppsService.checkName(name);
+      // Só atualiza se ainda for o mesmo nome digitado
+      if (newApp.value.name.trim().toLowerCase() === name) {
+        nameAvailable.value = result.available;
+        nameError.value = result.available
+          ? ""
+          : result.reason || "Nome já está em uso.";
       }
-
-      if (importedCount === 0) {
-        importError.value
-          = 'Nenhuma variável válida encontrada no formato KEY=VALUE'
-        return
-      }
-
-      dialogImportEnv.value = false
-      envFileContent.value = ''
-    } catch (error_) {
-      importError.value = 'Erro ao processar arquivo .env'
-      console.error('Erro ao importar .env:', error_)
-    }
-  }
-
-  // Watch do selectedRepo para preencher campos
-  watch(selectedRepo, repo => {
-    if (repo) {
-      if (!newApp.value.name) newApp.value.name = repo.name
-      newApp.value.git = repo.clone_url
-      selectedBranch.value = repo.default_branch
-    }
-  })
-
-  // Deploy
-  async function handleDeploy () {
-    const name = newApp.value.name.trim()
-    if (!name) return
-
-    let git = ''
-    let branch: string | undefined
-
-    if (sourceMode.value === 'github' && selectedRepo.value) {
-      git = selectedRepo.value.clone_url
-      branch = selectedBranch.value || selectedRepo.value.default_branch
-    } else {
-      git = newApp.value.git.trim()
-      branch = newApp.value.branch || undefined
-    }
-
-    if (!git) return
-
-    creating.value = true
-    try {
-      const app = await appStore.createApp({
-        name,
-        git,
-        branch,
-        project: projectId,
-        variables: buildVariables(),
-        ...(canCustomize.value && customDokkuName.value.trim()
-          ? { name_dokku: customDokkuName.value.trim() }
-          : {}),
-      })
-
-      // Após criar, buscar status da task para checar erro de deploy key ou permissão de org
-      if (app?.id) {
-        try {
-          const status = await appStore.fetchAppStatus(String(app.id))
-          // Detecta erro de deploy keys desabilitadas pelo error_type
-          if (
-            status?.state === 'FAILURE'
-            && (status as any).error_type === 'DeployKeysDisabled'
-          ) {
-            router.push({
-              path: '/projects/deploy-keys-disabled',
-              query: { help_url: (status as any).help_url || undefined },
-            })
-            return
-          }
-          // Detecta erro de permissão de organização
-          if (
-            status?.state === 'FAILURE'
-            && (status as any).error_type === 'OrgPermissionDenied'
-          ) {
-            router.push({
-              path: '/projects/org-permission-denied',
-              query: { help_url: (status as any).help_url || undefined },
-            })
-            return
-          }
-        } catch {
-        // Se falhar ao buscar status, apenas segue fluxo normal
-        }
-        router.push(`/projects/${projectId}/${app.id}`)
-      } else {
-        router.push(`/projects/${projectId}`)
-      }
-    } catch (error_) {
-      console.error('Erro ao criar app:', error_)
+    } catch {
+      // Se falhar, não bloqueia o usuário
+      nameAvailable.value = null;
+      nameError.value = "";
     } finally {
-      creating.value = false
+      nameChecking.value = false;
+    }
+  }, 400);
+}
+
+onUnmounted(() => {
+  if (nameCheckTimer) clearTimeout(nameCheckTimer);
+});
+
+// Build
+const buildPreset = ref("Node.js");
+const buildCommand = ref("");
+const frameworkPresets = [
+  "Node.js",
+  "Python",
+  "Django",
+  "React",
+  "Vue.js",
+  "Next.js",
+  "Nuxt.js",
+  "Outro",
+];
+
+const buildCommandPlaceholder = computed(() => {
+  const map: Record<string, string> = {
+    "Node.js": "npm run build",
+    Python: "pip install -r requirements.txt",
+    Django: "python manage.py collectstatic --noinput",
+    React: "npm run build",
+    "Vue.js": "npm run build",
+    "Next.js": "npm run build",
+    "Nuxt.js": "npm run build",
+    Outro: "",
+  };
+  return map[buildPreset.value] || "";
+});
+
+// Variáveis de ambiente
+const envVars = ref<Array<{ key: string; value: string }>>([]);
+const dialogAddEnvVar = ref(false);
+const tempEnvVar = ref({ key: "", value: "" });
+const dialogImportEnv = ref(false);
+const envFileContent = ref("");
+const importError = ref("");
+
+// Breadcrumbs
+const breadcrumbs = computed(() => [
+  { title: "Dashboard", to: "/dashboard" },
+  { title: "Projetos", to: "/projects" },
+  {
+    title: projectStore.currentProject?.name || "Projeto",
+    to: `/projects/${projectId}`,
+  },
+  { title: "Novo App", disabled: true },
+]);
+
+// Branch options (quando repo selecionado)
+const branchOptions = computed(() => {
+  if (selectedRepo.value?.default_branch) {
+    return [selectedRepo.value.default_branch];
+  }
+  return ["main", "master", "develop"];
+});
+
+// Resumo computado
+const summaryRepo = computed(() => {
+  if (sourceMode.value === "github" && selectedRepo.value) {
+    return selectedRepo.value.full_name;
+  }
+  if (sourceMode.value === "manual" && newApp.value.git) {
+    try {
+      const url = new URL(newApp.value.git);
+      return url.pathname.replace(/^\//, "").replace(/\.git$/, "");
+    } catch {
+      return newApp.value.git;
     }
   }
+  return "—";
+});
+
+const summaryBranch = computed(() => {
+  if (sourceMode.value === "github") {
+    return selectedBranch.value || selectedRepo.value?.default_branch || "main";
+  }
+  return newApp.value.branch || "main";
+});
+
+const summaryVisibility = computed(() => {
+  if (sourceMode.value === "github" && selectedRepo.value) {
+    return selectedRepo.value.private ? "Privado" : "Público";
+  }
+  return "Público";
+});
+
+const summaryVisibilityIcon = computed(() => {
+  if (sourceMode.value === "github" && selectedRepo.value?.private) {
+    return "mdi-lock";
+  }
+  return "mdi-earth";
+});
+
+const canDeploy = computed(() => {
+  if (!newApp.value.name.trim()) return false;
+  if (nameAvailable.value !== true || nameChecking.value || !!nameError.value)
+    return false;
+  if (sourceMode.value === "github") return !!selectedRepo.value;
+  return !!newApp.value.git.trim();
+});
+
+// Carregar dados iniciais
+onMounted(async () => {
+  if (!projectStore.currentProject) {
+    await projectStore.fetchProject(projectId);
+  }
+  if (gitStore.repos.length === 0) {
+    gitStore.fetchRepos();
+  }
+});
+
+// Sincronizar branch quando selecionar repo
+function handleRepoSearch() {
+  if (gitStore.repos.length === 0) {
+    gitStore.fetchRepos();
+  }
+}
+
+// Mascarar valor de variável
+function maskValue(value: string) {
+  if (value.length <= 4) return "••••";
+  return value.slice(0, 4) + "••••••";
+}
+
+// Env vars
+function buildVariables(): Record<string, string> | undefined {
+  if (envVars.value.length === 0) return undefined;
+  const variables: Record<string, string> = {};
+  for (const envVar of envVars.value) {
+    variables[envVar.key] = envVar.value;
+  }
+  return variables;
+}
+
+function confirmAddEnvVar() {
+  if (!tempEnvVar.value.key || !tempEnvVar.value.value) return;
+  envVars.value.push({ ...tempEnvVar.value });
+  dialogAddEnvVar.value = false;
+  tempEnvVar.value = { key: "", value: "" };
+}
+
+function importEnvFile() {
+  importError.value = "";
+  if (!envFileContent.value.trim()) {
+    importError.value = "Por favor, cole o conteúdo do arquivo .env";
+    return;
+  }
+
+  try {
+    const lines = envFileContent.value.split("\n");
+    let importedCount = 0;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+
+      const equalIndex = trimmed.indexOf("=");
+      if (equalIndex === -1) continue;
+
+      const key = trimmed.slice(0, equalIndex).trim();
+      let value = trimmed.slice(equalIndex + 1).trim();
+
+      if (
+        (value.startsWith("'") && value.endsWith("'")) ||
+        (value.startsWith('"') && value.endsWith('"'))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      if (key && value) {
+        const existingIndex = envVars.value.findIndex((v) => v.key === key);
+        if (existingIndex === -1) {
+          envVars.value.push({ key, value });
+        } else {
+          const existing = envVars.value[existingIndex];
+          if (existing) existing.value = value;
+        }
+        importedCount++;
+      }
+    }
+
+    if (importedCount === 0) {
+      importError.value =
+        "Nenhuma variável válida encontrada no formato KEY=VALUE";
+      return;
+    }
+
+    dialogImportEnv.value = false;
+    envFileContent.value = "";
+  } catch (error_) {
+    importError.value = "Erro ao processar arquivo .env";
+    console.error("Erro ao importar .env:", error_);
+  }
+}
+
+// Watch do selectedRepo para preencher campos
+watch(selectedRepo, (repo) => {
+  if (repo) {
+    if (!newApp.value.name) newApp.value.name = repo.name;
+    newApp.value.git = repo.clone_url;
+    selectedBranch.value = repo.default_branch;
+  }
+});
+
+// Deploy
+async function handleDeploy() {
+  const name = newApp.value.name.trim();
+  if (!name) return;
+
+  let git = "";
+  let branch: string | undefined;
+
+  if (sourceMode.value === "github" && selectedRepo.value) {
+    git = selectedRepo.value.clone_url;
+    branch = selectedBranch.value || selectedRepo.value.default_branch;
+  } else {
+    git = newApp.value.git.trim();
+    branch = newApp.value.branch || undefined;
+  }
+
+  if (!git) return;
+
+  creating.value = true;
+  try {
+    const app = await appStore.createApp({
+      name,
+      git,
+      branch,
+      project: projectId,
+      variables: buildVariables(),
+      ...(canCustomize.value && customDokkuName.value.trim()
+        ? { name_dokku: customDokkuName.value.trim() }
+        : {}),
+    });
+
+    // Após criar, buscar status da task para checar erro de deploy key ou permissão de org
+    if (app?.id) {
+      try {
+        const status = await appStore.fetchAppStatus(String(app.id));
+        // Detecta erro de deploy keys desabilitadas pelo error_type
+        if (
+          status?.state === "FAILURE" &&
+          (status as any).error_type === "DeployKeysDisabled"
+        ) {
+          router.push({
+            path: "/projects/deploy-keys-disabled",
+            query: { help_url: (status as any).help_url || undefined },
+          });
+          return;
+        }
+        // Detecta erro de permissão de organização
+        if (
+          status?.state === "FAILURE" &&
+          (status as any).error_type === "OrgPermissionDenied"
+        ) {
+          router.push({
+            path: "/projects/org-permission-denied",
+            query: { help_url: (status as any).help_url || undefined },
+          });
+          return;
+        }
+      } catch {
+        // Se falhar ao buscar status, apenas segue fluxo normal
+      }
+      router.push(`/projects/${projectId}/${app.id}`);
+    } else {
+      router.push(`/projects/${projectId}`);
+    }
+  } catch (error_) {
+    console.error("Erro ao criar app:", error_);
+  } finally {
+    creating.value = false;
+  }
+}
 </script>
 
 <style scoped>

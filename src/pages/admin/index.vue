@@ -163,8 +163,8 @@
     storageError.value = null
     try {
       storageUsage.value = await AdminService.getStorageUsage()
-    } catch (e) {
-      storageError.value = e instanceof Error ? e.message : 'Erro ao carregar uso de espaço'
+    } catch (error) {
+      storageError.value = error instanceof Error ? error.message : 'Erro ao carregar uso de espaço'
     } finally {
       storageLoading.value = false
     }

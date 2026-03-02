@@ -16,12 +16,12 @@
       <span v-else class="logs-console__prompt-icon">$</span>
       <input
         v-model="commandInput"
-        :disabled="running"
         class="logs-console__input"
+        :disabled="running"
         placeholder="python manage.py migrate"
         type="text"
         @keydown.enter="submitCommand"
-      />
+      >
     </div>
     <!-- Output do comando -->
     <div v-if="output" class="logs-console__output">
@@ -56,8 +56,8 @@
   const emit = defineEmits<{
     'stream-logs': [taskId: string, afterId?: number]
     'stop-stream': []
-    run: [command: string]
-    clear: []
+    'run': [command: string]
+    'clear': []
   }>()
 
   const commandInput = ref('')

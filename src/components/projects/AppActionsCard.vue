@@ -172,7 +172,7 @@
     deleteConfirmName.value = ''
   }
 
-  watch(confirmDelete, (open) => {
+  watch(confirmDelete, open => {
     if (open) deleteConfirmName.value = ''
   })
 

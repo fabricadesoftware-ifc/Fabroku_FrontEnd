@@ -46,6 +46,7 @@
             to="/admin"
           />
           <v-list-item
+            v-if="authStore.user?.is_superuser"
             class="menu-item"
             link
             prepend-icon="mdi-book-open-variant-outline"

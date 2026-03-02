@@ -35,7 +35,13 @@
       <v-progress-linear v-if="loadingServices" indeterminate />
 
       <v-row v-if="!loadingServices">
-        <v-col v-for="service in services" :key="service.id" cols="12" md="6" lg="4">
+        <v-col
+          v-for="service in services"
+          :key="service.id"
+          cols="12"
+          lg="4"
+          md="6"
+        >
           <v-card class="h-100" variant="outlined">
             <v-card-title class="d-flex align-center">
               <v-icon class="mr-2" color="primary">mdi-database</v-icon>
@@ -72,9 +78,9 @@
               </v-btn>
               <v-btn
                 color="error"
+                :loading="deletingId === service.id"
                 size="small"
                 variant="text"
-                :loading="deletingId === service.id"
                 @click="handleDelete(service)"
               >
                 Excluir
@@ -106,9 +112,9 @@
         <v-card-text>
           <v-select
             v-model="selectedAppId"
-            :items="projectApps"
             item-title="name"
             item-value="id"
+            :items="projectApps"
             label="Selecione o app"
             variant="outlined"
           />

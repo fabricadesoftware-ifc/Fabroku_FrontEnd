@@ -55,8 +55,8 @@
             class="mb-4"
             :color="
               appStore.currentApp.status === 'DELETING' ? 'pink'
-                : appStore.currentApp.status === 'DEPLOYING' ? 'orange'
-                  : 'primary'
+              : appStore.currentApp.status === 'DEPLOYING' ? 'orange'
+                : 'primary'
             "
             variant="tonal"
           >
@@ -137,13 +137,19 @@
         <v-card-text>
           <v-select
             v-model="selectedServiceToLink"
-            :items="availableServicesToLink"
             item-title="name"
             item-value="id"
+            :items="availableServicesToLink"
             label="Selecione o serviço"
             variant="outlined"
           />
-          <v-alert v-if="availableServicesToLink.length === 0" class="mt-3" color="info" density="compact" variant="tonal">
+          <v-alert
+            v-if="availableServicesToLink.length === 0"
+            class="mt-3"
+            color="info"
+            density="compact"
+            variant="tonal"
+          >
             Nenhum serviço disponível. Crie um em
             <router-link :to="`/projects/${projectId}/services/new`">Serviços do projeto</router-link>.
           </v-alert>

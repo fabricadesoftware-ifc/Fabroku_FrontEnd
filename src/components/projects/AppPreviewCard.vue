@@ -82,7 +82,9 @@
     try {
       await navigator.clipboard.writeText(url)
       copied.value = true
-      setTimeout(() => { copied.value = false }, 2000)
+      setTimeout(() => {
+        copied.value = false
+      }, 2000)
     } catch {
       // fallback
     }

@@ -20,21 +20,21 @@
       <v-card-text>
         <v-select
           v-model="serviceType"
-          :items="serviceTypeOptions"
           item-disabled="disabled"
           item-title="label"
           item-value="value"
+          :items="serviceTypeOptions"
           label="Tipo de serviço"
           variant="outlined"
         />
         <v-text-field
           v-model="name"
           class="mt-4"
+          hint="Deixe vazio para gerar automaticamente"
           label="Nome do serviço (opcional)"
+          persistent-hint
           placeholder="meu-banco"
           variant="outlined"
-          hint="Deixe vazio para gerar automaticamente"
-          persistent-hint
         />
       </v-card-text>
       <v-card-actions>
@@ -130,9 +130,9 @@
         creating.value = false
         router.push(`/projects/${projectId}/services`)
       }
-    } catch (e) {
+    } catch (error) {
       creating.value = false
-      throw e
+      throw error
     }
   }
 

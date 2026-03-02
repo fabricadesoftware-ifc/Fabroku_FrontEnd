@@ -4,60 +4,80 @@ meta:
 </route>
 
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue'
-  import { useRouter } from 'vue-router'
-  import { useAuthStore } from '@/stores'
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores";
 
-  const router = useRouter()
-  const authStore = useAuthStore()
-  const error = ref<string | null>(null)
-  const loading = ref(true)
+const router = useRouter();
+const authStore = useAuthStore();
+const error = ref<string | null>(null);
+const loading = ref(true);
 
-  function getDefaultErrorMessage (errorCode: string): string {
-    const errorMessages: Record<string, string> = {
-      auth_failed: 'Falha ao obter token de acesso do GitHub.',
-      user_info_failed: 'Falha ao obter informações do usuário do GitHub.',
-      email_failed: 'Falha ao obter email do usuário do GitHub.',
-      invalid_email: 'O email do usuário não é válido.',
-      unexpected_error: 'Erro inesperado durante a autenticação.',
-    }
-    return errorMessages[errorCode] || 'Erro desconhecido na autenticação.'
+const errorCode = ref<string | null>(null);
+
+function getDefaultErrorMessage(errorCode: string): string {
+  const errorMessages: Record<string, string> = {
+    auth_failed: "Falha ao obter token de acesso do GitHub.",
+    user_info_failed: "Falha ao obter informações do usuário do GitHub.",
+    email_failed: "Falha ao obter email do usuário do GitHub.",
+    invalid_email: "O email do usuário não é válido.",
+    user_disabled:
+      "Sua conta foi desabilitada pelo administrador. Entre em contato com o suporte.",
+    unexpected_error: "Erro inesperado durante a autenticação.",
+  };
+  return errorMessages[errorCode] || "Erro desconhecido na autenticação.";
+}
+
+function getErrorIcon(code: string | null): string {
+  const icons: Record<string, string> = {
+    user_disabled: "mdi-account-lock",
+    invalid_email: "mdi-email-off",
+    auth_failed: "mdi-key-remove",
+    user_info_failed: "mdi-account-alert",
+    email_failed: "mdi-email-alert",
+  };
+  return icons[code || ""] || "mdi-alert-circle";
+}
+
+function getErrorColor(code: string | null): string {
+  if (code === "user_disabled") return "warning";
+  return "error";
+}
+
+onMounted(async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const errorParam = urlParams.get("error");
+  const messageParam = urlParams.get("message");
+
+  if (errorParam) {
+    errorCode.value = errorParam;
+    error.value = messageParam
+      ? decodeURIComponent(messageParam)
+      : getDefaultErrorMessage(errorParam);
+    loading.value = false;
+    return;
   }
 
-  onMounted(async () => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const errorParam = urlParams.get('error')
-    const messageParam = urlParams.get('message')
+  try {
+    // Com cookies httpOnly, o backend já setou os cookies
+    // Apenas verificamos se a autenticação funcionou
+    const isAuthenticated = await authStore.checkAuth();
 
-    if (errorParam) {
-      // Usar a mensagem do backend se disponível, senão usar mensagem padrão
-      error.value = messageParam
-        ? decodeURIComponent(messageParam)
-        : getDefaultErrorMessage(errorParam)
-      loading.value = false
-      return
+    if (isAuthenticated) {
+      // Redireciona para o dashboard
+      router.push("/dashboard");
+    } else {
+      error.value = "Falha na autenticação. Tente novamente.";
+      loading.value = false;
     }
-
-    try {
-      // Com cookies httpOnly, o backend já setou os cookies
-      // Apenas verificamos se a autenticação funcionou
-      const isAuthenticated = await authStore.checkAuth()
-
-      if (isAuthenticated) {
-        // Redireciona para o dashboard
-        router.push('/dashboard')
-      } else {
-        error.value = 'Falha na autenticação. Tente novamente.'
-        loading.value = false
-      }
-    } catch (error_) {
-      error.value
-        = error_ instanceof Error
-          ? error_.message
-          : 'Erro ao processar autenticação'
-      loading.value = false
-    }
-  })
+  } catch (error_) {
+    error.value =
+      error_ instanceof Error
+        ? error_.message
+        : "Erro ao processar autenticação";
+    loading.value = false;
+  }
+});
 </script>
 
 <template>
@@ -70,10 +90,20 @@ meta:
       </div>
 
       <div v-else-if="error" class="error">
-        <h2>Erro na autenticação</h2>
+        <v-icon :color="getErrorColor(errorCode)" size="64">{{
+          getErrorIcon(errorCode)
+        }}</v-icon>
+
+        <h2 v-if="errorCode === 'user_disabled'" class="text-warning">
+          Conta Desabilitada
+        </h2>
+        <h2 v-else-if="errorCode === 'invalid_email'">Email Não Permitido</h2>
+        <h2 v-else>Erro na autenticação</h2>
+
         <p>{{ error }}</p>
+
         <button class="retry-button" @click="router.push('/')">
-          Tentar novamente
+          Voltar ao início
         </button>
       </div>
     </div>

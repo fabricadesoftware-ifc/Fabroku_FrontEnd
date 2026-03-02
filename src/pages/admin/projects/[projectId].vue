@@ -47,6 +47,19 @@
             <strong>Atualizado em:</strong>
             {{ formatDate(projectStore.currentProject.updated_at) }}
           </p>
+          <div class="mt-3">
+            <strong>Membros:</strong>
+            <div class="d-flex flex-wrap ga-2 mt-1">
+              <v-chip
+                v-for="u in projectStore.currentProject.users_detail || []"
+                :key="u.id"
+                :prepend-avatar="u.avatar_url || undefined"
+                size="small"
+              >
+                {{ u.name || u.email }}
+              </v-chip>
+            </div>
+          </div>
         </v-card-text>
       </v-card>
 
@@ -106,11 +119,9 @@
         <!-- Empty State -->
         <v-col v-if="projectApps.length === 0" cols="12">
           <v-card class="text-center pa-8">
-            <v-icon
-              class="mb-4"
-              color="grey"
-              size="64"
-            >mdi-application-outline</v-icon>
+            <v-icon class="mb-4" color="grey" size="64"
+              >mdi-application-outline</v-icon
+            >
             <h3 class="text-h6 mb-2">Nenhum app neste projeto</h3>
             <p class="text-grey">Este projeto ainda não possui apps</p>
           </v-card>
@@ -121,38 +132,38 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, ref } from 'vue'
-  import { useRoute } from 'vue-router'
+import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 
-  import { useAppStore, useProjectStore } from '@/stores'
-  import { formatStatus, getStatusColor, getStatusIcon } from '@/utils/status'
+import { useAppStore, useProjectStore } from "@/stores";
+import { formatStatus, getStatusColor, getStatusIcon } from "@/utils/status";
 
-  const route = useRoute()
-  const projectId = (route.params as { projectId: string }).projectId || ''
+const route = useRoute();
+const projectId = (route.params as { projectId: string }).projectId || "";
 
-  const projectStore = useProjectStore()
-  const appStore = useAppStore()
+const projectStore = useProjectStore();
+const appStore = useAppStore();
 
-  const loading = ref(true)
+const loading = ref(true);
 
-  // Apps do projeto atual
-  const projectApps = computed(() => appStore.apps)
+// Apps do projeto atual
+const projectApps = computed(() => appStore.apps);
 
-  onMounted(async () => {
-    try {
-      await projectStore.fetchProject(projectId)
-      await appStore.fetchAppsByProject(projectId)
-    } finally {
-      loading.value = false
-    }
-  })
-
-  function formatDate (dateString?: string) {
-    if (!dateString) {
-      return '-'
-    }
-    return new Date(dateString).toLocaleDateString('pt-BR')
+onMounted(async () => {
+  try {
+    await projectStore.fetchProject(projectId);
+    await appStore.fetchAppsByProject(projectId);
+  } finally {
+    loading.value = false;
   }
+});
+
+function formatDate(dateString?: string) {
+  if (!dateString) {
+    return "-";
+  }
+  return new Date(dateString).toLocaleDateString("pt-BR");
+}
 
 // Helpers importados de @/utils/status
 </script>

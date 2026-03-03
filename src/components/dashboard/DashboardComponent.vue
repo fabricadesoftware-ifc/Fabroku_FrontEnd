@@ -2,10 +2,6 @@
   <v-container>
     <div class="d-flex justify-space-between align-center mb-4">
       <h1 class="text-h4 mb-6">Dashboard</h1>
-      <v-icon
-        class="mb-4 bg-primary rounded-circle pa-4"
-        @click=""
-      >mdi-plus</v-icon>
     </div>
 
     <v-progress-linear v-if="loading" class="mb-4" indeterminate />

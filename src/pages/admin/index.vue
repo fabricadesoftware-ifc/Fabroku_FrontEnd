@@ -164,32 +164,58 @@
                 <span class="text-caption">{{ u.email }}</span>
               </td>
               <td class="text-center">
-                <v-chip v-if="u.is_superuser" color="warning" size="small" variant="tonal">
-                  <v-icon start size="14">mdi-shield-crown</v-icon>
+                <v-chip
+                  v-if="u.is_superuser"
+                  color="warning"
+                  size="small"
+                  variant="tonal"
+                >
+                  <v-icon size="14" start>mdi-shield-crown</v-icon>
                   Admin
                 </v-chip>
-                <v-chip v-else-if="u.is_fabric" color="info" size="small" variant="tonal">
-                  <v-icon start size="14">mdi-account-hard-hat</v-icon>
+                <v-chip
+                  v-else-if="u.is_fabric"
+                  color="info"
+                  size="small"
+                  variant="tonal"
+                >
+                  <v-icon size="14" start>mdi-account-hard-hat</v-icon>
                   Fábrica
                 </v-chip>
                 <span v-else class="text-grey text-caption">Aluno</span>
               </td>
               <td class="text-center">
                 <v-chip
-                  :color="u.is_superuser ? 'grey' : getQuotaColor(u.apps_count, u.max_apps)"
+                  :color="
+                    u.is_superuser
+                      ? 'grey'
+                      : getQuotaColor(u.apps_count, u.max_apps)
+                  "
                   size="small"
                   variant="tonal"
                 >
-                  {{ u.is_superuser ? '∞' : `${u.apps_count ?? 0}/${u.max_apps ?? '?'}` }}
+                  {{
+                    u.is_superuser
+                      ? "∞"
+                      : `${u.apps_count ?? 0}/${u.max_apps ?? "?"}`
+                  }}
                 </v-chip>
               </td>
               <td class="text-center">
                 <v-chip
-                  :color="u.is_superuser ? 'grey' : getQuotaColor(u.services_count, u.max_services)"
+                  :color="
+                    u.is_superuser
+                      ? 'grey'
+                      : getQuotaColor(u.services_count, u.max_services)
+                  "
                   size="small"
                   variant="tonal"
                 >
-                  {{ u.is_superuser ? '∞' : `${u.services_count ?? 0}/${u.max_services ?? '?'}` }}
+                  {{
+                    u.is_superuser
+                      ? "∞"
+                      : `${u.services_count ?? 0}/${u.max_services ?? "?"}`
+                  }}
                 </v-chip>
               </td>
               <td class="text-center">
@@ -207,7 +233,10 @@
                   @click="openQuotaDialog(u)"
                 >
                   <v-icon size="18">mdi-tune</v-icon>
-                  <v-tooltip activator="parent" location="top">Ajustar limites</v-tooltip>
+                  <v-tooltip
+                    activator="parent"
+                    location="top"
+                  >Ajustar limites</v-tooltip>
                 </v-btn>
                 <v-btn
                   :color="u.is_active ? 'error' : 'success'"
@@ -333,8 +362,11 @@
         </v-card-title>
         <v-card-text>
           <p class="text-caption text-medium-emphasis mb-4">
-            Defina limites personalizados. Deixe vazio para usar o padrão
-            ({{ quotaUser?.is_fabric ? '5 apps / 3 serviços - Fábrica' : '3 apps / 2 serviços - Aluno' }}).
+            Defina limites personalizados. Deixe vazio para usar o padrão ({{
+              quotaUser?.is_fabric
+                ? "5 apps / 3 serviços - Fábrica"
+                : "3 apps / 2 serviços - Aluno"
+            }}).
           </p>
 
           <v-text-field
@@ -369,7 +401,8 @@
             type="info"
             variant="tonal"
           >
-            Uso atual: {{ quotaUser.apps_count ?? 0 }} apps, {{ quotaUser.services_count ?? 0 }} serviços
+            Uso atual: {{ quotaUser.apps_count ?? 0 }} apps,
+            {{ quotaUser.services_count ?? 0 }} serviços
           </v-alert>
         </v-card-text>
         <v-card-actions>
@@ -419,10 +452,12 @@
   // Quota dialog
   const quotaDialog = ref(false)
   const quotaUser = ref<User | null>(null)
-  const quotaForm = ref<{ max_apps: number | null; max_services: number | null }>({
-    max_apps: null,
-    max_services: null,
-  })
+  const quotaForm = ref<{ max_apps: number | null, max_services: number | null }>(
+    {
+      max_apps: null,
+      max_services: null,
+    },
+  )
   const quotaSaving = ref(false)
 
   async function fetchStorageUsage () {

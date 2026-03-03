@@ -178,103 +178,103 @@ PORT=3000"
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+  import { computed, ref } from 'vue'
 
-defineProps<{
-  variables?: Record<string, string>;
-  saving?: boolean;
-}>();
+  defineProps<{
+    variables?: Record<string, string>
+    saving?: boolean
+  }>()
 
-const emit = defineEmits<{
-  add: [envVar: { key: string; value: string }];
-  "add-multiple": [envVars: Array<{ key: string; value: string }>];
-  remove: [key: string];
-}>();
+  const emit = defineEmits<{
+    'add': [envVar: { key: string, value: string }]
+    'add-multiple': [envVars: Array<{ key: string, value: string }>]
+    'remove': [key: string]
+  }>()
 
-const showSecrets = ref(false);
-const dialogEnvVar = ref(false);
-const dialogImportEnv = ref(false);
-const newEnvVars = ref<Array<{ key: string; value: string }>>([
-  { key: "", value: "" },
-]);
-const envFileContent = ref("");
-const importError = ref("");
+  const showSecrets = ref(false)
+  const dialogEnvVar = ref(false)
+  const dialogImportEnv = ref(false)
+  const newEnvVars = ref<Array<{ key: string, value: string }>>([
+    { key: '', value: '' },
+  ])
+  const envFileContent = ref('')
+  const importError = ref('')
 
-const validEntries = computed(() =>
-  newEnvVars.value.filter((e) => e.key.trim() && e.value.trim()),
-);
+  const validEntries = computed(() =>
+    newEnvVars.value.filter(e => e.key.trim() && e.value.trim()),
+  )
 
-const hasValidEntries = computed(() => validEntries.value.length > 0);
-const validCount = computed(() => validEntries.value.length);
+  const hasValidEntries = computed(() => validEntries.value.length > 0)
+  const validCount = computed(() => validEntries.value.length)
 
-function openAddDialog() {
-  newEnvVars.value = [{ key: "", value: "" }];
-  dialogEnvVar.value = true;
-}
-
-function handleAddMultiple() {
-  const entries = validEntries.value.map((e) => ({
-    key: e.key.trim(),
-    value: e.value.trim(),
-  }));
-  if (entries.length === 0) return;
-
-  if (entries.length === 1 && entries[0]) {
-    emit("add", entries[0]);
-  } else {
-    emit("add-multiple", entries);
+  function openAddDialog () {
+    newEnvVars.value = [{ key: '', value: '' }]
+    dialogEnvVar.value = true
   }
-  dialogEnvVar.value = false;
-  newEnvVars.value = [{ key: "", value: "" }];
-}
 
-function parseEnvContent(
-  content: string,
-): Array<{ key: string; value: string }> {
-  const results: Array<{ key: string; value: string }> = [];
-  const lines = content.split("\n");
+  function handleAddMultiple () {
+    const entries = validEntries.value.map(e => ({
+      key: e.key.trim(),
+      value: e.value.trim(),
+    }))
+    if (entries.length === 0) return
 
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
+    if (entries.length === 1 && entries[0]) {
+      emit('add', entries[0])
+    } else {
+      emit('add-multiple', entries)
+    }
+    dialogEnvVar.value = false
+    newEnvVars.value = [{ key: '', value: '' }]
+  }
 
-    const equalIndex = trimmed.indexOf("=");
-    if (equalIndex === -1) continue;
+  function parseEnvContent (
+    content: string,
+  ): Array<{ key: string, value: string }> {
+    const results: Array<{ key: string, value: string }> = []
+    const lines = content.split('\n')
 
-    const key = trimmed.slice(0, equalIndex).trim();
-    let value = trimmed.slice(equalIndex + 1).trim();
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
 
-    if (
-      (value.startsWith("'") && value.endsWith("'")) ||
-      (value.startsWith('"') && value.endsWith('"'))
-    ) {
-      value = value.slice(1, -1);
+      const equalIndex = trimmed.indexOf('=')
+      if (equalIndex === -1) continue
+
+      const key = trimmed.slice(0, equalIndex).trim()
+      let value = trimmed.slice(equalIndex + 1).trim()
+
+      if (
+        (value.startsWith('\'') && value.endsWith('\''))
+        || (value.startsWith('"') && value.endsWith('"'))
+      ) {
+        value = value.slice(1, -1)
+      }
+
+      if (key && value) {
+        results.push({ key, value })
+      }
+    }
+    return results
+  }
+
+  function handleImportEnv () {
+    importError.value = ''
+    if (!envFileContent.value.trim()) {
+      importError.value = 'Por favor, cole o conteúdo do arquivo .env'
+      return
     }
 
-    if (key && value) {
-      results.push({ key, value });
+    const parsed = parseEnvContent(envFileContent.value)
+
+    if (parsed.length === 0) {
+      importError.value
+        = 'Nenhuma variável válida encontrada no formato KEY=VALUE'
+      return
     }
+
+    emit('add-multiple', parsed)
+    dialogImportEnv.value = false
+    envFileContent.value = ''
   }
-  return results;
-}
-
-function handleImportEnv() {
-  importError.value = "";
-  if (!envFileContent.value.trim()) {
-    importError.value = "Por favor, cole o conteúdo do arquivo .env";
-    return;
-  }
-
-  const parsed = parseEnvContent(envFileContent.value);
-
-  if (parsed.length === 0) {
-    importError.value =
-      "Nenhuma variável válida encontrada no formato KEY=VALUE";
-    return;
-  }
-
-  emit("add-multiple", parsed);
-  dialogImportEnv.value = false;
-  envFileContent.value = "";
-}
 </script>

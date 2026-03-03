@@ -17,11 +17,19 @@
                 <span class="text-subtitle-1 font-weight-medium">Apps</span>
               </div>
               <v-chip
-                :color="quota.max_apps == null ? 'grey' : getQuotaColor(quota.apps_count, quota.max_apps)"
+                :color="
+                  quota.max_apps == null
+                    ? 'grey'
+                    : getQuotaColor(quota.apps_count, quota.max_apps)
+                "
                 size="small"
                 variant="tonal"
               >
-                {{ quota.max_apps == null ? `${quota.apps_count} / ∞` : `${quota.apps_count} / ${quota.max_apps}` }}
+                {{
+                  quota.max_apps == null
+                    ? `${quota.apps_count} / ∞`
+                    : `${quota.apps_count} / ${quota.max_apps}`
+                }}
               </v-chip>
             </div>
             <v-progress-linear
@@ -30,12 +38,7 @@
               :model-value="(quota.apps_count / quota.max_apps) * 100"
               rounded
             />
-            <v-progress-linear
-              v-else
-              color="grey"
-              :model-value="0"
-              rounded
-            />
+            <v-progress-linear v-else color="grey" :model-value="0" rounded />
           </v-card-text>
         </v-card>
       </v-col>
@@ -49,11 +52,19 @@
                 <span class="text-subtitle-1 font-weight-medium">Serviços</span>
               </div>
               <v-chip
-                :color="quota.max_services == null ? 'grey' : getQuotaColor(quota.services_count, quota.max_services)"
+                :color="
+                  quota.max_services == null
+                    ? 'grey'
+                    : getQuotaColor(quota.services_count, quota.max_services)
+                "
                 size="small"
                 variant="tonal"
               >
-                {{ quota.max_services == null ? `${quota.services_count} / ∞` : `${quota.services_count} / ${quota.max_services}` }}
+                {{
+                  quota.max_services == null
+                    ? `${quota.services_count} / ∞`
+                    : `${quota.services_count} / ${quota.max_services}`
+                }}
               </v-chip>
             </div>
             <v-progress-linear
@@ -62,12 +73,7 @@
               :model-value="(quota.services_count / quota.max_services) * 100"
               rounded
             />
-            <v-progress-linear
-              v-else
-              color="grey"
-              :model-value="0"
-              rounded
-            />
+            <v-progress-linear v-else color="grey" :model-value="0" rounded />
           </v-card-text>
         </v-card>
       </v-col>
@@ -213,9 +219,11 @@
       await Promise.all([
         projectStore.fetchProjects(),
         appStore.fetchApps(),
-        UsersService.getMyQuota().then(q => {
-          quota.value = q
-        }).catch(() => {}),
+        UsersService.getMyQuota()
+          .then(q => {
+            quota.value = q
+          })
+          .catch(() => {}),
       ])
     } finally {
       loading.value = false

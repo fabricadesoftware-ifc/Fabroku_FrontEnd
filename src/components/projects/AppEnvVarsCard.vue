@@ -219,7 +219,7 @@ PORT=3000"
     }))
     if (entries.length === 0) return
 
-    if (entries.length === 1) {
+    if (entries.length === 1 && entries[0]) {
       emit('add', entries[0])
     } else {
       emit('add-multiple', entries)

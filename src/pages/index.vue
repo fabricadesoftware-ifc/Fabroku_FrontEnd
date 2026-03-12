@@ -26,7 +26,7 @@ meta:
                 </div>
 
                 <h1 class="text-h3 font-weight-bold text-white mb-4">
-                  Bem-vindo à Fabroku
+                  Bem-vindo ao Fabroku
                 </h1>
 
                 <p class="text-body-1 text-grey-lighten-2 mb-8">

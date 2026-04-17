@@ -92,7 +92,7 @@
                 variant="text"
                 @click="handleUnlink(service)"
               >
-                Desvincular ao App
+                Desvincular do app
               </v-btn>
             </v-card-actions>
           </v-card>

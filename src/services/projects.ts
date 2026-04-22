@@ -18,7 +18,7 @@ class ProjectsService {
   }
 
   async updateProject (id: string, data: any): Promise<Project> {
-    const response = await apiClient.put(`/projects/projects/${id}/`, data)
+    const response = await apiClient.patch(`/projects/projects/${id}/`, data)
     return response.data
   }
 

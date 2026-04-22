@@ -30,6 +30,8 @@ declare module 'vue-router/auto-routes' {
     '/projects/[projectId]/[appId]/logs': RouteRecordInfo<'/projects/[projectId]/[appId]/logs', '/projects/:projectId/:appId/logs', { projectId: ParamValue<true>, appId: ParamValue<true> }, { projectId: ParamValue<false>, appId: ParamValue<false> }>,
     '/projects/[projectId]/apps/[appId]/logs': RouteRecordInfo<'/projects/[projectId]/apps/[appId]/logs', '/projects/:projectId/apps/:appId/logs', { projectId: ParamValue<true>, appId: ParamValue<true> }, { projectId: ParamValue<false>, appId: ParamValue<false> }>,
     '/projects/[projectId]/new': RouteRecordInfo<'/projects/[projectId]/new', '/projects/:projectId/new', { projectId: ParamValue<true> }, { projectId: ParamValue<false> }>,
+    '/projects/[projectId]/services/': RouteRecordInfo<'/projects/[projectId]/services/', '/projects/:projectId/services', { projectId: ParamValue<true> }, { projectId: ParamValue<false> }>,
+    '/projects/[projectId]/services/new': RouteRecordInfo<'/projects/[projectId]/services/new', '/projects/:projectId/services/new', { projectId: ParamValue<true> }, { projectId: ParamValue<false> }>,
     '/projects/deploy-keys-disabled': RouteRecordInfo<'/projects/deploy-keys-disabled', '/projects/deploy-keys-disabled', Record<never, never>, Record<never, never>>,
     '/projects/new': RouteRecordInfo<'/projects/new', '/projects/new', Record<never, never>, Record<never, never>>,
     '/projects/org-permission-denied': RouteRecordInfo<'/projects/org-permission-denied', '/projects/org-permission-denied', Record<never, never>, Record<never, never>>,
@@ -93,6 +95,14 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/projects/[projectId]/new.vue': {
       routes: '/projects/[projectId]/new'
+      views: never
+    }
+    'src/pages/projects/[projectId]/services/index.vue': {
+      routes: '/projects/[projectId]/services/'
+      views: never
+    }
+    'src/pages/projects/[projectId]/services/new.vue': {
+      routes: '/projects/[projectId]/services/new'
       views: never
     }
     'src/pages/projects/deploy-keys-disabled.vue': {

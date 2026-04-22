@@ -18,7 +18,6 @@ declare module 'vue' {
     AppEnvVarsCard: typeof import('./components/projects/AppEnvVarsCard.vue')['default']
     AppLogsCard: typeof import('./components/projects/AppLogsCard.vue')['default']
     AppPreviewCard: typeof import('./components/projects/AppPreviewCard.vue')['default']
-    Apps: typeof import('./components/projects/apps/index.vue')['default']
     Components: typeof import('./components/index.vue')['default']
     DashboardComponent: typeof import('./components/dashboard/DashboardComponent.vue')['default']
     DocumentationComponent: typeof import('./components/documentation/DocumentationComponent.vue')['default']

@@ -292,7 +292,7 @@
               icon
               size="small"
               variant="text"
-              @click="fetchStorageUsage"
+              @click="fetchStorageUsage(true)"
             >
               <v-icon>mdi-refresh</v-icon>
             </v-btn>
@@ -442,7 +442,7 @@
   import type { Project, User } from '@/interfaces'
   import type { StorageUsageResponse } from '@/services/admin'
 
-  import { computed, onMounted, ref } from 'vue'
+  import { computed, onMounted, ref, watch } from 'vue'
 
   import AdminService from '@/services/admin'
   import UsersService from '@/services/users'
@@ -478,11 +478,11 @@
   )
   const quotaSaving = ref(false)
 
-  async function fetchStorageUsage () {
+  async function fetchStorageUsage (forceRefresh = false) {
     storageLoading.value = true
     storageError.value = null
     try {
-      storageUsage.value = await AdminService.getStorageUsage()
+      storageUsage.value = await AdminService.getStorageUsage(forceRefresh)
     } catch (error) {
       storageError.value
         = error instanceof Error ? error.message : 'Erro ao carregar uso de espaço'
@@ -504,8 +504,17 @@
 
   onMounted(() => {
     projectStore.fetchProjects()
-    fetchStorageUsage()
     fetchUsers()
+  })
+
+  watch(activeTab, tab => {
+    if (
+      tab === 'storage'
+      && !storageLoading.value
+      && (!storageUsage.value || storageError.value)
+    ) {
+      fetchStorageUsage()
+    }
   })
 
   const filteredProjects = computed(() => {

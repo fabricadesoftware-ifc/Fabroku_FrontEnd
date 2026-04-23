@@ -19,8 +19,10 @@ export interface StorageUsageResponse {
 }
 
 class AdminService {
-  async getStorageUsage (): Promise<StorageUsageResponse> {
-    const response = await apiClient.get<StorageUsageResponse>('/admin-api/storage-usage/')
+  async getStorageUsage (forceRefresh = false): Promise<StorageUsageResponse> {
+    const response = await apiClient.get<StorageUsageResponse>('/admin-api/storage-usage/', {
+      params: forceRefresh ? { refresh: '1' } : undefined,
+    })
     return response.data
   }
 }

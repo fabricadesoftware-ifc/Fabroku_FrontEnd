@@ -139,7 +139,7 @@
                 {{ formatGitUrl(app.git) }}
               </v-list-item-subtitle>
               <v-list-item-subtitle v-if="app.last_commit_sha" class="text-caption">
-                <v-icon size="12" class="mr-1" color="primary">mdi-source-commit</v-icon>
+                <v-icon class="mr-1" color="primary" size="12">mdi-source-commit</v-icon>
                 {{ app.last_commit_sha.slice(0, 7) }}
               </v-list-item-subtitle>
               <template #append>
@@ -191,7 +191,7 @@
     can_create_service: boolean
   } | null>(null)
 
-  const stats = computed(() => ({
+  const _stats = computed(() => ({
     projects: projectStore.projects.length,
     apps: appStore.apps.length,
     running: appStore.apps.filter(a => a.status === 'RUNNING').length,

@@ -18,7 +18,7 @@
       <!-- ========== COLUNA ESQUERDA — FORMULÁRIO ========== -->
       <v-col cols="12" lg="8">
         <!-- Seção 1 — Identificação do App -->
-        <v-card class="mb-6 app-card" variant="flat">
+        <v-card v-if="false" class="mb-6 app-card" variant="flat">
           <v-card-title class="d-flex align-center ga-2 pa-5 pb-1">
             <v-icon
               color="primary"
@@ -327,25 +327,7 @@
                     <div class="text-overline text-medium-emphasis mb-1">
                       Framework Preset
                     </div>
-                    <v-select
-                      v-model="buildPreset"
-                      density="comfortable"
-                      hide-details
-                      :items="frameworkPresets"
-                      variant="outlined"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="7">
-                    <div class="text-overline text-medium-emphasis mb-1">
-                      Comando de Build
-                    </div>
-                    <v-text-field
-                      v-model="buildCommand"
-                      density="comfortable"
-                      hide-details
-                      :placeholder="buildCommandPlaceholder"
-                      variant="outlined"
-                    />
+
                   </v-col>
                 </v-row>
               </v-expansion-panel-text>
@@ -629,8 +611,8 @@ PORT=3000"
   })
 
   const buildPreset = ref('Node.js')
-  const buildCommand = ref('')
-  const frameworkPresets = [
+  const _buildCommand = ref('')
+  const _frameworkPresets = [
     'Node.js',
     'Python',
     'Django',
@@ -641,7 +623,7 @@ PORT=3000"
     'Outro',
   ]
 
-  const buildCommandPlaceholder = computed(() => {
+  const _buildCommandPlaceholder = computed(() => {
     const map: Record<string, string> = {
       'Node.js': 'npm run build',
       'Python': 'pip install -r requirements.txt',

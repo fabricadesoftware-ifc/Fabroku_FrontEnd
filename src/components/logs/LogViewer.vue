@@ -302,7 +302,6 @@
           cls: 'log-line--success',
         }
       }
-      case 'INFO':
       default: {
         return { prefix: '○', prefixCls: 'log-line__prefix--info', cls: '' }
       }

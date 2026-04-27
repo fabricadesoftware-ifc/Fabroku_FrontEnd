@@ -176,7 +176,7 @@
             </v-btn>
             <v-btn
               color="primary"
-              :disabled="!hasTeamChanges || !selectedTeamIds.length"
+              :disabled="!hasTeamChanges || selectedTeamIds.length === 0"
               :loading="teamSaving"
               @click="saveTeamChanges"
             >
@@ -288,14 +288,16 @@
   const teamFeedback = ref<{ type: 'success' | 'error', message: string } | null>(null)
   const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
 
+  function sortNumericIds (ids: number[]) {
+    // eslint-disable-next-line unicorn/no-array-sort -- tsconfig target does not include ES2023 Array#toSorted.
+    return [...ids].sort((left, right) => left - right)
+  }
+
   const currentProject = computed(() => projectStore.currentProject)
 
   const currentTeamIds = computed(() => {
     const users = currentProject.value?.users || []
-    return users
-      .filter((id): id is number => typeof id === 'number')
-      .slice()
-      .sort((left, right) => left - right)
+    return sortNumericIds(users.filter((id): id is number => typeof id === 'number'))
   })
 
   const projectApps = computed(() => {
@@ -347,7 +349,7 @@
       }
     }
 
-    return Array.from(ids).sort((left, right) => left - right)
+    return sortNumericIds(Array.from(ids))
   })
 
   const hasTeamChanges = computed(() => {
@@ -404,7 +406,7 @@
 
   function initializeTeamSelection (project: Project | null) {
     const lockedMemberId = fixedMember.value?.id
-    const members = (project?.users_detail || []).map(mapProjectUserToUser)
+    const members = (project?.users_detail || []).map(user => mapProjectUserToUser(user))
 
     editableTeamMembers.value = members.filter(user => user.id !== lockedMemberId)
     teamSearchQuery.value = ''
@@ -463,7 +465,7 @@
   }
 
   async function saveTeamChanges () {
-    if (!currentProject.value?.id || !selectedTeamIds.value.length) {
+    if (!currentProject.value?.id || selectedTeamIds.value.length === 0) {
       return
     }
 

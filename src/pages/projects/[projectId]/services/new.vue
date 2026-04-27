@@ -77,9 +77,7 @@
         <div v-if="taskStatus" class="mb-2">
           <div class="d-flex justify-space-between mb-1">
             <span>{{ taskStatus.status || "Processando..." }}</span>
-            <span v-if="taskStatus.current != null"
-              >{{ taskStatus.current }}%</span
-            >
+            <span v-if="taskStatus.current != null">{{ taskStatus.current }}%</span>
           </div>
           <v-progress-linear
             v-if="taskStatus.current != null"
@@ -95,92 +93,92 @@
 </template>
 
 <script setup lang="ts">
-import type { Service, TaskStatus } from "@/interfaces";
+  import type { Service, TaskStatus } from '@/interfaces'
 
-import axios from "axios";
-import { onMounted, onUnmounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+  import axios from 'axios'
+  import { onMounted, onUnmounted, ref } from 'vue'
+  import { useRoute, useRouter } from 'vue-router'
 
-import ServicesService from "@/services/services";
-import { useProjectStore } from "@/stores";
+  import ServicesService from '@/services/services'
+  import { useProjectStore } from '@/stores'
 
-const route = useRoute();
-const router = useRouter();
-const projectId = (route.params as { projectId: string }).projectId || "";
+  const route = useRoute()
+  const router = useRouter()
+  const projectId = (route.params as { projectId: string }).projectId || ''
 
-const projectStore = useProjectStore();
+  const projectStore = useProjectStore()
 
-const serviceTypeOptions = [
-  { value: "postgres", label: "PostgreSQL" },
-  { value: "redis", label: "Redis", disabled: true },
-];
-const serviceType = ref("postgres");
-const name = ref("");
-const creating = ref(false);
-const quotaError = ref("");
-const createdService = ref<Service | null>(null);
-const taskStatus = ref<TaskStatus | null>(null);
-let pollInterval: ReturnType<typeof setInterval> | null = null;
+  const serviceTypeOptions = [
+    { value: 'postgres', label: 'PostgreSQL' },
+    { value: 'redis', label: 'Redis', disabled: true },
+  ]
+  const serviceType = ref('postgres')
+  const name = ref('')
+  const creating = ref(false)
+  const quotaError = ref('')
+  const createdService = ref<Service | null>(null)
+  const taskStatus = ref<TaskStatus | null>(null)
+  let pollInterval: ReturnType<typeof setInterval> | null = null
 
-onMounted(async () => {
-  await projectStore.fetchProject(projectId);
-});
+  onMounted(async () => {
+    await projectStore.fetchProject(projectId)
+  })
 
-onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval);
-});
+  onUnmounted(() => {
+    if (pollInterval) clearInterval(pollInterval)
+  })
 
-async function handleCreate() {
-  if (!projectStore.currentProject?.id) return;
-  creating.value = true;
-  createdService.value = null;
-  taskStatus.value = null;
-  try {
-    const service = await ServicesService.createService({
-      project: projectStore.currentProject.id,
-      service_type: serviceType.value,
-      name: name.value || undefined,
-    });
-    createdService.value = service;
-    if (service.task_id) {
-      pollInterval = setInterval(pollStatus, 2000);
-      await pollStatus();
-    } else {
-      creating.value = false;
-      router.push(`/projects/${projectId}/services`);
+  async function handleCreate () {
+    if (!projectStore.currentProject?.id) return
+    creating.value = true
+    createdService.value = null
+    taskStatus.value = null
+    try {
+      const service = await ServicesService.createService({
+        project: projectStore.currentProject.id,
+        service_type: serviceType.value,
+        name: name.value || undefined,
+      })
+      createdService.value = service
+      if (service.task_id) {
+        pollInterval = setInterval(pollStatus, 2000)
+        await pollStatus()
+      } else {
+        creating.value = false
+        router.push(`/projects/${projectId}/services`)
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.quota) {
+        const data = error.response.data
+        quotaError.value = `Limite de serviços atingido: você possui ${data.current} de ${data.limit} serviços permitidos.`
+      }
+      creating.value = false
     }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.data?.quota) {
-      const data = error.response.data;
-      quotaError.value = `Limite de serviços atingido: você possui ${data.current} de ${data.limit} serviços permitidos.`;
-    }
-    creating.value = false;
   }
-}
 
-async function pollStatus() {
-  if (!createdService.value?.id) return;
-  try {
-    const status = await ServicesService.getServiceStatus(
-      createdService.value.id,
-    );
-    taskStatus.value = status;
-    if (status.state === "SUCCESS") {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-        pollInterval = null;
+  async function pollStatus () {
+    if (!createdService.value?.id) return
+    try {
+      const status = await ServicesService.getServiceStatus(
+        createdService.value.id,
+      )
+      taskStatus.value = status
+      if (status.state === 'SUCCESS') {
+        if (pollInterval) {
+          clearInterval(pollInterval)
+          pollInterval = null
+        }
+        creating.value = false
+        router.push(`/projects/${projectId}/services`)
+      } else if (status.state === 'FAILURE') {
+        if (pollInterval) {
+          clearInterval(pollInterval)
+          pollInterval = null
+        }
+        creating.value = false
       }
-      creating.value = false;
-      router.push(`/projects/${projectId}/services`);
-    } else if (status.state === "FAILURE") {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-        pollInterval = null;
-      }
-      creating.value = false;
-    }
-  } catch {
+    } catch {
     // ignora erros de polling
+    }
   }
-}
 </script>

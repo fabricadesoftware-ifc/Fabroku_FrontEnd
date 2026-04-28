@@ -18,7 +18,7 @@
       <!-- ========== COLUNA ESQUERDA — FORMULÁRIO ========== -->
       <v-col cols="12" lg="8">
         <!-- Seção 1 — Identificação do App -->
-        <v-card v-if="false" class="mb-6 app-card" variant="flat">
+        <v-card class="mb-6 app-card" variant="flat">
           <v-card-title class="d-flex align-center ga-2 pa-5 pb-1">
             <v-icon
               color="primary"
@@ -797,7 +797,10 @@ PORT=3000"
 
   watch(selectedRepo, repo => {
     if (repo) {
-      if (!newApp.value.name) newApp.value.name = repo.name
+      if (!newApp.value.name) {
+        newApp.value.name = repo.name
+        onNameInput(repo.name)
+      }
       newApp.value.git = repo.clone_url
       selectedBranch.value = repo.default_branch
     }

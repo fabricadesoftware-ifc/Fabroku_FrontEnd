@@ -12,7 +12,40 @@
     <v-progress-linear v-if="loading" indeterminate />
 
     <template v-if="currentProject">
-      <h1 class="text-h4 mb-4">{{ currentProject.name }}</h1>
+      <div class="mb-4">
+        <button
+          v-if="!isEditingProjectName"
+          class="project-name-trigger"
+          type="button"
+          @click="startProjectNameEditing"
+          @keydown.enter.prevent="startProjectNameEditing"
+          @keydown.space.prevent="startProjectNameEditing"
+        >
+          <span class="text-h4 project-name-text">{{ currentProject.name }}</span>
+          <v-icon
+            class="project-name-icon"
+            :color="savingProjectName ? 'primary' : undefined"
+            size="18"
+          >
+            {{ savingProjectName ? "mdi-loading mdi-spin" : "mdi-pencil-outline" }}
+          </v-icon>
+        </button>
+
+        <v-text-field
+          v-else
+          ref="projectNameField"
+          v-model="projectNameInput"
+          class="project-name-input"
+          density="compact"
+          hide-details="auto"
+          :error-messages="projectNameError ? [projectNameError] : []"
+          single-line
+          variant="plain"
+          @blur="handleProjectNameBlur"
+          @keydown.enter.prevent="saveProjectName"
+          @keydown.esc.prevent="cancelProjectNameEditing"
+        />
+      </div>
 
       <v-card class="mb-6">
         <v-card-title>
@@ -264,7 +297,7 @@
 <script setup lang="ts">
   import type { Project, ProjectUser, User } from '@/interfaces'
 
-  import { computed, onMounted, ref } from 'vue'
+  import { computed, nextTick, onMounted, ref, watch } from 'vue'
   import { useRoute } from 'vue-router'
 
   import { UsersService } from '@/services'
@@ -279,6 +312,12 @@
   const authStore = useAuthStore()
 
   const loading = ref(true)
+  const isEditingProjectName = ref(false)
+  const savingProjectName = ref(false)
+  const projectNameInput = ref('')
+  const projectNameError = ref('')
+  const skipProjectNameBlur = ref(false)
+  const projectNameField = ref<{ focus?: () => void } | null>(null)
   const teamDialog = ref(false)
   const teamSaving = ref(false)
   const teamSearching = ref(false)
@@ -294,6 +333,17 @@
   }
 
   const currentProject = computed(() => projectStore.currentProject)
+
+  watch(
+    currentProject,
+    project => {
+      if (!isEditingProjectName.value) {
+        projectNameInput.value = project?.name || ''
+        projectNameError.value = ''
+      }
+    },
+    { immediate: true },
+  )
 
   const currentTeamIds = computed(() => {
     const users = currentProject.value?.users || []
@@ -385,6 +435,66 @@
       loading.value = false
     }
   })
+
+  async function startProjectNameEditing () {
+    if (!currentProject.value) return
+
+    projectNameInput.value = currentProject.value.name
+    projectNameError.value = ''
+    isEditingProjectName.value = true
+
+    await nextTick()
+    projectNameField.value?.focus?.()
+  }
+
+  function cancelProjectNameEditing () {
+    skipProjectNameBlur.value = true
+    isEditingProjectName.value = false
+    projectNameError.value = ''
+    projectNameInput.value = currentProject.value?.name || ''
+  }
+
+  async function handleProjectNameBlur () {
+    if (skipProjectNameBlur.value) {
+      skipProjectNameBlur.value = false
+      return
+    }
+
+    await saveProjectName()
+  }
+
+  async function saveProjectName () {
+    const project = currentProject.value
+    const nextName = projectNameInput.value.trim()
+
+    if (!project?.id || savingProjectName.value) {
+      return
+    }
+
+    if (!nextName) {
+      projectNameError.value = 'Informe um nome para o projeto.'
+      return
+    }
+
+    if (nextName === project.name) {
+      isEditingProjectName.value = false
+      projectNameError.value = ''
+      return
+    }
+
+    savingProjectName.value = true
+    projectNameError.value = ''
+
+    try {
+      await projectStore.updateProject(project.id, { name: nextName })
+      isEditingProjectName.value = false
+    } catch (error) {
+      console.error('Erro ao atualizar nome do projeto:', error)
+      projectNameError.value = getProjectRenameErrorMessage(error)
+    } finally {
+      savingProjectName.value = false
+    }
+  }
 
   function mapProjectUserToUser (user: ProjectUser): User {
     return {
@@ -493,6 +603,36 @@
     }
   }
 
+  function getProjectRenameErrorMessage (error: unknown): string {
+    const responseData = (error as {
+      response?: {
+        data?: {
+          detail?: string
+          error?: string
+          name?: string[] | string
+        }
+      }
+    })?.response?.data
+
+    if (Array.isArray(responseData?.name) && responseData.name.length > 0) {
+      return responseData.name[0] ?? 'Nao foi possivel atualizar o nome do projeto.'
+    }
+
+    if (typeof responseData?.name === 'string') {
+      return responseData.name
+    }
+
+    if (typeof responseData?.detail === 'string') {
+      return responseData.detail
+    }
+
+    if (typeof responseData?.error === 'string') {
+      return responseData.error
+    }
+
+    return 'Nao foi possivel atualizar o nome do projeto.'
+  }
+
   function getProjectTeamErrorMessage (error: unknown): string {
     const responseData = (error as {
       response?: {
@@ -523,3 +663,55 @@
     return 'Nao foi possivel atualizar a equipe do projeto.'
   }
 </script>
+
+<style scoped>
+  .project-name-trigger {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 10px;
+    margin: -6px -10px 0;
+    max-width: 100%;
+    padding: 6px 10px;
+    text-align: left;
+    transition: background-color 0.18s ease;
+  }
+
+  .project-name-trigger:hover,
+  .project-name-trigger:focus-visible {
+    background: rgba(var(--v-theme-on-surface), 0.06);
+    outline: none;
+  }
+
+  .project-name-text {
+    overflow-wrap: anywhere;
+  }
+
+  .project-name-icon {
+    flex-shrink: 0;
+    opacity: 0.68;
+  }
+
+  .project-name-input {
+    max-width: min(100%, 720px);
+  }
+
+  .project-name-input :deep(.v-field__input) {
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.2;
+    min-height: auto;
+    padding: 0;
+  }
+
+  .project-name-input :deep(.v-field) {
+    padding: 0;
+  }
+
+  .project-name-input :deep(.v-field__append-inner) {
+    align-self: center;
+  }
+</style>

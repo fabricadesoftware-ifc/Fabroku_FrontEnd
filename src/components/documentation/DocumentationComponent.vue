@@ -5,7 +5,7 @@
       <v-icon class="mb-3" color="primary" size="56">mdi-console</v-icon>
       <h1 class="text-h3 font-weight-bold">Fabroku CLI</h1>
       <p class="text-grey mt-2" style="max-width: 600px; margin: 0 auto">
-        DocumentaÃ§Ã£o completa da ferramenta de linha de comando para gerenciar
+        Documentação completa da ferramenta de linha de comando para gerenciar
         seus apps na plataforma Fabroku.
       </p>
       <div class="mt-4 d-flex justify-center ga-3">
@@ -21,11 +21,11 @@
       </div>
     </div>
 
-    <!-- NavegaÃ§Ã£o rÃ¡pida -->
+    <!-- Navegação rápida -->
     <v-card class="mb-6" variant="outlined">
       <v-card-title class="d-flex align-center">
         <v-icon class="mr-2" size="20">mdi-compass</v-icon>
-        NavegaÃ§Ã£o rÃ¡pida
+        Navegação rápida
       </v-card-title>
       <v-card-text>
         <div class="d-flex flex-wrap ga-2">
@@ -43,12 +43,12 @@
       </v-card-text>
     </v-card>
 
-    <!-- InstalaÃ§Ã£o -->
+    <!-- Instalação -->
     <section :id="'instalacao'" class="mb-6">
       <v-card>
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2" color="success">mdi-download</v-icon>
-          InstalaÃ§Ã£o
+          Instalação
         </v-card-title>
         <v-card-text>
           <p class="mb-3">Instale a CLI globalmente via npm:</p>
@@ -68,16 +68,16 @@
       </v-card>
     </section>
 
-    <!-- AutenticaÃ§Ã£o -->
+    <!-- Autenticação -->
     <section :id="'autenticacao'" class="mb-6">
       <v-card>
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2" color="warning">mdi-shield-key</v-icon>
-          AutenticaÃ§Ã£o
+          Autenticação
         </v-card-title>
         <v-card-text>
           <p class="mb-3">
-            A CLI utiliza autenticaÃ§Ã£o via <strong>GitHub OAuth</strong>. O
+            A CLI utiliza autenticação via <strong>GitHub OAuth</strong>. O
             login abre o navegador automaticamente e recebe o token via
             callback.
           </p>
@@ -87,7 +87,7 @@
               <code>fabroku login</code>
             </v-card-title>
             <v-card-text>
-              <p class="mb-2">Autentica o usuÃ¡rio via GitHub OAuth.</p>
+              <p class="mb-2">Autentica o usuário via GitHub OAuth.</p>
               <FlagTable :flags="loginFlags" />
               <p class="mt-3 font-weight-medium">Como funciona:</p>
               <v-timeline class="mt-2" density="compact" side="end">
@@ -112,7 +112,7 @@
               <code>fabroku logout</code>
             </v-card-title>
             <v-card-text>
-              <p>Encerra a sessÃ£o, limpando o token e dados do usuÃ¡rio.</p>
+              <p>Encerra a sessão, limpando o token e dados do usuário.</p>
               <CodeBlock class="mt-2" code="fabroku logout" />
             </v-card-text>
           </v-card>
@@ -123,8 +123,8 @@
             </v-card-title>
             <v-card-text>
               <p class="mb-2">
-                Exibe informaÃ§Ãµes do usuÃ¡rio autenticado e verifica se o token Ã©
-                vÃ¡lido.
+                Exibe informações do usuário autenticado e verifica se o token é
+                válido.
               </p>
               <CodeBlock :code="whoamiExample" />
             </v-card-text>
@@ -133,12 +133,12 @@
       </v-card>
     </section>
 
-    <!-- VerificaÃ§Ã£o de Arquivos -->
+    <!-- Verificação de Arquivos -->
     <section :id="'verificacao'" class="mb-6">
       <v-card>
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2" color="info">mdi-file-check</v-icon>
-          VerificaÃ§Ã£o de Arquivos
+          Verificação de Arquivos
         </v-card-title>
         <v-card-text>
           <v-card class="mb-4" variant="tonal">
@@ -147,7 +147,7 @@
             </v-card-title>
             <v-card-text>
               <p class="mb-3">
-                Verifica se o projeto contÃ©m os arquivos necessÃ¡rios para deploy
+                Verifica se o projeto contém os arquivos necessários para deploy
                 no Dokku.
               </p>
               <FlagTable :flags="verifyFlags" />
@@ -217,7 +217,7 @@
                 type="info"
                 variant="tonal"
               >
-                A auto-detecÃ§Ã£o identifica o tipo pelo
+                A auto-detecção identifica o tipo pelo
                 <code>package.json</code> (frontend) ou <code>manage.py</code>,
                 <code>requirements.txt</code>,
                 <code>pyproject.toml</code> (backend).
@@ -247,7 +247,7 @@
             </v-card-title>
             <v-card-text>
               <p class="mb-3">
-                Lista todos os apps do usuÃ¡rio na plataforma em formato tabular.
+                Lista todos os apps do usuário na plataforma em formato tabular.
               </p>
               <FlagTable :flags="appsFlags" />
               <CodeBlock
@@ -255,7 +255,7 @@
                 :code="`fabroku apps\nfabroku apps --project 42`"
               />
 
-              <p class="mt-3 font-weight-medium">Status possÃ­veis:</p>
+              <p class="mt-3 font-weight-medium">Status possíveis:</p>
               <div class="d-flex flex-wrap ga-2 mt-2">
                 <v-chip
                   v-for="s in statusList"
@@ -292,7 +292,7 @@
 
               <v-divider class="my-4" />
 
-              <p class="font-weight-medium mb-2">Fluxo de execuÃ§Ã£o:</p>
+              <p class="font-weight-medium mb-2">Fluxo de execução:</p>
               <v-timeline class="mt-2" density="compact" side="end">
                 <v-timeline-item
                   v-for="(step, i) in deploySteps"
@@ -310,7 +310,7 @@
                 type="info"
                 variant="tonal"
               >
-                Se <code>--app</code> nÃ£o for especificado, a CLI detecta o app
+                Se <code>--app</code> não for especificado, a CLI detecta o app
                 automaticamente comparando a URL do
                 <code>git remote origin</code> com os apps registrados na
                 plataforma.
@@ -318,7 +318,7 @@
 
               <CodeBlock
                 class="mt-3"
-                :code="`# Na raiz do repositÃ³rio (auto-detecta o app)\nfabroku deploy\n\n# Especificando o app\nfabroku deploy --app meu-app\n\n# Pular verificaÃ§Ã£o e nÃ£o aguardar\nfabroku deploy --skip-verify --no-wait\n\n# DiretÃ³rio especÃ­fico\nfabroku deploy --dir ./meu-projeto`"
+                :code="`# Na raiz do repositório (auto-detecta o app)\nfabroku deploy\n\n# Especificando o app\nfabroku deploy --app meu-app\n\n# Pular verificação e não aguardar\nfabroku deploy --skip-verify --no-wait\n\n# Diretório específico\nfabroku deploy --dir ./meu-projeto`"
               />
             </v-card-text>
           </v-card>
@@ -352,7 +352,7 @@
                 variant="tonal"
               >
                 Nesta versao, o fluxo e exclusivo para Django e exige a flag
-                <code>--django</code>. O arquivo deve ser JSON UTF-8 e ter atÃ©
+                <code>--django</code>. O arquivo deve ser JSON UTF-8 e ter até
                 <code>50 MB</code>.
               </v-alert>
 
@@ -388,7 +388,7 @@
 
               <CodeBlock
                 class="mt-3"
-                :code="`# Dump completo para arquivo local\nfabroku run dumpdata --django --output ./dump.json\n\n# Com filtros e flags do Django apÃ³s --\nfabroku run dumpdata --django --output ./users.json -- --indent 2 auth.User\n\n# Usando app detectado por git remote e manage.py customizado\nfabroku run dumpdata --django --dir ./backend --manage src/manage.py --output ./backups/auth.json -- auth.User`"
+                :code="`# Dump completo para arquivo local\nfabroku run dumpdata --django --output ./dump.json\n\n# Com filtros e flags do Django após --\nfabroku run dumpdata --django --output ./users.json -- --indent 2 auth.User\n\n# Usando app detectado por git remote e manage.py customizado\nfabroku run dumpdata --django --dir ./backend --manage src/manage.py --output ./backups/auth.json -- auth.User`"
               />
             </v-card-text>
           </v-card>
@@ -416,7 +416,7 @@
 
               <v-divider class="my-4" />
 
-              <p class="font-weight-medium mb-2">DiagnÃ³sticos realizados:</p>
+              <p class="font-weight-medium mb-2">Diagnósticos realizados:</p>
               <v-list density="compact">
                 <v-list-item
                   v-for="check in webhookChecks"
@@ -432,7 +432,7 @@
 
               <CodeBlock
                 class="mt-3"
-                :code="`# Listar apps disponÃ­veis\nfabroku webhook\n\n# Diagnosticar app\nfabroku webhook 15\n\n# Criar/recriar webhook\nfabroku webhook 15 --setup\n\n# Testar commit status\nfabroku webhook 15 --test\n\n# Tudo junto\nfabroku webhook 15 --setup --test`"
+                :code="`# Listar apps disponíveis\nfabroku webhook\n\n# Diagnosticar app\nfabroku webhook 15\n\n# Criar/recriar webhook\nfabroku webhook 15 --setup\n\n# Testar commit status\nfabroku webhook 15 --test\n\n# Tudo junto\nfabroku webhook 15 --setup --test`"
               />
             </v-card-text>
           </v-card>
@@ -449,7 +449,7 @@
         </v-card-title>
         <v-card-text>
           <p class="mb-4">
-            Passo a passo para fazer deploy de uma aplicaÃ§Ã£o do zero:
+            Passo a passo para fazer deploy de uma aplicação do zero:
           </p>
           <v-timeline density="compact" side="end">
             <v-timeline-item
@@ -473,17 +473,17 @@
       </v-card>
     </section>
 
-    <!-- ConfiguraÃ§Ã£o -->
+    <!-- Configuração -->
     <section :id="'configuracao'" class="mb-6">
       <v-card>
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2" color="grey">mdi-cog</v-icon>
-          Arquivo de ConfiguraÃ§Ã£o
+          Arquivo de Configuração
         </v-card-title>
         <v-card-text>
           <p class="mb-3">
-            A CLI armazena suas configuraÃ§Ãµes em
-            <code>~/.fabroku/config.json</code>. Este arquivo Ã© criado
+            A CLI armazena suas configurações em
+            <code>~/.fabroku/config.json</code>. Este arquivo é criado
             automaticamente no primeiro uso.
           </p>
           <CodeBlock :code="configExample" />
@@ -493,7 +493,7 @@
             type="warning"
             variant="tonal"
           >
-            Nunca compartilhe o arquivo de configuraÃ§Ã£o â€” ele contÃ©m seu token
+            Nunca compartilhe o arquivo de configuração — ele contém seu token
             de acesso.
           </v-alert>
         </v-card-text>
@@ -512,7 +512,7 @@
             <thead>
               <tr>
                 <th>Problema</th>
-                <th>SoluÃ§Ã£o</th>
+                <th>Solução</th>
               </tr>
             </thead>
             <tbody>
@@ -538,14 +538,14 @@
         <v-card-text>
           <p class="mb-3">
             Endpoints consumidos internamente pela CLI (timeout de 15s,
-            autenticaÃ§Ã£o via header <code>Authorization: CLI {token}</code>):
+            autenticação via header <code>Authorization: CLI {token}</code>):
           </p>
           <v-table density="compact">
             <thead>
               <tr>
-                <th>MÃ©todo</th>
+                <th>Método</th>
                 <th>Endpoint</th>
-                <th>DescriÃ§Ã£o</th>
+                <th>Descrição</th>
               </tr>
             </thead>
             <tbody>
@@ -623,9 +623,9 @@
             h('thead', null, [
               h('tr', null, [
                 h('th', { style: thStyle }, 'Flag'),
-                h('th', { style: thStyle }, 'DescriÃ§Ã£o'),
+                h('th', { style: thStyle }, 'Descrição'),
                 ...(props.flags.some(f => f.default)
-                  ? [h('th', { style: thStyle }, 'PadrÃ£o')]
+                  ? [h('th', { style: thStyle }, 'Padrão')]
                   : []),
               ]),
             ]),
@@ -637,7 +637,7 @@
                   h('td', { style: tdStyle }, h('code', null, f.flag)),
                   h('td', { style: tdStyle }, f.desc),
                   ...(props.flags.some(ff => ff.default)
-                    ? [h('td', { style: tdStyle }, f.default || 'â€”')]
+                    ? [h('td', { style: tdStyle }, f.default || '—')]
                     : []),
                 ]),
               ),
@@ -662,15 +662,15 @@
 
   // ---- Data ----
   const navSections = [
-    { id: 'instalacao', label: 'InstalaÃ§Ã£o', icon: 'mdi-download' },
-    { id: 'autenticacao', label: 'AutenticaÃ§Ã£o', icon: 'mdi-shield-key' },
-    { id: 'verificacao', label: 'VerificaÃ§Ã£o', icon: 'mdi-file-check' },
+    { id: 'instalacao', label: 'Instalação', icon: 'mdi-download' },
+    { id: 'autenticacao', label: 'Autenticação', icon: 'mdi-shield-key' },
+    { id: 'verificacao', label: 'Verificação', icon: 'mdi-file-check' },
     { id: 'apps', label: 'Apps', icon: 'mdi-view-list' },
     { id: 'deploy', label: 'Deploy', icon: 'mdi-rocket-launch' },
     { id: 'run', label: 'Run', icon: 'mdi-database-sync' },
     { id: 'webhook', label: 'Webhook', icon: 'mdi-webhook' },
     { id: 'workflow', label: 'Workflow', icon: 'mdi-map-marker-path' },
-    { id: 'configuracao', label: 'ConfiguraÃ§Ã£o', icon: 'mdi-cog' },
+    { id: 'configuracao', label: 'Configuração', icon: 'mdi-cog' },
     { id: 'troubleshooting', label: 'Troubleshooting', icon: 'mdi-lifebuoy' },
     { id: 'api', label: 'API', icon: 'mdi-api' },
   ]
@@ -678,19 +678,19 @@
   const loginFlags = [
     {
       flag: '--api-url <url>',
-      desc: 'URL base da API Fabroku (sobrescreve o padrÃ£o)',
+      desc: 'URL base da API Fabroku (sobrescreve o padrão)',
     },
   ]
 
   const loginSteps = [
-    { text: 'Verifica se jÃ¡ existe sessÃ£o ativa', color: 'grey' },
+    { text: 'Verifica se já existe sessão ativa', color: 'grey' },
     { text: 'Busca uma porta livre e abre o navegador', color: 'info' },
     { text: 'Servidor HTTP local aguarda callback OAuth', color: 'warning' },
     {
       text: 'Recebe o token e salva em ~/.fabroku/config.json',
       color: 'success',
     },
-    { text: 'Timeout de 2 minutos se nÃ£o receber callback', color: 'error' },
+    { text: 'Timeout de 2 minutos se não receber callback', color: 'error' },
   ]
 
   const whoamiExample = `fabroku whoami
@@ -703,12 +703,12 @@
   const verifyFlags = [
     {
       flag: '-d, --dir <path>',
-      desc: 'DiretÃ³rio do projeto',
+      desc: 'Diretório do projeto',
       default: '. (atual)',
     },
     {
       flag: '-t, --type <type>',
-      desc: 'ForÃ§ar tipo: frontend ou backend',
+      desc: 'Forçar tipo: frontend ou backend',
       default: 'auto-detecta',
     },
     {
@@ -720,14 +720,14 @@
 
   const frontendFiles = [
     { name: '.buildpacks', desc: 'Buildpacks Node.js + Nginx' },
-    { name: '.static', desc: 'Marcador de aplicaÃ§Ã£o estÃ¡tica' },
-    { name: 'static.json', desc: 'ConfiguraÃ§Ã£o SPA (rotas, cache, root)' },
+    { name: '.static', desc: 'Marcador de aplicação estática' },
+    { name: 'static.json', desc: 'Configuração SPA (rotas, cache, root)' },
   ]
 
   const backendFiles = [
-    { name: 'Procfile', desc: 'Comando de execuÃ§Ã£o do servidor' },
-    { name: 'requirements.txt', desc: 'DependÃªncias Python' },
-    { name: 'runtime.txt', desc: 'VersÃ£o do Python' },
+    { name: 'Procfile', desc: 'Comando de execução do servidor' },
+    { name: 'requirements.txt', desc: 'Dependências Python' },
+    { name: 'runtime.txt', desc: 'Versão do Python' },
   ]
 
   const appsFlags = [
@@ -752,28 +752,28 @@
     },
     {
       flag: '-d, --dir <path>',
-      desc: 'DiretÃ³rio do projeto',
+      desc: 'Diretório do projeto',
       default: '. (atual)',
     },
     {
       flag: '--skip-verify',
-      desc: 'Pular verificaÃ§Ã£o de arquivos',
+      desc: 'Pular verificação de arquivos',
       default: 'false',
     },
     {
       flag: '--no-wait',
-      desc: 'NÃ£o aguardar o deploy terminar',
+      desc: 'Não aguardar o deploy terminar',
       default: 'false',
     },
   ]
 
   const deploySteps = [
-    { text: 'Verifica autenticaÃ§Ã£o', color: 'grey' },
+    { text: 'Verifica autenticação', color: 'grey' },
     { text: 'Identifica o app (por nome, ID ou git remote)', color: 'info' },
-    { text: 'Roda fabroku verify (se nÃ£o --skip-verify)', color: 'warning' },
+    { text: 'Roda fabroku verify (se não --skip-verify)', color: 'warning' },
     { text: 'Dispara redeploy via API', color: 'primary' },
     { text: 'Polling de progresso com barra em tempo real', color: 'success' },
-    { text: 'Exibe resultado: URL do domÃ­nio ou erro', color: 'success' },
+    { text: 'Exibe resultado: URL do domínio ou erro', color: 'success' },
   ]
 
   const runLoaddataFlags = [
@@ -839,16 +839,16 @@
   const webhookChecks = [
     {
       name: 'backend_url_public',
-      desc: 'URL do backend Ã© pÃºblica (nÃ£o localhost)',
+      desc: 'URL do backend é pública (não localhost)',
     },
-    { name: 'user_git_token', desc: 'Token GitHub do usuÃ¡rio Ã© vÃ¡lido' },
+    { name: 'user_git_token', desc: 'Token GitHub do usuário é válido' },
     {
       name: 'project_git_token',
       desc: 'Pelo menos 1 membro do projeto tem token GitHub',
     },
-    { name: 'git_url_parseable', desc: 'URL git do app Ã© vÃ¡lida' },
-    { name: 'webhook_exists', desc: 'Webhook existe no repositÃ³rio GitHub' },
-    { name: 'last_commit', desc: 'Ãšltimo commit detectado no repositÃ³rio' },
+    { name: 'git_url_parseable', desc: 'URL git do app é válida' },
+    { name: 'webhook_exists', desc: 'Webhook existe no repositório GitHub' },
+    { name: 'last_commit', desc: 'Último commit detectado no repositório' },
   ]
 
   const workflowSteps = [
@@ -860,25 +860,25 @@
     },
     {
       title: '2. Autenticar',
-      desc: 'FaÃ§a login com sua conta GitHub.',
+      desc: 'Faça login com sua conta GitHub.',
       code: 'fabroku login',
       color: 'warning',
     },
     {
       title: '3. Acessar o projeto',
-      desc: 'Navegue atÃ© o diretÃ³rio do seu projeto.',
+      desc: 'Navegue até o diretório do seu projeto.',
       code: 'cd meu-projeto',
       color: 'info',
     },
     {
       title: '4. Verificar arquivos',
-      desc: 'Verifique e gere os arquivos necessÃ¡rios para deploy.',
+      desc: 'Verifique e gere os arquivos necessários para deploy.',
       code: 'fabroku verify --fix',
       color: 'info',
     },
     {
       title: '5. Commitar e push',
-      desc: 'Envie as alteraÃ§Ãµes para o GitHub.',
+      desc: 'Envie as alterações para o GitHub.',
       code: 'git add . && git commit -m "prepare deploy"\ngit push origin main',
       color: 'primary',
     },
@@ -938,10 +938,10 @@
     },
     {
       problem: 'HTTP 409 no deploy',
-      solution: 'Deploy jÃ¡ em andamento, aguarde',
+      solution: 'Deploy já em andamento, aguarde',
     },
     {
-      problem: 'Webhook nÃ£o funciona',
+      problem: 'Webhook não funciona',
       solution: 'Use fabroku webhook <id> --test para diagnosticar',
     },
     {
@@ -954,12 +954,12 @@
     {
       method: 'GET',
       endpoint: '/api/auth/check/',
-      desc: 'Verifica autenticaÃ§Ã£o',
+      desc: 'Verifica autenticação',
     },
     {
       method: 'GET',
       endpoint: '/api/auth/users/me/',
-      desc: 'Dados do usuÃ¡rio logado',
+      desc: 'Dados do usuário logado',
     },
     { method: 'GET', endpoint: '/api/apps/apps/', desc: 'Lista apps' },
     {
@@ -980,12 +980,12 @@
     {
       method: 'GET',
       endpoint: '/api/apps/apps/{id}/run_loaddata/',
-      desc: 'Upload do fixture e execuÃƒÂ§ÃƒÂ£o do loaddata',
+      desc: 'Upload do fixture e execução do loaddata',
     },
     {
       method: 'POST',
       endpoint: '/api/apps/apps/{id}/run_dumpdata/',
-      desc: 'ExecuÃƒÂ§ÃƒÂ£o do dumpdata com geraÃƒÂ§ÃƒÂ£o de artefato',
+      desc: 'Execução do dumpdata com geração de artefato',
     },
     {
       method: 'GET',
@@ -995,7 +995,7 @@
     {
       method: 'GET',
       endpoint: '/api/apps/apps/{id}/diagnose_webhook/',
-      desc: 'DiagnÃ³stico de webhook',
+      desc: 'Diagnóstico de webhook',
     },
     {
       method: 'POST',

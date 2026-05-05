@@ -119,6 +119,17 @@
       <v-card>
         <v-card-title>Vincular serviço ao app</v-card-title>
         <v-card-text>
+          <v-alert
+            v-if="linkError"
+            class="mb-4"
+            closable
+            density="compact"
+            type="error"
+            variant="tonal"
+            @click:close="linkError = ''"
+          >
+            {{ linkError }}
+          </v-alert>
           <v-select
             v-model="selectedAppId"
             item-title="name"
@@ -168,6 +179,7 @@
   const selectedService = ref<Service | null>(null)
   const selectedAppId = ref<number | null>(null)
   const linking = ref(false)
+  const linkError = ref('')
 
   const projectApps = computed<App[]>(() => {
     return appStore.apps.filter(app => app.is_owner !== false)
@@ -196,20 +208,62 @@
   function openLinkDialog (service: Service) {
     selectedService.value = service
     selectedAppId.value = projectApps.value[0]?.id ?? null
+    linkError.value = ''
     linkDialog.value = true
+  }
+
+  function sleep (ms: number) {
+    return new Promise(resolve => {
+      setTimeout(resolve, ms)
+    })
+  }
+
+  async function waitForAppTaskCompletion (appId: number, taskId: string) {
+    const timeoutMs = 60_000
+    const pollIntervalMs = 1500
+    const startedAt = Date.now()
+    const app = appStore.apps.find(app => app.id === appId)
+
+    if (app) {
+      app.task_id = taskId
+    }
+
+    while (Date.now() - startedAt < timeoutMs) {
+      const status = await appStore.fetchAppStatus(String(appId))
+
+      if (status?.state === 'SUCCESS' || status?.state === 'FAILURE') {
+        return status
+      }
+
+      await sleep(pollIntervalMs)
+    }
+
+    return null
   }
 
   async function confirmLink () {
     if (!selectedService.value?.id || !selectedAppId.value) return
     const appId = selectedAppId.value
     linking.value = true
+    linkError.value = ''
     try {
-      await ServicesService.linkService(selectedService.value.id, appId)
+      const result = await ServicesService.linkService(selectedService.value.id, appId)
+      const status = await waitForAppTaskCompletion(appId, result.task_id)
+
+      if (status?.state === 'FAILURE') {
+        linkError.value = status.status || 'Nao foi possivel vincular o servico ao app.'
+        return
+      }
+
       linkDialog.value = false
       selectedService.value = null
       selectedAppId.value = null
       await fetchServices()
+      await appStore.fetchAppsByProject(projectId)
       router.push(`/projects/${projectId}/${appId}`)
+    } catch (error) {
+      console.error('Erro ao vincular servico:', error)
+      linkError.value = 'Nao foi possivel vincular o servico ao app.'
     } finally {
       linking.value = false
     }
@@ -227,10 +281,15 @@
   }
 
   async function handleUnlink (service: Service) {
+    const appId = typeof service.app === 'number' ? service.app : null
     if (!service.id || !confirm('Desvincular este serviço?')) return
     try {
-      await ServicesService.unlinkService(service.id)
+      const result = await ServicesService.unlinkService(service.id)
+      if (appId) {
+        await waitForAppTaskCompletion(appId, result.task_id)
+      }
       await fetchServices()
+      await appStore.fetchAppsByProject(projectId)
     } catch (error) {
       console.error('Erro ao desvincular serviço:', error)
     }

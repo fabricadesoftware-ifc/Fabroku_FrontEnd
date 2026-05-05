@@ -101,6 +101,19 @@
 
           <AppPreviewCard :app="appStore.currentApp" />
 
+          <AppDatabaseCard
+            :app-name="appStore.currentApp.name_dokku || appStore.currentApp.name"
+            :creating="creatingDatabase"
+            :deleting-id="deletingService"
+            :linking="linkingService"
+            :services="appServices"
+            :unlinking-id="unlinkingService"
+            @create="handleCreateDatabase"
+            @delete="handleDeleteService"
+            @link="openLinkDialog"
+            @unlink="handleUnlinkService"
+          />
+
           <AppEnvVarsCard
             :saving="savingEnvVar"
             :variables="envVariables"
@@ -202,7 +215,7 @@
   import { useRoute, useRouter } from 'vue-router'
 
   import AppActionsCard from '@/components/projects/AppActionsCard.vue'
-  import _AppDatabaseCard from '@/components/projects/AppDatabaseCard.vue'
+  import AppDatabaseCard from '@/components/projects/AppDatabaseCard.vue'
   import AppDetailsCard from '@/components/projects/AppDetailsCard.vue'
   import AppEnvVarsCard from '@/components/projects/AppEnvVarsCard.vue'
   import AppLogsCard from '@/components/projects/AppLogsCard.vue'
@@ -712,7 +725,7 @@
     }
   }
 
-  async function _handleCreateDatabase () {
+  async function handleCreateDatabase () {
     if (!appStore.currentApp?.id) return
     creatingDatabase.value = true
     try {
@@ -735,7 +748,7 @@
     }
   }
 
-  async function _openLinkDialog () {
+  async function openLinkDialog () {
     try {
       const response = await ServicesService.getServicesByProject(projectId)
       availableServicesToLink.value = response.results.filter(s => !s.app)
@@ -764,7 +777,7 @@
     }
   }
 
-  async function _handleUnlinkService (serviceId: number) {
+  async function handleUnlinkService (serviceId: number) {
     unlinkingService.value = serviceId
     try {
       const result = await ServicesService.unlinkService(serviceId)
@@ -776,7 +789,7 @@
     }
   }
 
-  async function _handleDeleteService (serviceId: number) {
+  async function handleDeleteService (serviceId: number) {
     deletingService.value = serviceId
     try {
       await ServicesService.deleteService(serviceId)

@@ -1,4 +1,4 @@
-import type { App, Response, TaskStatus } from '@/interfaces'
+import type { App, AppProcessScale, Response, TaskStatus } from '@/interfaces'
 
 import apiClient from '@/plugins/axios'
 
@@ -57,6 +57,26 @@ class AppsService {
 
   async restartApp (id: string): Promise<App> {
     const response = await apiClient.post(`/apps/apps/${id}/restart/`)
+    return response.data
+  }
+
+  async getAppProcesses (
+    id: string,
+    refresh = false,
+  ): Promise<{ processes: AppProcessScale[], max_instances: number }> {
+    const response = await apiClient.get(`/apps/apps/${id}/processes/`, {
+      params: { refresh },
+    })
+    return response.data
+  }
+
+  async scaleAppProcesses (
+    id: string,
+    processes: Record<string, number>,
+  ): Promise<{ status: string, message: string, task_id: string }> {
+    const response = await apiClient.post(`/apps/apps/${id}/scale_processes/`, {
+      processes,
+    })
     return response.data
   }
 

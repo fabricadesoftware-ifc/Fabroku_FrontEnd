@@ -99,6 +99,17 @@
 
           <AppDetailsCard :app="appStore.currentApp" />
 
+          <AppProcessScaleCard
+            :error="processScaleError"
+            :loading="processesLoading"
+            :locked="processScaleLocked"
+            :max-instances="processMaxInstances"
+            :processes="appProcesses"
+            :saving="scalingProcesses"
+            @apply="handleScaleProcesses"
+            @refresh="handleRefreshProcesses"
+          />
+
           <AppPreviewCard :app="appStore.currentApp" />
 
           <AppDatabaseCard
@@ -219,7 +230,7 @@
 
 <script setup lang="ts">
 // Diagnóstico manual de erro
-  import type { Service } from '@/interfaces'
+  import type { AppProcessScale, Service } from '@/interfaces'
 
   import axios from 'axios'
   import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
@@ -231,6 +242,7 @@
   import AppEnvVarsCard from '@/components/projects/AppEnvVarsCard.vue'
   import AppLogsCard from '@/components/projects/AppLogsCard.vue'
   import AppPreviewCard from '@/components/projects/AppPreviewCard.vue'
+  import AppProcessScaleCard from '@/components/projects/AppProcessScaleCard.vue'
   import AppsService from '@/services/apps'
   import LogsService from '@/services/logs'
   import ServicesService from '@/services/services'
@@ -299,6 +311,13 @@
   const selectedServiceToLink = ref<number | null>(null)
   const linkServiceError = ref('')
 
+  // Estado da escala de processos Dokku
+  const appProcesses = ref<AppProcessScale[]>([])
+  const processesLoading = ref(false)
+  const scalingProcesses = ref(false)
+  const processScaleError = ref('')
+  const processMaxInstances = ref(5)
+
   // Estado do console de comandos
   const runningCommand = ref(false)
   const commandOutput = ref('')
@@ -337,6 +356,9 @@
     if (isRunning.value) return 'Logs da Aplicação'
     return 'Deploy Logs'
   })
+  const processScaleLocked = computed(() =>
+    ['DEPLOYING', 'STARTING', 'DELETING'].includes(appStore.currentApp?.status ?? ''),
+  )
 
   async function fetchRuntimeLogs () {
     if (!appStore.currentApp?.id || !appStore.currentApp?.name_dokku) return
@@ -396,6 +418,7 @@
       if (appStore.currentApp?.id) {
         await logStore.fetchLogsByApp(Number(appStore.currentApp.id))
         await fetchServices()
+        void fetchAppProcesses(true)
         await startLogStreamIfNeeded()
       }
       startTaskPollingIfNeeded()
@@ -466,6 +489,7 @@
       if (status?.state === 'SUCCESS' || status?.state === 'FAILURE') {
         stopTaskPolling()
         await appStore.fetchApp(appId)
+        await fetchAppProcesses(true)
         // Se era delete, navegar de volta após concluir
         if (appStore.currentApp?.status === 'DELETING' && status?.state === 'SUCCESS') {
           // App foi deletado
@@ -719,6 +743,52 @@
       }
       commandSuccess.value = false
       runningCommand.value = false
+    }
+  }
+
+  async function fetchAppProcesses (refresh = false) {
+    if (!appStore.currentApp?.id) return
+    processesLoading.value = true
+    processScaleError.value = ''
+
+    try {
+      const response = await AppsService.getAppProcesses(appId, refresh)
+      appProcesses.value = response.processes
+      processMaxInstances.value = response.max_instances
+    } catch (error_: any) {
+      processScaleError.value = error_?.response?.data?.error || 'Erro ao buscar processos do app'
+      console.error('Erro ao buscar processos do app:', error_)
+    } finally {
+      processesLoading.value = false
+    }
+  }
+
+  async function handleRefreshProcesses () {
+    await fetchAppProcesses(true)
+  }
+
+  async function handleScaleProcesses (processes: Record<string, number>) {
+    if (!appStore.currentApp?.id) return
+    scalingProcesses.value = true
+    processScaleError.value = ''
+
+    try {
+      const result = await AppsService.scaleAppProcesses(appId, processes)
+      if (appStore.currentApp) {
+        appStore.currentApp.task_id = result.task_id
+      }
+
+      const status = await waitForCurrentAppTaskCompletion(result.task_id)
+      if (status?.state === 'FAILURE') {
+        processScaleError.value = status.status || 'Erro ao aplicar escala de processos'
+      }
+
+      await fetchAppProcesses(true)
+    } catch (error_: any) {
+      processScaleError.value = error_?.response?.data?.error || 'Erro ao aplicar escala de processos'
+      console.error('Erro ao aplicar escala de processos:', error_)
+    } finally {
+      scalingProcesses.value = false
     }
   }
 

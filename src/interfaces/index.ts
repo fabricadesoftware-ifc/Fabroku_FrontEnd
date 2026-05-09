@@ -69,6 +69,17 @@ interface App {
   last_commit_sha?: string
 }
 
+interface AppProcessScale {
+  id?: number
+  process_name: string
+  quantity: number
+  desired_quantity: number
+  current_quantity: number
+  detected_at?: string
+  last_synced_at?: string | null
+  updated_at?: string
+}
+
 interface Service {
   id?: number
   name: string
@@ -130,6 +141,7 @@ interface GitRepo {
 
 export type {
   App,
+  AppProcessScale,
   AppLog,
   GitRepo,
   LogCategory,

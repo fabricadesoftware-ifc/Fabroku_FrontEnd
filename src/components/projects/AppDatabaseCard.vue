@@ -107,16 +107,6 @@
           </v-list-item>
         </v-list>
 
-        <v-alert
-          class="mt-3"
-          color="success"
-          density="compact"
-          icon="mdi-check-circle"
-          variant="tonal"
-        >
-          A variável de conexão do serviço foi sincronizada automaticamente pelo
-          Dokku ao vincular o serviço.
-        </v-alert>
       </div>
     </v-card-text>
   </v-card>

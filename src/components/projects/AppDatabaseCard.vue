@@ -3,10 +3,11 @@
     <v-card-title class="d-flex justify-space-between align-center flex-wrap ga-2">
       <span>
         <v-icon class="mr-2">mdi-database</v-icon>
-        Banco de Dados
+        Serviços Vinculados
       </span>
-      <div v-if="!hasDatabase" class="d-flex ga-2">
+      <div class="d-flex ga-2">
         <v-btn
+          v-if="!hasPostgres"
           color="primary"
           :disabled="!appName"
           :loading="creating"
@@ -31,17 +32,17 @@
       </div>
     </v-card-title>
     <v-card-text>
-      <!-- Sem banco de dados -->
-      <div v-if="!hasDatabase && !creating" class="text-center py-4 text-grey">
+      <!-- Sem servicos vinculados -->
+      <div v-if="!hasLinkedServices && !creating" class="text-center py-4 text-grey">
         <v-icon class="mb-2" color="grey" size="48">mdi-database-off</v-icon>
-        <p class="mb-2">Nenhum banco de dados vinculado</p>
+        <p class="mb-2">Nenhum serviço vinculado</p>
         <p class="text-caption">
-          Crie um banco PostgreSQL e a variável <code>DATABASE_URL</code>
-          será injetada automaticamente no app.
+          Crie ou vincule PostgreSQL/Redis e a variável
+          <code>DATABASE_URL</code> ou <code>REDIS_URL</code> será sincronizada no app.
         </p>
       </div>
 
-      <!-- Criando banco -->
+      <!-- Criando servico -->
       <div v-else-if="creating" class="text-center py-4">
         <v-progress-circular
           class="mb-3"
@@ -49,14 +50,14 @@
           indeterminate
           size="48"
         />
-        <p class="text-primary">Criando banco de dados...</p>
+        <p class="text-primary">Criando serviço...</p>
         <p class="text-caption text-grey">
-          O banco será provisionado e a <code>DATABASE_URL</code> será
+          O serviço será provisionado e a variável de conexão será
           automaticamente configurada.
         </p>
       </div>
 
-      <!-- Banco de dados existente -->
+      <!-- Servicos vinculados -->
       <div v-else>
         <v-list density="compact">
           <v-list-item v-for="service in services" :key="service.id">
@@ -86,7 +87,7 @@
                 <v-tooltip
                   activator="parent"
                   location="top"
-                >Desvincular (mantém o banco)</v-tooltip>
+                >Desvincular (mantém o serviço)</v-tooltip>
               </v-btn>
               <v-btn
                 color="error"
@@ -100,7 +101,7 @@
                 <v-tooltip
                   activator="parent"
                   location="top"
-                >Excluir banco</v-tooltip>
+                >Excluir serviço</v-tooltip>
               </v-btn>
             </template>
           </v-list-item>
@@ -113,8 +114,8 @@
           icon="mdi-check-circle"
           variant="tonal"
         >
-          A variável <code>DATABASE_URL</code> foi injetada automaticamente pelo
-          Dokku ao vincular o banco.
+          A variável de conexão do serviço foi sincronizada automaticamente pelo
+          Dokku ao vincular o serviço.
         </v-alert>
       </div>
     </v-card-text>
@@ -143,5 +144,8 @@
     delete: [serviceId: number]
   }>()
 
-  const hasDatabase = computed(() => props.services.length > 0)
+  const hasLinkedServices = computed(() => props.services.length > 0)
+  const hasPostgres = computed(() =>
+    props.services.some(service => service.service_type === 'postgres'),
+  )
 </script>

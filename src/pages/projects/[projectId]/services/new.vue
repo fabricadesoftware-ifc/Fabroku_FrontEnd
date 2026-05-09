@@ -11,12 +11,12 @@
 
     <h1 class="text-h4 mb-2">Criar Novo Serviço</h1>
     <p class="text-body-2 text-medium-emphasis mb-6">
-      Crie um banco de dados PostgreSQL standalone. Depois você pode vincular o
-      serviço a qualquer app do projeto.
+      Crie um serviço standalone. Depois você pode vincular o serviço a qualquer
+      app do projeto.
     </p>
 
     <v-card max-width="600" variant="outlined">
-      <v-card-title>Banco PostgreSQL</v-card-title>
+      <v-card-title>Serviço do Projeto</v-card-title>
       <v-card-text>
         <v-alert
           v-if="quotaError"
@@ -44,7 +44,7 @@
           hint="Deixe vazio para gerar automaticamente"
           label="Nome do serviço (opcional)"
           persistent-hint
-          placeholder="meu-banco"
+          placeholder="meu-servico"
           variant="outlined"
         />
       </v-card-text>
@@ -71,7 +71,7 @@
     >
       <v-card-title class="d-flex align-center">
         <v-icon class="mr-2 mdi-spin">mdi-loading</v-icon>
-        Provisionando banco de dados...
+        Provisionando serviço...
       </v-card-title>
       <v-card-text>
         <div v-if="taskStatus" class="mb-2">
@@ -110,7 +110,7 @@
 
   const serviceTypeOptions = [
     { value: 'postgres', label: 'PostgreSQL' },
-    { value: 'redis', label: 'Redis', disabled: true },
+    { value: 'redis', label: 'Redis' },
   ]
   const serviceType = ref('postgres')
   const name = ref('')

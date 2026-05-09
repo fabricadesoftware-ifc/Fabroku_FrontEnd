@@ -103,8 +103,8 @@
             <v-icon class="mb-4" color="grey" size="64">mdi-database-off</v-icon>
             <h3 class="text-h6 mb-2">Nenhum serviço neste projeto</h3>
             <p class="text-grey mb-4">
-              Crie um banco PostgreSQL para começar. Você pode vincular o serviço
-              a qualquer app do projeto depois.
+              Crie um PostgreSQL ou Redis para começar. Você pode vincular o
+              serviço a qualquer app do projeto depois.
             </p>
             <v-btn color="primary" :to="`/projects/${projectId}/services/new`">
               Criar Serviço

@@ -147,7 +147,7 @@
     <!-- Dialog para vincular serviço existente -->
     <v-dialog v-model="linkServiceDialog" max-width="500" persistent>
       <v-card>
-        <v-card-title>Vincular banco existente</v-card-title>
+        <v-card-title>Vincular serviço existente</v-card-title>
         <v-card-text>
           <v-select
             v-model="selectedServiceToLink"

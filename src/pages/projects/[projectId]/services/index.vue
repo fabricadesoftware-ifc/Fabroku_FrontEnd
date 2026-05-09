@@ -54,8 +54,11 @@
               <span v-if="service.app" class="ml-2 text-caption">
                 Vinculado ao app
               </span>
-              <span v-else class="ml-2 text-caption text-grey">
+              <span v-else-if="isServiceReady(service)" class="ml-2 text-caption text-grey">
                 Disponível para vincular
+              </span>
+              <span v-else class="ml-2 text-caption text-primary">
+                Provisionando
               </span>
             </v-card-subtitle>
             <v-card-text>
@@ -65,16 +68,27 @@
               <p v-else-if="service.task_id" class="text-caption text-primary">
                 Provisionando...
               </p>
+              <p v-else class="text-caption text-warning">
+                Provisionamento ainda não concluído. Aguarde ou recrie o serviço.
+              </p>
             </v-card-text>
             <v-card-actions>
               <v-btn
-                v-if="!service.app"
+                v-if="!service.app && isServiceReady(service)"
                 color="primary"
                 size="small"
                 variant="text"
                 @click="openLinkDialog(service)"
               >
                 Vincular a um App
+              </v-btn>
+              <v-btn
+                v-else-if="!service.app"
+                disabled
+                size="small"
+                variant="text"
+              >
+                Aguardando provisionamento
               </v-btn>
               <v-btn
                 color="error"
@@ -205,7 +219,15 @@
     }
   }
 
+  function isServiceReady (service: Service) {
+    return Boolean(service.container_name) && !service.task_id
+  }
+
   function openLinkDialog (service: Service) {
+    if (!isServiceReady(service)) {
+      linkError.value = 'Aguarde o serviço terminar de provisionar antes de vincular.'
+      return
+    }
     selectedService.value = service
     selectedAppId.value = projectApps.value[0]?.id ?? null
     linkError.value = ''
@@ -263,7 +285,7 @@
       router.push(`/projects/${projectId}/${appId}`)
     } catch (error) {
       console.error('Erro ao vincular servico:', error)
-      linkError.value = 'Nao foi possivel vincular o servico ao app.'
+      linkError.value = (error as any)?.response?.data?.error || 'Nao foi possivel vincular o servico ao app.'
     } finally {
       linking.value = false
     }

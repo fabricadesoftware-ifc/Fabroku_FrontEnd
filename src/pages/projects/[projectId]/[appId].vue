@@ -149,6 +149,17 @@
       <v-card>
         <v-card-title>Vincular serviço existente</v-card-title>
         <v-card-text>
+          <v-alert
+            v-if="linkServiceError"
+            class="mb-4"
+            closable
+            density="compact"
+            type="error"
+            variant="tonal"
+            @click:close="linkServiceError = ''"
+          >
+            {{ linkServiceError }}
+          </v-alert>
           <v-select
             v-model="selectedServiceToLink"
             item-title="name"
@@ -286,6 +297,7 @@
   const linkServiceDialog = ref(false)
   const availableServicesToLink = ref<Service[]>([])
   const selectedServiceToLink = ref<number | null>(null)
+  const linkServiceError = ref('')
 
   // Estado do console de comandos
   const runningCommand = ref(false)
@@ -725,6 +737,10 @@
     }
   }
 
+  function isServiceReady (service: Service) {
+    return Boolean(service.container_name) && !service.task_id
+  }
+
   async function handleCreateDatabase () {
     if (!appStore.currentApp?.id) return
     creatingDatabase.value = true
@@ -751,7 +767,8 @@
   async function openLinkDialog () {
     try {
       const response = await ServicesService.getServicesByProject(projectId)
-      availableServicesToLink.value = response.results.filter(s => !s.app)
+      linkServiceError.value = ''
+      availableServicesToLink.value = response.results.filter(s => !s.app && isServiceReady(s))
       selectedServiceToLink.value = availableServicesToLink.value[0]?.id ?? null
       linkServiceDialog.value = true
     } catch (error_) {
@@ -762,6 +779,7 @@
   async function handleLinkService () {
     if (!selectedServiceToLink.value || !appStore.currentApp?.id) return
     linkingService.value = true
+    linkServiceError.value = ''
     try {
       const result = await ServicesService.linkService(
         selectedServiceToLink.value,
@@ -772,6 +790,7 @@
       await waitForCurrentAppTaskCompletion(result.task_id)
     } catch (error_) {
       console.error('Erro ao vincular serviço:', error_)
+      linkServiceError.value = (error_ as any)?.response?.data?.error || 'Nao foi possivel vincular o servico.'
     } finally {
       linkingService.value = false
     }

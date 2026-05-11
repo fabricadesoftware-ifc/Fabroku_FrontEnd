@@ -31,7 +31,7 @@
           <tr>
             <th>Chave</th>
             <th>Valor</th>
-            <th width="80">Ações</th>
+            <th width="112">Acoes</th>
           </tr>
         </thead>
         <tbody>
@@ -43,6 +43,14 @@
               <code>{{ showSecrets ? value : "••••••••" }}</code>
             </td>
             <td>
+              <v-btn
+                icon
+                size="small"
+                variant="text"
+                @click="openEditDialog(String(key), String(value))"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
               <v-btn
                 color="error"
                 icon
@@ -76,6 +84,14 @@
     <v-card>
       <v-card-title>Adicionar Variáveis de Ambiente</v-card-title>
       <v-card-text>
+        <v-alert
+          class="mb-4"
+          density="compact"
+          type="info"
+          variant="tonal"
+        >
+          Cole o conteudo de um arquivo .env em qualquer campo para preencher varias variaveis automaticamente.
+        </v-alert>
         <div
           v-for="(entry, index) in newEnvVars"
           :key="index"
@@ -87,6 +103,7 @@
             density="compact"
             hide-details
             label="Chave"
+            @paste="handleEnvPaste"
             placeholder="DATABASE_URL"
             variant="outlined"
           />
@@ -95,6 +112,7 @@
             density="compact"
             hide-details
             label="Valor"
+            @paste="handleEnvPaste"
             placeholder="postgres://..."
             variant="outlined"
           />
@@ -129,6 +147,39 @@
           @click="handleAddMultiple"
         >
           Salvar {{ validCount > 1 ? `(${validCount})` : "" }}
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialog Editar Variavel -->
+  <v-dialog v-model="dialogEditEnvVar" max-width="520">
+    <v-card>
+      <v-card-title>Editar Variavel de Ambiente</v-card-title>
+      <v-card-text>
+        <v-text-field
+          v-model="editingEnvVar.key"
+          autofocus
+          class="mb-3"
+          label="Chave"
+          variant="outlined"
+        />
+        <v-text-field
+          v-model="editingEnvVar.value"
+          label="Valor"
+          variant="outlined"
+        />
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn variant="text" @click="dialogEditEnvVar = false">Cancelar</v-btn>
+        <v-btn
+          color="primary"
+          :disabled="!editingEnvVar.key.trim()"
+          :loading="saving"
+          @click="handleUpdateEnvVar"
+        >
+          Salvar
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -188,20 +239,24 @@ PORT=3000"
   const emit = defineEmits<{
     'add': [envVar: { key: string, value: string }]
     'add-multiple': [envVars: Array<{ key: string, value: string }>]
+    'update': [oldKey: string, envVar: { key: string, value: string }]
     'remove': [key: string]
   }>()
 
   const showSecrets = ref(false)
   const dialogEnvVar = ref(false)
+  const dialogEditEnvVar = ref(false)
   const dialogImportEnv = ref(false)
   const newEnvVars = ref<Array<{ key: string, value: string }>>([
     { key: '', value: '' },
   ])
+  const editingOriginalKey = ref('')
+  const editingEnvVar = ref({ key: '', value: '' })
   const envFileContent = ref('')
   const importError = ref('')
 
   const validEntries = computed(() =>
-    newEnvVars.value.filter(e => e.key.trim() && e.value.trim()),
+    newEnvVars.value.filter(e => e.key.trim()),
   )
 
   const hasValidEntries = computed(() => validEntries.value.length > 0)
@@ -215,7 +270,7 @@ PORT=3000"
   function handleAddMultiple () {
     const entries = validEntries.value.map(e => ({
       key: e.key.trim(),
-      value: e.value.trim(),
+      value: e.value,
     }))
     if (entries.length === 0) return
 
@@ -226,6 +281,39 @@ PORT=3000"
     }
     dialogEnvVar.value = false
     newEnvVars.value = [{ key: '', value: '' }]
+  }
+
+  function openEditDialog (key: string, value: string) {
+    editingOriginalKey.value = key
+    editingEnvVar.value = { key, value }
+    dialogEditEnvVar.value = true
+  }
+
+  function handleUpdateEnvVar () {
+    const key = editingEnvVar.value.key.trim()
+    if (!key) return
+
+    emit('update', editingOriginalKey.value, {
+      key,
+      value: editingEnvVar.value.value,
+    })
+    dialogEditEnvVar.value = false
+  }
+
+  function handleEnvPaste (event: ClipboardEvent) {
+    const content = event.clipboardData?.getData('text') ?? ''
+    const parsed = parseEnvContent(content)
+    if (parsed.length === 0) return
+
+    event.preventDefault()
+    const currentEntries = validEntries.value.map(e => ({
+      key: e.key.trim(),
+      value: e.value,
+    }))
+
+    newEnvVars.value = currentEntries.length > 0
+      ? [...currentEntries, ...parsed]
+      : parsed
   }
 
   function parseEnvContent (
@@ -241,7 +329,10 @@ PORT=3000"
       const equalIndex = trimmed.indexOf('=')
       if (equalIndex === -1) continue
 
-      const key = trimmed.slice(0, equalIndex).trim()
+      const rawKey = trimmed.slice(0, equalIndex).trim()
+      const key = rawKey.startsWith('export ')
+        ? rawKey.slice('export '.length).trim()
+        : rawKey
       let value = trimmed.slice(equalIndex + 1).trim()
 
       if (
@@ -251,7 +342,7 @@ PORT=3000"
         value = value.slice(1, -1)
       }
 
-      if (key && value) {
+      if (key) {
         results.push({ key, value })
       }
     }

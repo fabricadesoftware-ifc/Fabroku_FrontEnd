@@ -35,6 +35,17 @@ class AppsService {
     return response.data
   }
 
+  async updateEnvVars (
+    id: string,
+    variables: Record<string, string>,
+  ): Promise<{ app: App, updated_keys: string[], removed_keys: string[], restarted: boolean }> {
+    const response = await apiClient.patch(`/apps/apps/${id}/env_vars/`, {
+      variables,
+      restart: true,
+    })
+    return response.data
+  }
+
   async deleteApp (id: string): Promise<{ status: string, message: string, task_id: string }> {
     const response = await apiClient.delete(`/apps/apps/${id}/`)
     return response.data

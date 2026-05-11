@@ -10,7 +10,7 @@
       </p>
       <div class="mt-4 d-flex justify-center ga-3">
         <v-chip color="primary" prepend-icon="mdi-npm" variant="outlined">
-          v0.1.4
+          v0.1.7
         </v-chip>
         <v-chip color="success" prepend-icon="mdi-nodejs" variant="outlined">
           Node.js 18+
@@ -53,17 +53,6 @@
         <v-card-text>
           <p class="mb-3">Instale a CLI globalmente via npm:</p>
           <CodeBlock code="npm i -g fabroku" />
-
-          <v-divider class="my-4" />
-
-          <p class="font-weight-medium mb-2">Desenvolvimento local:</p>
-          <CodeBlock
-            :code="`cd Fabroku_CLI\nnpm install\nnpm link\nfabroku --help`"
-          />
-          <v-alert class="mt-3" density="compact" type="info" variant="tonal">
-            O comando <code>npm link</code> registra a CLI globalmente em modo
-            de desenvolvimento.
-          </v-alert>
         </v-card-text>
       </v-card>
     </section>
@@ -88,21 +77,11 @@
             </v-card-title>
             <v-card-text>
               <p class="mb-2">Autentica o usuário via GitHub OAuth.</p>
-              <FlagTable :flags="loginFlags" />
               <p class="mt-3 font-weight-medium">Como funciona:</p>
-              <v-timeline class="mt-2" density="compact" side="end">
-                <v-timeline-item
-                  v-for="(step, i) in loginSteps"
-                  :key="i"
-                  :dot-color="step.color"
-                  size="x-small"
-                >
-                  <span class="text-body-2">{{ step.text }}</span>
-                </v-timeline-item>
-              </v-timeline>
+
               <CodeBlock
                 class="mt-3"
-                :code="`fabroku login\nfabroku login --api-url http://localhost:8000`"
+                :code="`fabroku login`"
               />
             </v-card-text>
           </v-card>
@@ -150,7 +129,6 @@
                 Verifica se o projeto contém os arquivos necessários para deploy
                 no Dokku.
               </p>
-              <FlagTable :flags="verifyFlags" />
 
               <v-divider class="my-4" />
 
@@ -225,7 +203,7 @@
 
               <CodeBlock
                 class="mt-3"
-                :code="`fabroku verify\nfabroku verify --fix\nfabroku verify --dir ./meu-projeto --type frontend --fix`"
+                :code="`fabroku verify\nfabroku verify --fix`"
               />
             </v-card-text>
           </v-card>
@@ -474,7 +452,7 @@
     </section>
 
     <!-- Configuração -->
-    <section :id="'configuracao'" class="mb-6">
+    <!-- <section :id="'configuracao'" class="mb-6">
       <v-card>
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2" color="grey">mdi-cog</v-icon>
@@ -498,7 +476,7 @@
           </v-alert>
         </v-card-text>
       </v-card>
-    </section>
+    </section> -->
 
     <!-- Troubleshooting -->
     <section :id="'troubleshooting'" class="mb-6">
@@ -529,7 +507,7 @@
     </section>
 
     <!-- Endpoints API -->
-    <section :id="'api'" class="mb-6">
+    <!-- <section :id="'api'" class="mb-6">
       <v-card>
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2" color="cyan">mdi-api</v-icon>
@@ -567,7 +545,7 @@
           </v-table>
         </v-card-text>
       </v-card>
-    </section>
+    </section> -->
   </v-container>
 </template>
 
@@ -670,9 +648,7 @@
     { id: 'run', label: 'Run', icon: 'mdi-database-sync' },
     { id: 'webhook', label: 'Webhook', icon: 'mdi-webhook' },
     { id: 'workflow', label: 'Workflow', icon: 'mdi-map-marker-path' },
-    { id: 'configuracao', label: 'Configuração', icon: 'mdi-cog' },
     { id: 'troubleshooting', label: 'Troubleshooting', icon: 'mdi-lifebuoy' },
-    { id: 'api', label: 'API', icon: 'mdi-api' },
   ]
 
   const loginFlags = [

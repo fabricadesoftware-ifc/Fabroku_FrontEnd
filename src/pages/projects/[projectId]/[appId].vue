@@ -132,6 +132,7 @@
             @add="handleAddEnvVar"
             @add-multiple="handleAddMultipleEnvVars"
             @remove="removeEnvVar"
+            @update="handleUpdateEnvVar"
           />
         </v-col>
 
@@ -582,9 +583,7 @@
     savingEnvVar.value = true
     try {
       const currentVars = appStore.currentApp?.variables || {}
-      await appStore.updateApp(appId, {
-        variables: { ...currentVars, [envVar.key]: envVar.value },
-      })
+      await saveEnvVars({ ...currentVars, [envVar.key]: envVar.value })
     } finally {
       savingEnvVar.value = false
     }
@@ -599,16 +598,43 @@
       for (const envVar of envVars) {
         currentVars[envVar.key] = envVar.value
       }
-      await appStore.updateApp(appId, { variables: currentVars })
+      await saveEnvVars(currentVars)
+    } finally {
+      savingEnvVar.value = false
+    }
+  }
+
+  async function handleUpdateEnvVar (
+    oldKey: string,
+    envVar: { key: string, value: string },
+  ) {
+    savingEnvVar.value = true
+    try {
+      const currentVars = { ...appStore.currentApp?.variables }
+      if (oldKey !== envVar.key) {
+        delete currentVars[oldKey]
+      }
+      currentVars[envVar.key] = envVar.value
+      await saveEnvVars(currentVars)
     } finally {
       savingEnvVar.value = false
     }
   }
 
   async function removeEnvVar (key: string) {
+    savingEnvVar.value = true
     const currentVars = { ...appStore.currentApp?.variables }
-    delete currentVars[key]
-    await appStore.updateApp(appId, { variables: currentVars })
+    try {
+      delete currentVars[key]
+      await saveEnvVars(currentVars)
+    } finally {
+      savingEnvVar.value = false
+    }
+  }
+
+  async function saveEnvVars (variables: Record<string, string>) {
+    const response = await AppsService.updateEnvVars(appId, variables)
+    appStore.currentApp = response.app
   }
 
   // --- Controle do App ---

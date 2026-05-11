@@ -100,6 +100,7 @@
           <AppDetailsCard :app="appStore.currentApp" />
 
           <AppProcessScaleCard
+            v-if="canManageProcesses"
             :error="processScaleError"
             :loading="processesLoading"
             :locked="processScaleLocked"
@@ -246,7 +247,7 @@
   import AppsService from '@/services/apps'
   import LogsService from '@/services/logs'
   import ServicesService from '@/services/services'
-  import { useAppStore, useLogStore } from '@/stores'
+  import { useAppStore, useAuthStore, useLogStore } from '@/stores'
   import { formatStatus, getStatusColor, getStatusIcon } from '@/utils/status'
   async function diagnoseAppError () {
     if (!appStore.currentApp?.id) return
@@ -289,6 +290,7 @@
   const appId = (route.params as { appId: string }).appId || ''
 
   const appStore = useAppStore()
+  const authStore = useAuthStore()
   const logStore = useLogStore()
   const loading = ref(true)
   const refreshing = ref(false)
@@ -359,6 +361,9 @@
   const processScaleLocked = computed(() =>
     ['DEPLOYING', 'STARTING', 'DELETING'].includes(appStore.currentApp?.status ?? ''),
   )
+  const canManageProcesses = computed(() =>
+    Boolean(authStore.user?.is_fabric || authStore.user?.is_superuser),
+  )
 
   async function fetchRuntimeLogs () {
     if (!appStore.currentApp?.id || !appStore.currentApp?.name_dokku) return
@@ -418,7 +423,9 @@
       if (appStore.currentApp?.id) {
         await logStore.fetchLogsByApp(Number(appStore.currentApp.id))
         await fetchServices()
-        void fetchAppProcesses(true)
+        if (canManageProcesses.value) {
+          void fetchAppProcesses(true)
+        }
         await startLogStreamIfNeeded()
       }
       startTaskPollingIfNeeded()
@@ -463,6 +470,12 @@
     },
   )
 
+  watch(canManageProcesses, enabled => {
+    if (enabled && appStore.currentApp?.id && appProcesses.value.length === 0) {
+      void fetchAppProcesses(true)
+    }
+  })
+
   // --- Task Polling ---
   function startTaskPollingIfNeeded () {
     const app = appStore.currentApp
@@ -489,7 +502,9 @@
       if (status?.state === 'SUCCESS' || status?.state === 'FAILURE') {
         stopTaskPolling()
         await appStore.fetchApp(appId)
-        await fetchAppProcesses(true)
+        if (canManageProcesses.value) {
+          await fetchAppProcesses(true)
+        }
         // Se era delete, navegar de volta após concluir
         if (appStore.currentApp?.status === 'DELETING' && status?.state === 'SUCCESS') {
           // App foi deletado
@@ -747,7 +762,7 @@
   }
 
   async function fetchAppProcesses (refresh = false) {
-    if (!appStore.currentApp?.id) return
+    if (!appStore.currentApp?.id || !canManageProcesses.value) return
     processesLoading.value = true
     processScaleError.value = ''
 
@@ -768,7 +783,7 @@
   }
 
   async function handleScaleProcesses (processes: Record<string, number>) {
-    if (!appStore.currentApp?.id) return
+    if (!appStore.currentApp?.id || !canManageProcesses.value) return
     scalingProcesses.value = true
     processScaleError.value = ''
 

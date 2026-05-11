@@ -304,6 +304,115 @@
       </v-card>
     </section>
 
+    <!-- Procfile -->
+    <section :id="'procfile'" class="mb-6">
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2" color="indigo">mdi-file-cog-outline</v-icon>
+          Procfile e Processos
+        </v-card-title>
+        <v-card-text>
+          <p class="mb-3">
+            O <code>Procfile</code> diz ao Dokku quais comandos existem dentro
+            do app. Cada linha segue o formato <code>tipo: comando</code>. No
+            Fabroku, os tipos mais importantes sao <code>web</code>,
+            <code>worker</code> e <code>release</code>.
+          </p>
+
+          <v-alert
+            class="mb-4"
+            density="compact"
+            type="info"
+            variant="tonal"
+          >
+            O arquivo deve ficar na raiz do repositorio que sera enviado para
+            deploy. Se o app usa uma pasta interna, garanta que o deploy esteja
+            apontando para essa pasta.
+          </v-alert>
+
+          <v-row class="mb-4">
+            <v-col
+              v-for="process in procfileProcesses"
+              :key="process.name"
+              cols="12"
+              md="4"
+            >
+              <v-card height="100%" variant="outlined">
+                <v-card-title class="d-flex align-center text-subtitle-1">
+                  <v-icon class="mr-2" :color="process.color">
+                    {{ process.icon }}
+                  </v-icon>
+                  <code>{{ process.name }}</code>
+                </v-card-title>
+                <v-card-text>
+                  <p class="mb-2">{{ process.desc }}</p>
+                  <v-chip
+                    :color="process.managed ? 'success' : 'warning'"
+                    size="small"
+                    variant="tonal"
+                  >
+                    {{ process.managed ? 'Escalavel no Fabroku' : 'Executa no deploy' }}
+                  </v-chip>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <v-card class="mb-4" variant="tonal">
+            <v-card-title class="text-subtitle-1">
+              Exemplo para Django + Celery
+            </v-card-title>
+            <v-card-text>
+              <CodeBlock :code="procfileDjangoExample" />
+            </v-card-text>
+          </v-card>
+
+          <v-list density="compact">
+            <v-list-item prepend-icon="mdi-web">
+              <v-list-item-title><code>web</code></v-list-item-title>
+              <v-list-item-subtitle>
+                Processo que recebe HTTP. Normalmente deve ficar em
+                <code>1</code> ou mais. Para parar o app, use o botao Parar em
+                vez de colocar <code>web=0</code> pela tela de Processos.
+              </v-list-item-subtitle>
+            </v-list-item>
+
+            <v-list-item prepend-icon="mdi-cog-play">
+              <v-list-item-title><code>worker</code></v-list-item-title>
+              <v-list-item-subtitle>
+                Processo continuo para tarefas em segundo plano, como Celery.
+                Se voce adicionar um worker depois do app existir, faca um novo
+                deploy para o Dokku detectar o processo e depois ajuste a escala
+                na tela de Processos.
+              </v-list-item-subtitle>
+            </v-list-item>
+
+            <v-list-item prepend-icon="mdi-run-fast">
+              <v-list-item-title><code>release</code></v-list-item-title>
+              <v-list-item-subtitle>
+                Comando executado uma vez durante o deploy, antes da nova versao
+                ficar ativa. Use para migracoes, por exemplo
+                <code>python manage.py migrate --noinput</code>. Ele nao fica
+                rodando, nao aparece como processo escalavel e nao substitui um
+                <code>worker</code>.
+              </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+
+          <v-alert
+            class="mt-4"
+            density="compact"
+            type="warning"
+            variant="tonal"
+          >
+            Evite colocar comandos demorados ou interativos no
+            <code>release</code>. Se o comando travar, o deploy pode ficar preso
+            ou falhar.
+          </v-alert>
+        </v-card-text>
+      </v-card>
+    </section>
+
     <!-- Run -->
     <section :id="'run'" class="mb-6">
       <v-card>
@@ -645,6 +754,7 @@
     { id: 'verificacao', label: 'Verificação', icon: 'mdi-file-check' },
     { id: 'apps', label: 'Apps', icon: 'mdi-view-list' },
     { id: 'deploy', label: 'Deploy', icon: 'mdi-rocket-launch' },
+    { id: 'procfile', label: 'Procfile', icon: 'mdi-file-cog-outline' },
     { id: 'run', label: 'Run', icon: 'mdi-database-sync' },
     { id: 'webhook', label: 'Webhook', icon: 'mdi-webhook' },
     { id: 'workflow', label: 'Workflow', icon: 'mdi-map-marker-path' },
@@ -701,7 +811,7 @@
   ]
 
   const backendFiles = [
-    { name: 'Procfile', desc: 'Comando de execução do servidor' },
+    { name: 'Procfile', desc: 'Processos web, worker e release' },
     { name: 'requirements.txt', desc: 'Dependências Python' },
     { name: 'runtime.txt', desc: 'Versão do Python' },
   ]
@@ -751,6 +861,34 @@
     { text: 'Polling de progresso com barra em tempo real', color: 'success' },
     { text: 'Exibe resultado: URL do domínio ou erro', color: 'success' },
   ]
+
+  const procfileProcesses = [
+    {
+      name: 'web',
+      icon: 'mdi-web',
+      color: 'primary',
+      managed: true,
+      desc: 'Servidor HTTP do app. Exemplo: gunicorn, uvicorn ou npm start.',
+    },
+    {
+      name: 'worker',
+      icon: 'mdi-cog-play',
+      color: 'teal',
+      managed: true,
+      desc: 'Processo continuo para filas e tarefas em background.',
+    },
+    {
+      name: 'release',
+      icon: 'mdi-run-fast',
+      color: 'orange',
+      managed: false,
+      desc: 'Comando unico que roda durante o deploy, antes da nova versao subir.',
+    },
+  ]
+
+  const procfileDjangoExample = `web: gunicorn config.wsgi:application --log-file -
+worker: celery -A config worker -l info
+release: python manage.py migrate --noinput`
 
   const runLoaddataFlags = [
     {

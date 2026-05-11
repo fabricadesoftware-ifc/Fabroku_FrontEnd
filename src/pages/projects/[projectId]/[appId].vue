@@ -501,6 +501,11 @@
       const status = await appStore.fetchAppStatus(appId)
       if (status?.state === 'SUCCESS' || status?.state === 'FAILURE') {
         stopTaskPolling()
+        if (appStore.currentApp?.status === 'DELETING' && status?.state === 'SUCCESS') {
+          stopLogStream()
+          router.push(`/projects/${projectId}`)
+          return
+        }
         await appStore.fetchApp(appId)
         if (canManageProcesses.value) {
           await fetchAppProcesses(true)

@@ -55,6 +55,7 @@ interface App {
     | 'ERROR'
     | 'STARTING'
     | 'DELETING'
+    | 'DELETED'
     | 'DEPLOYING'
     | 'RESTARTING'
     | 'STOPPING'

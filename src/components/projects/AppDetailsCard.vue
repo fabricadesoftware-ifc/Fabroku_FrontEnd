@@ -1,13 +1,16 @@
 <template>
   <v-card class="mb-4">
     <v-card-title>Detalhes do App</v-card-title>
+
     <v-card-text>
       <v-list>
         <v-list-item>
           <template #prepend>
             <v-icon>mdi-git</v-icon>
           </template>
+
           <v-list-item-title>Repositório</v-list-item-title>
+
           <v-list-item-subtitle>
             <a :href="app.git" target="_blank">
               {{ app.git }}
@@ -19,20 +22,25 @@
           <template #prepend>
             <v-icon>mdi-source-branch</v-icon>
           </template>
+
           <v-list-item-title>Branch</v-list-item-title>
           <v-list-item-subtitle>{{ app.branch }}</v-list-item-subtitle>
         </v-list-item>
 
         <v-list-item>
           <template #prepend>
-            <v-icon color="primary">mdi-source-commit</v-icon>
+            <v-icon>mdi-source-commit</v-icon>
           </template>
+
           <v-list-item-title>Último Commit</v-list-item-title>
+
           <v-list-item-subtitle>
             <span v-if="lastCommit">{{ lastCommit.sha_short }} — {{ lastCommit.message.split('\n')[0] }}</span>
+
             <span v-else-if="app.last_commit_sha">
               {{ app.last_commit_sha.slice(0, 7) }}
             </span>
+
             <span v-else>Nenhum deploy ainda</span>
           </v-list-item-subtitle>
         </v-list-item>
@@ -41,7 +49,9 @@
           <template #prepend>
             <v-icon>mdi-web</v-icon>
           </template>
+
           <v-list-item-title>URL do App</v-list-item-title>
+
           <v-list-item-subtitle>
             <a :href="getAppUrl(app.domain)" target="_blank">
               {{ getAppUrl(app.domain) }}
@@ -54,6 +64,7 @@
           <template #prepend>
             <v-icon>mdi-numeric</v-icon>
           </template>
+
           <v-list-item-title>Porta</v-list-item-title>
           <v-list-item-subtitle>{{ app.port }}</v-list-item-subtitle>
         </v-list-item>
@@ -62,7 +73,9 @@
           <template #prepend>
             <v-icon>mdi-calendar</v-icon>
           </template>
+
           <v-list-item-title>Criado em</v-list-item-title>
+
           <v-list-item-subtitle>{{
             formatDate(app.created_at)
           }}</v-list-item-subtitle>
@@ -72,7 +85,9 @@
           <template #prepend>
             <v-icon>mdi-calendar-edit</v-icon>
           </template>
+
           <v-list-item-title>Atualizado em</v-list-item-title>
+
           <v-list-item-subtitle>{{
             formatDate(app.updated_at)
           }}</v-list-item-subtitle>

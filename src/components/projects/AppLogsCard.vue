@@ -8,11 +8,14 @@
       @stop-stream="emit('stop-stream')"
       @stream-logs="(tid, afterId) => emit('stream-logs', tid, afterId)"
     />
+
     <div class="logs-console__prompt">
       <span v-if="running" class="logs-console__prompt-spinner">
         <v-progress-circular indeterminate size="14" width="2" />
       </span>
+
       <span v-else class="logs-console__prompt-icon">$</span>
+
       <input
         v-model="commandInput"
         class="logs-console__input"
@@ -22,8 +25,10 @@
         @keydown.enter="submitCommand"
       >
     </div>
+
     <div v-if="output" class="logs-console__output">
       <pre :class="success ? 'text-success' : 'text-error'">{{ output }}</pre>
+
       <v-btn
         icon
         size="x-small"

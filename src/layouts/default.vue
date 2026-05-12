@@ -12,6 +12,7 @@
               :image="authStore.user?.avatar_url ?? undefined"
               :name="authStore.user?.name"
             />
+
             <div class="ml-2">
               <div class="text-subtitle-2 font-weight-medium text-capitalize">
                 {{ authStore.user?.name || "Usuário" }}
@@ -19,6 +20,7 @@
             </div>
           </v-card>
         </v-sheet>
+
         <v-list class="d-flex flex-column align-center px-2">
           <v-list-item
             class="menu-item"
@@ -28,6 +30,7 @@
             title="Dashboard"
             to="/dashboard"
           />
+
           <v-list-item
             class="menu-item"
             link
@@ -36,6 +39,7 @@
             title="Projetos"
             to="/projects"
           />
+
           <v-list-item
             v-if="authStore.user?.is_superuser"
             class="menu-item"
@@ -45,6 +49,7 @@
             title="Administração"
             to="/admin"
           />
+
           <v-list-item
             class="menu-item"
             link
@@ -70,9 +75,10 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-main class="mt-4 mx-4">
+    <v-main class="mt-4 mx-0">
       <RouterView />
     </v-main>
+
     <p class="text-background">Peraza esteve aqui (;</p>
   </v-app>
 </template>

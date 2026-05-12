@@ -6,6 +6,7 @@
         Console
       </span>
     </v-card-title>
+
     <v-card-text>
       <p class="text-caption text-grey mb-3">
         Execute comandos dentro do container da aplicação (ex: migrate,
@@ -15,6 +16,7 @@
       <!-- Comandos rápidos -->
       <div class="mb-3">
         <p class="text-subtitle-2 mb-2">Comandos rápidos</p>
+
         <div class="d-flex flex-wrap ga-2">
           <v-chip
             color="primary"
@@ -25,6 +27,7 @@
             <v-icon class="mr-1" size="small">mdi-database-sync</v-icon>
             Django Migrate
           </v-chip>
+
           <v-chip
             color="primary"
             :disabled="running"
@@ -34,6 +37,7 @@
             <v-icon class="mr-1" size="small">mdi-folder-sync</v-icon>
             Collectstatic
           </v-chip>
+
           <v-chip
             color="primary"
             :disabled="running"
@@ -43,6 +47,7 @@
             <v-icon class="mr-1" size="small">mdi-database-arrow-right</v-icon>
             Prisma Migrate
           </v-chip>
+
           <v-chip
             color="primary"
             :disabled="running"
@@ -52,6 +57,7 @@
             <v-icon class="mr-1" size="small">mdi-language-php</v-icon>
             Laravel Migrate
           </v-chip>
+
           <v-chip
             color="primary"
             :disabled="running"
@@ -79,6 +85,7 @@
           variant="outlined"
           @keyup.enter="handleSubmit"
         />
+
         <v-btn
           color="primary"
           :disabled="!customCommand.trim()"
@@ -100,8 +107,10 @@
               size="16"
               width="2"
             />
+
             <span class="text-caption">Executando comando...</span>
           </div>
+
           <div v-else>
             <div class="d-flex justify-space-between align-center mb-2">
               <span
@@ -113,10 +122,12 @@
                 }}</v-icon>
                 {{ success ? "Comando executado" : "Falha na execução" }}
               </span>
+
               <v-btn icon size="x-small" variant="text" @click="emit('clear')">
                 <v-icon size="small">mdi-close</v-icon>
               </v-btn>
             </div>
+
             <pre class="text-caption console-text">{{ output }}</pre>
           </div>
         </div>

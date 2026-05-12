@@ -142,8 +142,8 @@ interface GitRepo {
 
 export type {
   App,
-  AppProcessScale,
   AppLog,
+  AppProcessScale,
   GitRepo,
   LogCategory,
   LogLevel,

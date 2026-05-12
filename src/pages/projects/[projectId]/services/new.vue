@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-10 py-2" fluid>
     <v-btn
       class="mb-4"
       prepend-icon="mdi-arrow-left"
@@ -10,6 +10,7 @@
     </v-btn>
 
     <h1 class="text-h4 mb-2">Criar Novo Serviço</h1>
+
     <p class="text-body-2 text-medium-emphasis mb-6">
       Crie um serviço standalone. Depois você pode vincular o serviço a qualquer
       app do projeto.
@@ -17,6 +18,7 @@
 
     <v-card max-width="600" variant="outlined">
       <v-card-title>Serviço do Projeto</v-card-title>
+
       <v-card-text>
         <v-alert
           v-if="quotaError"
@@ -29,6 +31,7 @@
         >
           {{ quotaError }}
         </v-alert>
+
         <v-select
           v-model="serviceType"
           item-disabled="disabled"
@@ -38,6 +41,7 @@
           label="Tipo de serviço"
           variant="outlined"
         />
+
         <v-text-field
           v-model="name"
           class="mt-4"
@@ -48,6 +52,7 @@
           variant="outlined"
         />
       </v-card-text>
+
       <v-card-actions>
         <v-btn
           variant="text"
@@ -55,7 +60,9 @@
         >
           Cancelar
         </v-btn>
+
         <v-spacer />
+
         <v-btn color="primary" :loading="creating" @click="handleCreate">
           Criar Serviço
         </v-btn>
@@ -73,12 +80,14 @@
         <v-icon class="mr-2 mdi-spin">mdi-loading</v-icon>
         Provisionando serviço...
       </v-card-title>
+
       <v-card-text>
         <div v-if="taskStatus" class="mb-2">
           <div class="d-flex justify-space-between mb-1">
             <span>{{ taskStatus.status || "Processando..." }}</span>
             <span v-if="taskStatus.current != null">{{ taskStatus.current }}%</span>
           </div>
+
           <v-progress-linear
             v-if="taskStatus.current != null"
             color="primary"

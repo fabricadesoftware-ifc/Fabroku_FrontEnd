@@ -1,7 +1,8 @@
 <template>
-  <v-container>
+  <v-container class="px-10 py-2" fluid>
     <div class="d-flex justify-space-between align-center mb-6">
       <h1 class="text-h4">Meus Projetos</h1>
+
       <v-btn color="primary" prepend-icon="mdi-plus" to="/projects/new">
         Novo Projeto
       </v-btn>
@@ -28,6 +29,7 @@
               <v-icon class="mr-2" color="primary">mdi-folder</v-icon>
               {{ project.name }}
             </div>
+
             <v-btn
               color="error"
               icon
@@ -36,20 +38,24 @@
               @click.stop="openDeleteDialog(project)"
             >
               <v-icon>mdi-delete</v-icon>
+
               <v-tooltip activator="parent" location="top">
                 Deletar projeto
               </v-tooltip>
             </v-btn>
           </v-card-title>
+
           <v-card-subtitle>
             Criado em: {{ formatDate(project.created_at) }}
           </v-card-subtitle>
+
           <v-card-text>
             <v-chip class="mr-1" size="small">
               <v-icon size="small" start>mdi-account-multiple</v-icon>
               {{ project.users?.length || 0 }} usuários
             </v-chip>
           </v-card-text>
+
           <v-card-actions>
             <v-btn
               color="primary"
@@ -70,6 +76,7 @@
             color="grey"
             size="64"
           >mdi-folder-outline</v-icon>
+
           <h3 class="text-h6 mb-2">Nenhum projeto ainda</h3>
           <p class="text-grey mb-4">Crie seu primeiro projeto para começar</p>
           <v-btn color="primary" to="/projects/new"> Criar Projeto </v-btn>
@@ -84,11 +91,13 @@
           <v-icon class="mr-2">mdi-alert</v-icon>
           Confirmar Exclusão
         </v-card-title>
+
         <v-card-text>
           <p class="mb-2">
             Tem certeza que deseja deletar o projeto
             <strong>{{ projectToDelete?.name }}</strong>?
           </p>
+
           <v-alert
             class="mt-3"
             color="error"
@@ -100,9 +109,11 @@
             deletados. Esta ação não pode ser desfeita.
           </v-alert>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="closeDeleteDialog">Cancelar</v-btn>
+
           <v-btn color="error" :loading="deleting" @click="handleDeleteProject">
             Deletar Projeto
           </v-btn>

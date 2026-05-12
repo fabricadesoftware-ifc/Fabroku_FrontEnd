@@ -2,6 +2,7 @@
   <v-card class="mb-4">
     <v-card-title class="d-flex justify-space-between align-center">
       <span>Variáveis de Ambiente</span>
+
       <div class="d-flex ga-2">
         <v-btn
           prepend-icon="mdi-file-import"
@@ -11,17 +12,19 @@
         >
           Importar .env
         </v-btn>
+
         <v-btn
           color="primary"
           prepend-icon="mdi-plus"
           size="small"
-          variant="tonal"
+          variant="flat"
           @click="openAddDialog"
         >
           Adicionar
         </v-btn>
       </div>
     </v-card-title>
+
     <v-card-text>
       <v-table
         v-if="variables && Object.keys(variables).length > 0"
@@ -34,14 +37,17 @@
             <th width="112">Acoes</th>
           </tr>
         </thead>
+
         <tbody>
           <tr v-for="(value, key) in variables" :key="key">
             <td>
               <code>{{ key }}</code>
             </td>
+
             <td>
               <code>{{ showSecrets ? value : "••••••••" }}</code>
             </td>
+
             <td>
               <v-btn
                 icon
@@ -51,6 +57,7 @@
               >
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
+
               <v-btn
                 color="error"
                 icon
@@ -64,10 +71,12 @@
           </tr>
         </tbody>
       </v-table>
+
       <div v-else class="text-center py-4 text-grey">
         <v-icon class="mb-2" size="32">mdi-variable</v-icon>
         <p>Nenhuma variável configurada</p>
       </div>
+
       <v-switch
         v-if="variables && Object.keys(variables).length > 0"
         v-model="showSecrets"
@@ -83,6 +92,7 @@
   <v-dialog v-model="dialogEnvVar" max-width="600">
     <v-card>
       <v-card-title>Adicionar Variáveis de Ambiente</v-card-title>
+
       <v-card-text>
         <v-alert
           class="mb-4"
@@ -92,6 +102,7 @@
         >
           Cole o conteudo de um arquivo .env em qualquer campo para preencher varias variaveis automaticamente.
         </v-alert>
+
         <div
           v-for="(entry, index) in newEnvVars"
           :key="index"
@@ -103,19 +114,21 @@
             density="compact"
             hide-details
             label="Chave"
-            @paste="handleEnvPaste"
             placeholder="DATABASE_URL"
             variant="outlined"
+            @paste="handleEnvPaste"
           />
+
           <v-text-field
             v-model="entry.value"
             density="compact"
             hide-details
             label="Valor"
-            @paste="handleEnvPaste"
             placeholder="postgres://..."
             variant="outlined"
+            @paste="handleEnvPaste"
           />
+
           <v-btn
             v-if="newEnvVars.length > 1"
             color="error"
@@ -127,6 +140,7 @@
             <v-icon size="small">mdi-close</v-icon>
           </v-btn>
         </div>
+
         <v-btn
           class="mt-1"
           prepend-icon="mdi-plus"
@@ -137,9 +151,11 @@
           Mais uma variável
         </v-btn>
       </v-card-text>
+
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="dialogEnvVar = false">Cancelar</v-btn>
+
         <v-btn
           color="primary"
           :disabled="!hasValidEntries"
@@ -156,6 +172,7 @@
   <v-dialog v-model="dialogEditEnvVar" max-width="520">
     <v-card>
       <v-card-title>Editar Variavel de Ambiente</v-card-title>
+
       <v-card-text>
         <v-text-field
           v-model="editingEnvVar.key"
@@ -164,15 +181,18 @@
           label="Chave"
           variant="outlined"
         />
+
         <v-text-field
           v-model="editingEnvVar.value"
           label="Valor"
           variant="outlined"
         />
       </v-card-text>
+
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="dialogEditEnvVar = false">Cancelar</v-btn>
+
         <v-btn
           color="primary"
           :disabled="!editingEnvVar.key.trim()"
@@ -189,6 +209,7 @@
   <v-dialog v-model="dialogImportEnv" max-width="600">
     <v-card>
       <v-card-title>Importar Variáveis do .env</v-card-title>
+
       <v-card-text>
         <v-textarea
           v-model="envFileContent"
@@ -201,6 +222,7 @@ PORT=3000"
           rows="10"
           variant="outlined"
         />
+
         <v-alert
           v-if="importError"
           class="mt-2"
@@ -212,9 +234,11 @@ PORT=3000"
           {{ importError }}
         </v-alert>
       </v-card-text>
+
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="dialogImportEnv = false">Cancelar</v-btn>
+
         <v-btn
           color="primary"
           :disabled="!envFileContent"

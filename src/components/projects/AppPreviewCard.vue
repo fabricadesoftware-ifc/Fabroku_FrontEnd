@@ -6,16 +6,19 @@
         URL da Aplicação
       </span>
     </v-card-title>
+
     <v-card-text>
       <div class="preview-link">
         <div class="preview-link__bar">
           <div class="preview-link__dots">
             <span /><span /><span />
           </div>
+
           <div class="preview-link__url">
             <v-icon color="green" size="14">mdi-lock</v-icon>
             <span>{{ app.domain }}</span>
           </div>
+
           <div class="preview-link__actions">
             <v-btn
               density="compact"
@@ -25,12 +28,14 @@
               @click="copyUrl"
             >
               <v-icon color="grey-lighten-1" size="14">{{ copied ? 'mdi-check' : 'mdi-content-copy' }}</v-icon>
+
               <v-tooltip activator="parent" location="top">
                 {{ copied ? 'Copiado!' : 'Copiar URL' }}
               </v-tooltip>
             </v-btn>
           </div>
         </div>
+
         <a
           class="preview-link__body"
           :class="{ 'preview-link__body--offline': app.status !== 'RUNNING' }"
@@ -40,13 +45,16 @@
         >
           <div v-if="app.status === 'RUNNING'" class="preview-link__content">
             <v-icon color="success" size="48">mdi-open-in-new</v-icon>
+
             <div class="preview-link__text">
               <span class="preview-link__label">Abrir aplicação</span>
               <span class="preview-link__domain">{{ app.domain }}</span>
             </div>
           </div>
+
           <div v-else class="preview-link__content">
             <v-icon color="grey" size="48">mdi-web-off</v-icon>
+
             <div class="preview-link__text">
               <span class="preview-link__label text-grey">App não está rodando</span>
               <span class="preview-link__domain text-grey">{{ app.domain }}</span>

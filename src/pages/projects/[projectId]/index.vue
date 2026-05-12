@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-10 py-2" fluid>
     <v-btn
       class="mb-4"
       prepend-icon="mdi-arrow-left"
@@ -21,7 +21,8 @@
           @keydown.enter.prevent="startProjectNameEditing"
           @keydown.space.prevent="startProjectNameEditing"
         >
-          <span class="text-h4 project-name-text">{{ currentProject.name }}</span>
+          <h2 class="project-name-text">{{ currentProject.name }}</h2>
+
           <v-icon
             class="project-name-icon"
             :color="savingProjectName ? 'primary' : undefined"
@@ -37,8 +38,8 @@
           v-model="projectNameInput"
           class="project-name-input"
           density="compact"
-          hide-details="auto"
           :error-messages="projectNameError ? [projectNameError] : []"
+          hide-details="auto"
           single-line
           variant="plain"
           @blur="handleProjectNameBlur"
@@ -63,25 +64,31 @@
           </div>
 
         </v-card-title>
+
         <v-card-text>
           <p><strong>ID:</strong> {{ currentProject.id }}</p>
+
           <p>
             <strong>Criado em:</strong>
             {{ formatDate(currentProject.created_at) }}
           </p>
+
           <p>
             <strong>Atualizado em:</strong>
             {{ formatDate(currentProject.updated_at) }}
           </p>
+
           <div class="mt-4">
             <div class="d-flex justify-space-between align-center flex-wrap ga-2 mb-2">
               <div class="d-flex align-center ga-2 flex-wrap">
                 <strong>Membros atuais:</strong>
-                <v-chip color="primary" size="small" variant="tonal">
+
+                <v-chip color="primary" size="small" variant="flat">
                   {{ currentTeamIds.length }} membro(s)
                 </v-chip>
               </div>
             </div>
+
             <div class="d-flex flex-wrap ga-2">
               <v-chip
                 v-for="user in currentProject.users_detail || []"
@@ -100,10 +107,12 @@
         <v-card>
           <v-card-title class="d-flex align-center justify-space-between flex-wrap ga-2">
             <span>Gerenciar equipe</span>
+
             <v-chip color="primary" size="small" variant="tonal">
               {{ selectedTeamIds.length }} membro(s)
             </v-chip>
           </v-card-title>
+
           <v-card-text>
             <p class="text-body-2 mb-3">
               {{ teamManagerHint }}
@@ -119,6 +128,7 @@
               <v-avatar v-if="fixedMember.avatar_url" size="24" start>
                 <v-img :src="fixedMember.avatar_url" />
               </v-avatar>
+
               <v-avatar v-else color="grey" size="24" start>
                 <v-icon size="small">mdi-account</v-icon>
               </v-avatar>
@@ -147,32 +157,37 @@
               <template #chip="{ item, props: chipProps }">
                 <v-chip
                   v-bind="chipProps"
-                  :prepend-avatar="item.raw.avatar_url || undefined"
+                  :prepend-avatar="getUserSlotItem(item).avatar_url || undefined"
                 >
-                  {{ formatUserName(item.raw) }}
+                  {{ formatUserName(getUserSlotItem(item)) }}
                 </v-chip>
               </template>
+
               <template #item="{ item, props: itemProps }">
                 <v-list-item v-bind="itemProps">
                   <template #prepend>
-                    <v-avatar v-if="item.raw.avatar_url" size="32">
-                      <v-img :src="item.raw.avatar_url" />
+                    <v-avatar v-if="getUserSlotItem(item).avatar_url" size="32">
+                      <v-img :src="getUserSlotItem(item).avatar_url!" />
                     </v-avatar>
+
                     <v-avatar v-else color="grey" size="32">
                       <v-icon>mdi-account</v-icon>
                     </v-avatar>
                   </template>
-                  <v-list-item-subtitle v-if="item.raw.email">
-                    {{ item.raw.email }}
+
+                  <v-list-item-subtitle v-if="getUserSlotItem(item).email">
+                    {{ getUserSlotItem(item).email }}
                   </v-list-item-subtitle>
                 </v-list-item>
               </template>
+
               <template #no-data>
                 <v-list-item v-if="teamSearchQuery && teamSearchQuery.length >= 2">
                   <v-list-item-title>
                     Nenhum usuario encontrado para "{{ teamSearchQuery }}"
                   </v-list-item-title>
                 </v-list-item>
+
                 <v-list-item v-else>
                   <v-list-item-title>
                     Digite pelo menos 2 caracteres para buscar
@@ -193,13 +208,7 @@
 
           <v-card-actions class="px-6 pb-6 pt-0">
             <v-spacer />
-            <v-btn
-              :disabled="teamSaving"
-              variant="text"
-              @click="closeTeamDialog"
-            >
-              Cancelar
-            </v-btn>
+
             <v-btn
               :disabled="!hasTeamChanges || teamSaving"
               variant="text"
@@ -207,6 +216,7 @@
             >
               Descartar
             </v-btn>
+
             <v-btn
               color="primary"
               :disabled="!hasTeamChanges || selectedTeamIds.length === 0"
@@ -221,6 +231,7 @@
 
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <h2 class="text-h5">Apps deste Projeto</h2>
+
         <div class="d-flex ga-2">
           <v-btn
             color="primary"
@@ -229,6 +240,7 @@
           >
             Servicos
           </v-btn>
+
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
@@ -254,20 +266,24 @@
               </v-icon>
               {{ app.name }}
             </v-card-title>
+
             <v-card-subtitle>{{ app.git }}</v-card-subtitle>
+
             <v-card-text>
               <v-chip :color="getStatusColor(app.status)" size="small">
                 {{ formatStatus(app.status) }}
               </v-chip>
+
               <span v-if="app.domain" class="ml-2 text-caption">
                 {{ app.domain }}
               </span>
             </v-card-text>
+
             <v-card-actions>
               <v-btn
                 color="primary"
                 :to="`/projects/${projectId}/${app.id}`"
-                variant="text"
+                variant="flat"
               >
                 Abrir App
               </v-btn>
@@ -282,8 +298,10 @@
               color="grey"
               size="64"
             >mdi-application-outline</v-icon>
+
             <h3 class="text-h6 mb-2">Nenhum app neste projeto</h3>
             <p class="text-grey mb-4">Crie seu primeiro app para comecar</p>
+
             <v-btn color="primary" :to="`/projects/${projectId}/new`">
               Criar App
             </v-btn>
@@ -514,6 +532,10 @@
     return user.name || user.email || `Usuario #${user.id}`
   }
 
+  function getUserSlotItem (item: User | { raw: User }): User {
+    return 'raw' in item ? item.raw : item
+  }
+
   function initializeTeamSelection (project: Project | null) {
     const lockedMemberId = fixedMember.value?.id
     const members = (project?.users_detail || []).map(user => mapProjectUserToUser(user))
@@ -563,6 +585,7 @@
 
   function resetTeamSelection () {
     initializeTeamSelection(currentProject.value)
+    closeTeamDialog()
   }
 
   function openTeamDialog () {

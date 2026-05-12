@@ -1,6 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title>Ações</v-card-title>
+
     <v-card-text>
       <!-- Alerta quando está deletando -->
       <v-alert
@@ -26,6 +27,7 @@
       >
         Iniciar
       </v-btn>
+
       <v-btn
         v-else
         block
@@ -95,6 +97,7 @@
   <!-- Acesso Rápido -->
   <v-card v-if="domain">
     <v-card-title>Acesso Rápido</v-card-title>
+
     <v-card-text>
       <v-btn
         block
@@ -102,7 +105,7 @@
         :href="getAppUrl(domain)"
         prepend-icon="mdi-open-in-new"
         target="_blank"
-        variant="tonal"
+        variant="flat"
       >
         Abrir App
       </v-btn>
@@ -116,10 +119,12 @@
         <v-icon class="mr-2">mdi-alert</v-icon>
         Confirmar Exclusão
       </v-card-title>
+
       <v-card-text>
         <p class="mb-3">
           Para deletar o app <strong>{{ appName }}</strong>, digite o nome abaixo:
         </p>
+
         <v-text-field
           v-model="deleteConfirmName"
           density="compact"
@@ -128,13 +133,16 @@
           variant="outlined"
           @keyup.enter="canConfirmDelete && handleDelete()"
         />
+
         <p class="text-error text-caption mt-2">
           Esta ação não pode ser desfeita.
         </p>
       </v-card-text>
+
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="closeDeleteDialog">Cancelar</v-btn>
+
         <v-btn
           color="error"
           :disabled="!canConfirmDelete"

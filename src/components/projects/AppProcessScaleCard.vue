@@ -59,6 +59,7 @@
       <div v-else-if="managedProcesses.length === 0" class="text-center py-4 text-grey">
         <v-icon class="mb-2" color="grey" size="42">mdi-cog-off</v-icon>
         <p class="mb-1">Nenhum processo gerenciável detectado.</p>
+
         <p class="text-caption">
           Faça um deploy com <code>Procfile</code> contendo processos como
           <code>web</code> ou <code>worker</code>.
@@ -75,18 +76,21 @@
               <th>Última sincronização</th>
             </tr>
           </thead>
+
           <tbody>
             <tr v-for="process in managedProcesses" :key="process.process_name">
               <td>
                 <v-chip
                   :color="process.process_name === 'web' ? 'primary' : 'teal'"
                   size="small"
-                  variant="tonal"
+                  variant="flat"
                 >
                   {{ process.process_name }}
                 </v-chip>
               </td>
+
               <td>{{ process.current_quantity }}</td>
+
               <td style="max-width: 140px;">
                 <v-text-field
                   v-model.number="draft[process.process_name]"
@@ -100,6 +104,7 @@
                   variant="outlined"
                 />
               </td>
+
               <td class="text-caption text-grey">
                 {{ formatDate(process.last_synced_at) }}
               </td>
@@ -153,13 +158,13 @@
 
   const hasStoppedWorker = computed(() =>
     managedProcesses.value.some(process =>
-      process.process_name === 'worker' && process.current_quantity === 0
+      process.process_name === 'worker' && process.current_quantity === 0,
     ),
   )
 
   const hasChanges = computed(() =>
     managedProcesses.value.some(process =>
-      Number(draft.value[process.process_name]) !== process.desired_quantity
+      Number(draft.value[process.process_name]) !== process.desired_quantity,
     ),
   )
 

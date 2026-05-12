@@ -9,6 +9,7 @@
 
     <!-- Título -->
     <h1 class="text-h4 font-weight-bold mb-1">Criar Novo App</h1>
+
     <p class="text-body-2 text-medium-emphasis mb-8">
       Configure os detalhes do seu aplicativo para iniciar o deploy automatizado
       nos servidores da Fábrica de Software.
@@ -26,10 +27,12 @@
             >mdi-card-account-details-outline</v-icon>
             Identificação do App
           </v-card-title>
+
           <v-card-text class="pa-5 pt-4">
             <div class="text-body-2 text-medium-emphasis mb-1">
               Nome do Aplicativo
             </div>
+
             <v-row align="center" no-gutters>
               <v-col>
                 <v-text-field
@@ -39,7 +42,7 @@
                   density="comfortable"
                   :error-messages="nameError ? [nameError] : []"
                   :loading="nameChecking"
-                  placeholder="meu-tcc-2024"
+                  :placeholder="'meu-tcc-' + new Date().getFullYear()"
                   variant="outlined"
                   @update:model-value="onNameInput"
                 >
@@ -49,6 +52,7 @@
                   >
                     <v-icon color="success" size="20">mdi-check-circle</v-icon>
                   </template>
+
                   <template
                     v-else-if="nameAvailable === false && !nameChecking"
                     #append-inner
@@ -57,10 +61,12 @@
                   </template>
                 </v-text-field>
               </v-col>
+
               <v-col class="pl-3" cols="auto">
                 <span class="text-body-2 text-medium-emphasis">.class.fabricadesoftware.ifc.edu.br</span>
               </v-col>
             </v-row>
+
             <div class="text-caption text-medium-emphasis mt-1">
               Use apenas letras minúsculas, números e hífens.
             </div>
@@ -68,9 +74,11 @@
             <!-- Nome personalizado — apenas fabric/admin -->
             <template v-if="canCustomize">
               <v-divider class="my-5" />
+
               <div class="text-body-2 text-medium-emphasis mb-1">
                 Nome Personalizado no Dokku
               </div>
+
               <v-text-field
                 v-model="customDokkuName"
                 density="comfortable"
@@ -79,6 +87,7 @@
                 prepend-inner-icon="mdi-rename"
                 variant="outlined"
               />
+
               <div class="text-caption text-medium-emphasis mt-1">
                 Deixe vazio para usar o nome padrão:
                 <code>{{ newApp.name || "nome-do-app" }}</code>
@@ -96,6 +105,7 @@
               <v-icon color="primary" size="small">mdi-github</v-icon>
               Integração GitHub
             </div>
+
             <v-chip
               v-if="gitStore.repos.length > 0 || selectedRepo"
               color="success"
@@ -106,6 +116,7 @@
               Conectado
             </v-chip>
           </v-card-title>
+
           <v-card-text class="pa-5 pt-4">
             <!-- Toggle manual / github -->
             <v-btn-toggle
@@ -121,6 +132,7 @@
                 <v-icon class="mr-1" size="small">mdi-github</v-icon>
                 Repositório GitHub
               </v-btn>
+
               <v-btn value="manual">
                 <v-icon class="mr-1" size="small">mdi-link-variant</v-icon>
                 URL Manual
@@ -131,6 +143,7 @@
               <div class="text-body-2 text-medium-emphasis mb-1">
                 Repositório
               </div>
+
               <v-autocomplete
                 v-model="selectedRepo"
                 chips
@@ -152,25 +165,27 @@
                     class="mr-1"
                     size="small"
                   >mdi-source-repository</v-icon>
-                  {{ item.raw.full_name }}
+                  {{ getRepoSlotItem(item).full_name }}
                 </template>
+
                 <template #item="{ item, props: itemProps }">
                   <v-list-item v-bind="itemProps">
                     <template #prepend>
                       <v-icon
-                        :color="item.raw.private ? 'warning' : 'success'"
+                        :color="getRepoSlotItem(item).private ? 'warning' : 'success'"
                         size="small"
                       >
                         {{
-                          item.raw.private
+                          getRepoSlotItem(item).private
                             ? "mdi-lock"
                             : "mdi-source-repository"
                         }}
                       </v-icon>
                     </template>
+
                     <template #append>
                       <v-chip size="x-small" variant="outlined">{{
-                        item.raw.default_branch
+                        getRepoSlotItem(item).default_branch
                       }}</v-chip>
                     </template>
                   </v-list-item>
@@ -180,6 +195,7 @@
               <div class="text-body-2 text-medium-emphasis mt-5 mb-1">
                 Branch de Produção
               </div>
+
               <v-select
                 v-model="selectedBranch"
                 density="comfortable"
@@ -188,6 +204,7 @@
                 prepend-inner-icon="mdi-source-branch"
                 variant="outlined"
               />
+
               <div class="text-caption text-medium-emphasis mt-1">
                 Esta branch será usada para builds automáticos em cada push.
               </div>
@@ -197,6 +214,7 @@
               <div class="text-body-2 text-medium-emphasis mb-1">
                 URL do Repositório Git
               </div>
+
               <v-text-field
                 v-model="newApp.git"
                 density="comfortable"
@@ -209,6 +227,7 @@
               <div class="text-body-2 text-medium-emphasis mt-5 mb-1">
                 Branch
               </div>
+
               <v-text-field
                 v-model="newApp.branch"
                 density="comfortable"
@@ -217,6 +236,7 @@
                 prepend-inner-icon="mdi-source-branch"
                 variant="outlined"
               />
+
               <div class="text-caption text-medium-emphasis mt-1">
                 Deixe vazio para usar a branch padrão.
               </div>
@@ -232,6 +252,7 @@
                 <div class="d-flex align-center ga-2">
                   <v-icon color="primary" size="small">mdi-key-variant</v-icon>
                   <span class="text-subtitle-1 font-weight-medium">Variáveis de Ambiente</span>
+
                   <v-chip
                     v-if="envVars.length > 0"
                     color="primary"
@@ -241,6 +262,7 @@
                   </v-chip>
                 </div>
               </v-expansion-panel-title>
+
               <v-expansion-panel-text>
                 <div class="d-flex ga-2 mb-4">
                   <v-btn
@@ -255,6 +277,7 @@
                   >
                     Adicionar
                   </v-btn>
+
                   <v-btn
                     prepend-icon="mdi-file-import"
                     size="small"
@@ -273,14 +296,17 @@
                       <th class="text-right" width="60" />
                     </tr>
                   </thead>
+
                   <tbody>
                     <tr v-for="(envVar, index) in envVars" :key="index">
                       <td>
                         <code class="text-primary">{{ envVar.key }}</code>
                       </td>
+
                       <td class="text-medium-emphasis">
                         <code>{{ maskValue(envVar.value) }}</code>
                       </td>
+
                       <td class="text-right">
                         <v-btn
                           color="error"
@@ -302,6 +328,7 @@
                     color="grey"
                     size="32"
                   >mdi-variable</v-icon>
+
                   <p class="text-body-2 text-medium-emphasis">
                     Nenhuma variável adicionada ainda.
                   </p>
@@ -312,7 +339,7 @@
         </v-card>
 
         <!-- Seção 4 — Configurações de Build (expansível) -->
-        <v-card class="mb-6 app-card" variant="flat">
+        <v-card v-if="false" class="mb-6 app-card" variant="flat">
           <v-expansion-panels variant="accordion">
             <v-expansion-panel elevation="0">
               <v-expansion-panel-title class="pa-5">
@@ -321,6 +348,7 @@
                   <span class="text-subtitle-1 font-weight-medium">Configurações de Build (Opcional)</span>
                 </div>
               </v-expansion-panel-title>
+
               <v-expansion-panel-text>
                 <v-row>
                   <v-col cols="12" md="5">
@@ -344,10 +372,13 @@
             <v-card-title class="pa-5 pb-3 text-subtitle-1 font-weight-bold">
               Resumo
             </v-card-title>
+
             <v-divider />
+
             <v-card-text class="pa-5">
               <div class="d-flex justify-space-between mb-3">
                 <span class="text-body-2 text-medium-emphasis">Repositório</span>
+
                 <span
                   class="text-body-2 font-weight-medium text-truncate ml-3"
                   style="max-width: 180px"
@@ -355,20 +386,25 @@
                   {{ summaryRepo }}
                 </span>
               </div>
+
               <div class="d-flex justify-space-between mb-3">
                 <span class="text-body-2 text-medium-emphasis">Branch</span>
+
                 <span class="text-body-2 font-weight-medium">
                   <v-icon size="x-small">mdi-source-branch</v-icon>
                   {{ summaryBranch }}
                 </span>
               </div>
+
               <div class="d-flex justify-space-between mb-3">
                 <span class="text-body-2 text-medium-emphasis">Visibilidade</span>
+
                 <span class="text-body-2 font-weight-medium">
                   <v-icon size="x-small">{{ summaryVisibilityIcon }}</v-icon>
                   {{ summaryVisibility }}
                 </span>
               </div>
+
               <div
                 v-if="envVars.length > 0"
                 class="d-flex justify-space-between mb-3"
@@ -376,18 +412,22 @@
                 <span class="text-body-2 text-medium-emphasis">Variáveis</span>
                 <span class="text-body-2 font-weight-medium">{{ envVars.length }} configurada(s)</span>
               </div>
+
               <div
                 v-if="canCustomize && customDokkuName.trim()"
                 class="d-flex justify-space-between mb-3"
               >
                 <span class="text-body-2 text-medium-emphasis">Nome Dokku</span>
+
                 <span class="text-body-2 font-weight-medium">
                   <v-icon color="amber" size="x-small">mdi-star</v-icon>
                   {{ customDokkuName.trim() }}
                 </span>
               </div>
+
               <div class="d-flex justify-space-between">
                 <span class="text-body-2 text-medium-emphasis">Projeto</span>
+
                 <span
                   class="text-body-2 font-weight-medium text-truncate ml-3"
                   style="max-width: 180px"
@@ -396,7 +436,9 @@
                 </span>
               </div>
             </v-card-text>
+
             <v-divider />
+
             <v-card-text class="pa-5">
               <v-alert
                 v-if="quotaError"
@@ -409,6 +451,7 @@
               >
                 {{ quotaError }}
               </v-alert>
+
               <v-btn
                 block
                 color="primary"
@@ -420,6 +463,7 @@
               >
                 Deploy App
               </v-btn>
+
               <p class="text-caption text-medium-emphasis text-center mt-3">
                 Ao clicar em Deploy, você concorda com as
                 <a class="text-primary" href="#">regras de uso</a> da Fábrica.
@@ -434,6 +478,7 @@
     <v-dialog v-model="dialogAddEnvVar" max-width="500">
       <v-card>
         <v-card-title>Adicionar Variável</v-card-title>
+
         <v-card-text>
           <v-text-field
             v-model="tempEnvVar.key"
@@ -444,6 +489,7 @@
             placeholder="DATABASE_URL"
             variant="outlined"
           />
+
           <v-text-field
             v-model="tempEnvVar.value"
             hint="Ex: postgres://..., sk-..."
@@ -452,12 +498,15 @@
             variant="outlined"
           />
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
+
           <v-btn
             variant="text"
             @click="dialogAddEnvVar = false"
           >Cancelar</v-btn>
+
           <v-btn
             color="primary"
             :disabled="!tempEnvVar.key || !tempEnvVar.value"
@@ -473,6 +522,7 @@
     <v-dialog v-model="dialogImportEnv" max-width="600">
       <v-card>
         <v-card-title>Importar Variáveis do .env</v-card-title>
+
         <v-card-text>
           <v-textarea
             v-model="envFileContent"
@@ -485,6 +535,7 @@ PORT=3000"
             rows="10"
             variant="outlined"
           />
+
           <v-alert
             v-if="importError"
             class="mt-2"
@@ -496,12 +547,15 @@ PORT=3000"
             {{ importError }}
           </v-alert>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
+
           <v-btn
             variant="text"
             @click="dialogImportEnv = false"
           >Cancelar</v-btn>
+
           <v-btn
             color="primary"
             :disabled="!envFileContent"
@@ -718,6 +772,10 @@ PORT=3000"
     if (gitStore.repos.length === 0) {
       gitStore.fetchRepos()
     }
+  }
+
+  function getRepoSlotItem (item: GitRepo | { raw: GitRepo }): GitRepo {
+    return 'raw' in item ? item.raw : item
   }
 
   function maskValue (value: string) {

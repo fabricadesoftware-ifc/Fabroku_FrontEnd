@@ -36,6 +36,7 @@
           <v-avatar v-if="authStore.user.avatar_url" size="24" start>
             <v-img :src="authStore.user.avatar_url" />
           </v-avatar>
+
           <v-avatar v-else color="grey" size="24" start>
             <v-icon size="small">mdi-account</v-icon>
           </v-avatar>
@@ -69,34 +70,40 @@
         >
           <template #chip="{ item, props: chipProps }">
             <v-chip v-bind="chipProps">
-              <v-avatar v-if="item.raw.avatar_url" size="24" start>
-                <v-img :src="item.raw.avatar_url" />
+              <v-avatar v-if="getUserSlotItem(item).avatar_url" size="24" start>
+                <v-img :src="getUserSlotItem(item).avatar_url!" />
               </v-avatar>
-              {{ item.raw.name }}
+              {{ formatUserName(getUserSlotItem(item)) }}
             </v-chip>
           </template>
+
           <template #item="{ item, props: itemProps }">
             <v-list-item v-bind="itemProps">
               <template #prepend>
-                <v-avatar v-if="item.raw.avatar_url" size="32">
-                  <v-img :src="item.raw.avatar_url" />
+                <v-avatar v-if="getUserSlotItem(item).avatar_url" size="32">
+                  <v-img :src="getUserSlotItem(item).avatar_url!" />
                 </v-avatar>
+
                 <v-avatar v-else color="grey" size="32">
                   <v-icon>mdi-account</v-icon>
                 </v-avatar>
               </template>
-              <v-list-item-title>{{ item.raw.name }}</v-list-item-title>
-              <v-list-item-subtitle v-if="item.raw.email">
-                {{ item.raw.email }}
+
+              <v-list-item-title>{{ formatUserName(getUserSlotItem(item)) }}</v-list-item-title>
+
+              <v-list-item-subtitle v-if="getUserSlotItem(item).email">
+                {{ getUserSlotItem(item).email }}
               </v-list-item-subtitle>
             </v-list-item>
           </template>
+
           <template #no-data>
             <v-list-item v-if="searchQuery && searchQuery.length >= 2">
               <v-list-item-title>
                 Nenhum usuário encontrado para "{{ searchQuery }}"
               </v-list-item-title>
             </v-list-item>
+
             <v-list-item v-else>
               <v-list-item-title>
                 Digite pelo menos 2 caracteres para buscar
@@ -108,10 +115,12 @@
 
       <v-card-actions class="pa-6 pt-0">
         <v-spacer />
+
         <v-btn
           variant="text"
           @click="$router.push('/projects')"
         >Cancelar</v-btn>
+
         <v-btn
           color="primary"
           :disabled="!projectName?.trim()"
@@ -146,6 +155,14 @@
   const searchResults = ref<User[]>([])
   const selectedUsers = ref<User[]>([])
   const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
+
+  function getUserSlotItem (item: User | { raw: User }): User {
+    return 'raw' in item ? item.raw : item
+  }
+
+  function formatUserName (user: Pick<User, 'email' | 'name' | 'username' | 'id'>) {
+    return user.name || user.username || user.email || `Usuario #${user.id}`
+  }
 
   async function handleSearch (query: string) {
     if (searchTimeout.value) {

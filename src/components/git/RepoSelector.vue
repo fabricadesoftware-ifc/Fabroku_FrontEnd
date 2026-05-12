@@ -2,10 +2,10 @@
   <v-card :loading="loading">
     <v-card-title class="d-flex align-center justify-space-between">
       <span>Selecionar Repositório</span>
+
       <v-btn
         icon
         :loading="loading"
-        size="small"
         variant="text"
         @click="loadRepos"
       >
@@ -30,6 +30,7 @@
         class="text-center py-4 text-grey"
       >
         <v-icon class="mb-2" size="48">mdi-source-repository</v-icon>
+
         <p>
           {{
             search
@@ -53,6 +54,7 @@
           </template>
 
           <v-list-item-title>{{ repo.name }}</v-list-item-title>
+
           <v-list-item-subtitle>
             {{ repo.description || "Sem descrição" }}
           </v-list-item-subtitle>
@@ -75,6 +77,7 @@
     <v-card-text v-if="selectedRepo" class="bg-surface-variant">
       <div class="d-flex align-center">
         <v-icon class="mr-2">mdi-check-circle</v-icon>
+
         <div>
           <div class="font-weight-medium">{{ selectedRepo.full_name }}</div>
           <div class="text-caption text-grey">{{ selectedRepo.clone_url }}</div>
@@ -85,6 +88,7 @@
     <v-card-actions>
       <v-spacer />
       <v-btn variant="text" @click="$emit('cancel')">Cancelar</v-btn>
+
       <v-btn
         color="primary"
         :disabled="!selectedRepo"

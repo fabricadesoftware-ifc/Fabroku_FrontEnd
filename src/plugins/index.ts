@@ -8,7 +8,6 @@
 import type { App } from 'vue'
 import { createPinia } from 'pinia'
 import router from '../router'
-
 // Plugins
 import vuetify from './vuetify'
 

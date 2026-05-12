@@ -3,12 +3,12 @@ import Vue from '@vitejs/plugin-vue'
 import Fonts from 'unplugin-fonts/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
-
 // Plugins
 import Components from 'unplugin-vue-components/vite'
 import VueRouter from 'unplugin-vue-router/vite'
 // Utilities
 import { defineConfig } from 'vite'
+import vueDevTools from 'vite-plugin-vue-devtools'
 import Layouts from 'vite-plugin-vue-layouts-next'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
@@ -36,9 +36,7 @@ export default defineConfig({
     }),
     Components({
       dts: 'src/components.d.ts',
-      resolvers: [
-        IconsResolver(),
-      ],
+      resolvers: [IconsResolver()],
     }),
     Fonts({
       fontsource: {
@@ -51,6 +49,7 @@ export default defineConfig({
         ],
       },
     }),
+    vueDevTools(),
   ],
   optimizeDeps: {
     exclude: [

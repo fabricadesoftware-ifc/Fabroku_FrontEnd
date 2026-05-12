@@ -10,15 +10,18 @@
         >
           <v-icon color="white" size="48">mdi-lock-alert</v-icon>
         </v-avatar>
+
         <h1 class="text-h5 font-weight-bold mb-2">
           Deploy keys desabilitadas no GitHub
         </h1>
+
         <p class="mb-4 text-grey-darken-1">
           O deploy automático não pôde ser realizado porque as
           <b>deploy keys</b> estão desabilitadas neste repositório ou organização.<br>
           Para continuar, ative as deploy keys nas configurações do repositório ou da organização no GitHub.
         </p>
       </div>
+
       <v-btn
         v-if="helpUrl"
         block
@@ -30,6 +33,7 @@
       >
         Ver documentação do GitHub
       </v-btn>
+
       <v-btn
         block
         color="secondary"

@@ -15,6 +15,7 @@
       <div class="d-flex align-center justify-space-between mb-4">
         <div>
           <h1 class="text-h4">{{ projectStore.currentProject.name }}</h1>
+
           <v-chip
             class="mt-2"
             :color="projectStore.currentProject.is_owner ? 'success' : 'grey'"
@@ -36,18 +37,23 @@
 
       <v-card class="mb-6">
         <v-card-title>Detalhes do Projeto</v-card-title>
+
         <v-card-text>
           <p><strong>ID:</strong> {{ projectStore.currentProject.id }}</p>
+
           <p>
             <strong>Criado em:</strong>
             {{ formatDate(projectStore.currentProject.created_at) }}
           </p>
+
           <p>
             <strong>Atualizado em:</strong>
             {{ formatDate(projectStore.currentProject.updated_at) }}
           </p>
+
           <div class="mt-3">
             <strong>Membros:</strong>
+
             <div class="d-flex flex-wrap ga-2 mt-1">
               <v-chip
                 v-for="u in projectStore.currentProject.users_detail || []"
@@ -82,6 +88,7 @@
                 </v-icon>
                 {{ app.name }}
               </div>
+
               <v-chip
                 :color="app.is_owner ? 'success' : 'grey'"
                 :prepend-icon="
@@ -92,15 +99,19 @@
                 {{ app.is_owner ? "Meu" : "Outro" }}
               </v-chip>
             </v-card-title>
+
             <v-card-subtitle>{{ app.git }}</v-card-subtitle>
+
             <v-card-text>
               <v-chip :color="getStatusColor(app.status)" size="small">
                 {{ formatStatus(app.status) }}
               </v-chip>
+
               <span v-if="app.domain" class="ml-2 text-caption">
                 {{ app.domain }}
               </span>
             </v-card-text>
+
             <v-card-actions>
               <v-btn
                 color="primary"
@@ -120,6 +131,7 @@
               color="grey"
               size="64"
             >mdi-application-outline</v-icon>
+
             <h3 class="text-h6 mb-2">Nenhum app neste projeto</h3>
             <p class="text-grey">Este projeto ainda não possui apps</p>
           </v-card>

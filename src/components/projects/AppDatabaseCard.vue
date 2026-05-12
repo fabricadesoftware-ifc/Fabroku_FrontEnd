@@ -5,6 +5,7 @@
         <v-icon class="mr-2">mdi-database</v-icon>
         Serviços Vinculados
       </span>
+
       <div class="d-flex ga-2">
         <v-btn
           v-if="!hasPostgres"
@@ -13,29 +14,32 @@
           :loading="creating"
           prepend-icon="mdi-database-plus"
           size="small"
-          variant="tonal"
+          variant="flat"
           @click="emit('create')"
         >
           Criar PostgreSQL
         </v-btn>
+
         <v-btn
           color="primary"
           :disabled="!appName"
           :loading="linking"
           prepend-icon="mdi-link"
           size="small"
-          variant="tonal"
+          variant="flat"
           @click="emit('link')"
         >
           Vincular existente
         </v-btn>
       </div>
     </v-card-title>
+
     <v-card-text>
       <!-- Sem servicos vinculados -->
       <div v-if="!hasLinkedServices && !creating" class="text-center py-4 text-grey">
         <v-icon class="mb-2" color="grey" size="48">mdi-database-off</v-icon>
         <p class="mb-2">Nenhum serviço vinculado</p>
+
         <p class="text-caption">
           Crie ou vincule PostgreSQL/Redis e a variável
           <code>DATABASE_URL</code> ou <code>REDIS_URL</code> será sincronizada no app.
@@ -50,7 +54,9 @@
           indeterminate
           size="48"
         />
+
         <p class="text-primary">Criando serviço...</p>
+
         <p class="text-caption text-grey">
           O serviço será provisionado e a variável de conexão será
           automaticamente configurada.
@@ -64,15 +70,19 @@
             <template #prepend>
               <v-icon color="success">mdi-database-check</v-icon>
             </template>
+
             <v-list-item-title class="d-flex align-center">
               <span class="font-weight-medium">{{ service.name }}</span>
+
               <v-chip class="ml-2" color="blue" size="x-small" variant="tonal">
                 {{ service.service_type }}
               </v-chip>
             </v-list-item-title>
+
             <v-list-item-subtitle>
               Contêiner: <code>{{ service.container_name || "-" }}</code>
             </v-list-item-subtitle>
+
             <template #append>
               <v-btn
                 v-if="showUnlink !== false"
@@ -84,11 +94,13 @@
                 @click="emit('unlink', service.id!)"
               >
                 <v-icon>mdi-link-off</v-icon>
+
                 <v-tooltip
                   activator="parent"
                   location="top"
                 >Desvincular (mantém o serviço)</v-tooltip>
               </v-btn>
+
               <v-btn
                 color="error"
                 icon
@@ -98,6 +110,7 @@
                 @click="emit('delete', service.id!)"
               >
                 <v-icon>mdi-delete</v-icon>
+
                 <v-tooltip
                   activator="parent"
                   location="top"

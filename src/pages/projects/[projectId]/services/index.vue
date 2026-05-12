@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-10 py-2" fluid>
     <v-btn
       class="mb-4"
       prepend-icon="mdi-arrow-left"
@@ -16,6 +16,7 @@
         <v-icon class="mr-2">mdi-database</v-icon>
         Serviços do Projeto
       </h1>
+
       <p class="text-body-2 text-medium-emphasis mb-6">
         Gerencie bancos de dados e outros serviços. Crie serviços standalone e
         vincule-os aos apps quando precisar.
@@ -23,6 +24,7 @@
 
       <div class="d-flex justify-space-between align-center mb-4">
         <h2 class="text-h5">Serviços</h2>
+
         <v-btn
           color="primary"
           prepend-icon="mdi-plus"
@@ -47,31 +49,39 @@
               <v-icon class="mr-2" color="primary">mdi-database</v-icon>
               {{ service.name }}
             </v-card-title>
+
             <v-card-subtitle>
               <v-chip color="blue" size="small" variant="tonal">
                 {{ service.service_type }}
               </v-chip>
+
               <span v-if="service.app" class="ml-2 text-caption">
                 Vinculado ao app
               </span>
+
               <span v-else-if="isServiceReady(service)" class="ml-2 text-caption text-grey">
                 Disponível para vincular
               </span>
+
               <span v-else class="ml-2 text-caption text-primary">
                 Provisionando
               </span>
             </v-card-subtitle>
+
             <v-card-text>
               <p v-if="service.container_name" class="text-caption mb-1">
                 Contêiner: <code>{{ service.container_name }}</code>
               </p>
+
               <p v-else-if="service.task_id" class="text-caption text-primary">
                 Provisionando...
               </p>
+
               <p v-else class="text-caption text-warning">
                 Provisionamento ainda não concluído. Aguarde ou recrie o serviço.
               </p>
             </v-card-text>
+
             <v-card-actions>
               <v-btn
                 v-if="!service.app && isServiceReady(service)"
@@ -82,6 +92,7 @@
               >
                 Vincular a um App
               </v-btn>
+
               <v-btn
                 v-else-if="!service.app"
                 disabled
@@ -90,6 +101,7 @@
               >
                 Aguardando provisionamento
               </v-btn>
+
               <v-btn
                 color="error"
                 :loading="deletingId === service.id"
@@ -99,6 +111,7 @@
               >
                 Excluir
               </v-btn>
+
               <v-btn
                 v-if="service.app"
                 color="warning"
@@ -116,10 +129,12 @@
           <v-card class="text-center pa-8">
             <v-icon class="mb-4" color="grey" size="64">mdi-database-off</v-icon>
             <h3 class="text-h6 mb-2">Nenhum serviço neste projeto</h3>
+
             <p class="text-grey mb-4">
               Crie um PostgreSQL ou Redis para começar. Você pode vincular o
               serviço a qualquer app do projeto depois.
             </p>
+
             <v-btn color="primary" :to="`/projects/${projectId}/services/new`">
               Criar Serviço
             </v-btn>
@@ -132,6 +147,7 @@
     <v-dialog v-model="linkDialog" max-width="500" persistent>
       <v-card>
         <v-card-title>Vincular serviço ao app</v-card-title>
+
         <v-card-text>
           <v-alert
             v-if="linkError"
@@ -144,6 +160,7 @@
           >
             {{ linkError }}
           </v-alert>
+
           <v-select
             v-model="selectedAppId"
             item-title="name"
@@ -153,9 +170,11 @@
             variant="outlined"
           />
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="linkDialog = false">Cancelar</v-btn>
+
           <v-btn
             color="primary"
             :loading="linking"

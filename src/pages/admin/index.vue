@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-10 py-2" fluid>
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
         <h1 class="text-h4">Administração</h1>
@@ -13,10 +13,12 @@
         <v-icon start>mdi-folder-multiple</v-icon>
         Projetos
       </v-tab>
+
       <v-tab value="users">
         <v-icon start>mdi-account-group</v-icon>
         Usuários
       </v-tab>
+
       <v-tab value="storage">
         <v-icon start>mdi-database</v-icon>
         Armazenamento
@@ -46,6 +48,7 @@
                   <v-icon class="mr-2" color="primary">mdi-folder</v-icon>
                   <span class="text-truncate">{{ project.name }}</span>
                 </div>
+
                 <v-chip
                   :color="project.is_owner ? 'success' : 'grey'"
                   :prepend-icon="
@@ -64,6 +67,7 @@
               <v-card-text class="flex-grow-1">
                 <div class="mb-2">
                   <span class="text-caption text-medium-emphasis">Membros:</span>
+
                   <div class="d-flex flex-wrap ga-1 mt-1">
                     <v-chip
                       v-for="u in project.users_detail || []"
@@ -73,6 +77,7 @@
                     >
                       {{ u.name || u.email }}
                     </v-chip>
+
                     <v-chip
                       v-if="!project.users_detail?.length"
                       color="grey"
@@ -92,7 +97,9 @@
                 >
                   Ver Apps
                 </v-btn>
+
                 <v-spacer />
+
                 <v-btn
                   color="error"
                   icon
@@ -101,6 +108,7 @@
                   @click.stop="confirmDeleteProject(project)"
                 >
                   <v-icon>mdi-delete</v-icon>
+
                   <v-tooltip
                     activator="parent"
                     location="top"
@@ -117,6 +125,7 @@
                 color="grey"
                 size="64"
               >mdi-folder-outline</v-icon>
+
               <h3 class="text-h6 mb-2">Nenhum projeto encontrado</h3>
               <p class="text-grey">{{ getEmptyMessage() }}</p>
             </v-card>
@@ -150,6 +159,7 @@
               <th class="text-center">Ações</th>
             </tr>
           </thead>
+
           <tbody>
             <tr v-for="u in filteredUsers" :key="u.id">
               <td>
@@ -157,12 +167,15 @@
                   <v-avatar :image="u.avatar_url || undefined" size="32">
                     <v-icon v-if="!u.avatar_url">mdi-account</v-icon>
                   </v-avatar>
+
                   <span>{{ u.name || "-" }}</span>
                 </div>
               </td>
+
               <td>
                 <span class="text-caption">{{ u.email }}</span>
               </td>
+
               <td class="text-center">
                 <v-chip
                   v-if="u.is_superuser"
@@ -173,6 +186,7 @@
                   <v-icon size="14" start>mdi-shield-crown</v-icon>
                   Admin
                 </v-chip>
+
                 <v-chip
                   v-else-if="u.is_fabric"
                   color="info"
@@ -182,8 +196,10 @@
                   <v-icon size="14" start>mdi-account-hard-hat</v-icon>
                   Fábrica
                 </v-chip>
+
                 <span v-else class="text-grey text-caption">Aluno</span>
               </td>
+
               <td class="text-center">
                 <v-chip
                   :color="
@@ -201,6 +217,7 @@
                   }}
                 </v-chip>
               </td>
+
               <td class="text-center">
                 <v-chip
                   :color="
@@ -218,11 +235,13 @@
                   }}
                 </v-chip>
               </td>
+
               <td class="text-center">
                 <v-chip :color="u.is_active ? 'success' : 'error'" size="small">
                   {{ u.is_active ? "Ativo" : "Desabilitado" }}
                 </v-chip>
               </td>
+
               <td class="text-center">
                 <div class="d-flex justify-center align-center flex-wrap ga-2">
                   <v-btn
@@ -240,6 +259,7 @@
                     }}</v-icon>
                     {{ u.is_superuser ? "Remover admin" : "Tornar admin" }}
                   </v-btn>
+
                   <v-btn
                     :disabled="u.is_superuser"
                     icon
@@ -248,11 +268,13 @@
                     @click="openQuotaDialog(u)"
                   >
                     <v-icon size="18">mdi-tune</v-icon>
+
                     <v-tooltip
                       activator="parent"
                       location="top"
                     >Ajustar limites</v-tooltip>
                   </v-btn>
+
                   <v-btn
                     :color="u.is_active ? 'error' : 'success'"
                     :disabled="u.is_superuser"
@@ -269,6 +291,7 @@
                 </div>
               </td>
             </tr>
+
             <tr v-if="filteredUsers.length === 0">
               <td class="text-center text-grey pa-6" colspan="7">
                 Nenhum usuário encontrado.
@@ -286,6 +309,7 @@
             <v-btn v-if="storageLoading" class="ml-2" icon size="small">
               <v-progress-circular indeterminate size="20" width="2" />
             </v-btn>
+
             <v-btn
               v-else
               class="ml-2"
@@ -297,15 +321,18 @@
               <v-icon>mdi-refresh</v-icon>
             </v-btn>
           </v-card-title>
+
           <v-card-text>
             <div v-if="storageError" class="text-error text-caption">
               {{ storageError }}
             </div>
+
             <template v-else>
               <p class="text-h6 mb-3">
                 Total:
                 <strong>{{ storageUsage?.total_formatted ?? "-" }}</strong>
               </p>
+
               <v-table v-if="storageUsage?.services?.length" density="compact">
                 <thead>
                   <tr>
@@ -315,19 +342,23 @@
                     <th class="text-right">Tamanho</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   <tr v-for="s in storageUsage.services" :key="s.service_id">
                     <td>{{ s.project_name }}</td>
                     <td>{{ s.app_name ?? "-" }}</td>
+
                     <td>
                       <code class="text-caption">{{
                         s.container_name ?? s.service_name
                       }}</code>
                     </td>
+
                     <td class="text-right">{{ s.size_formatted }}</td>
                   </tr>
                 </tbody>
               </v-table>
+
               <p v-else class="text-grey text-caption">
                 Nenhum banco Postgres encontrado.
               </p>
@@ -344,19 +375,23 @@
           <v-icon class="mr-2" color="error">mdi-alert</v-icon>
           Apagar Projeto
         </v-card-title>
+
         <v-card-text>
           <p>
             Tem certeza que deseja apagar o projeto
             <strong>{{ projectToDelete?.name }}</strong>?
           </p>
+
           <p class="text-error text-caption mt-2">
             Esta ação não pode ser desfeita. Todos os apps e serviços associados
             serão removidos.
           </p>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="deleteDialog = false">Cancelar</v-btn>
+
           <v-btn
             color="error"
             :loading="deleting"
@@ -376,6 +411,7 @@
           <v-icon class="mr-2" color="primary">mdi-tune</v-icon>
           Limites de {{ quotaUser?.name || quotaUser?.email }}
         </v-card-title>
+
         <v-card-text>
           <p class="text-caption text-medium-emphasis mb-4">
             Defina limites personalizados. Deixe vazio para usar o padrão ({{
@@ -421,9 +457,11 @@
             {{ quotaUser.services_count ?? 0 }} serviços
           </v-alert>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="quotaDialog = false">Cancelar</v-btn>
+
           <v-btn
             color="primary"
             :loading="quotaSaving"

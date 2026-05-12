@@ -1,20 +1,24 @@
 ﻿<template>
-  <v-container class="documentation py-6" fluid>
+  <v-container class="documentation py-6 px-10" fluid>
     <!-- Header -->
     <div class="text-center mb-8">
       <v-icon class="mb-3" color="primary" size="56">mdi-console</v-icon>
       <h1 class="text-h3 font-weight-bold">Fabroku CLI</h1>
+
       <p class="text-grey mt-2" style="max-width: 600px; margin: 0 auto">
         Documentação completa da ferramenta de linha de comando para gerenciar
         seus apps na plataforma Fabroku.
       </p>
+
       <div class="mt-4 d-flex justify-center ga-3">
         <v-chip color="primary" prepend-icon="mdi-npm" variant="outlined">
           v0.1.7
         </v-chip>
+
         <v-chip color="success" prepend-icon="mdi-nodejs" variant="outlined">
           Node.js 18+
         </v-chip>
+
         <v-chip color="info" prepend-icon="mdi-license" variant="outlined">
           MIT
         </v-chip>
@@ -27,13 +31,13 @@
         <v-icon class="mr-2" size="20">mdi-compass</v-icon>
         Navegação rápida
       </v-card-title>
+
       <v-card-text>
         <div class="d-flex flex-wrap ga-2">
           <v-btn
             v-for="section in navSections"
             :key="section.id"
             :prepend-icon="section.icon"
-            size="small"
             variant="tonal"
             @click="scrollTo(section.id)"
           >
@@ -50,6 +54,7 @@
           <v-icon class="mr-2" color="success">mdi-download</v-icon>
           Instalação
         </v-card-title>
+
         <v-card-text>
           <p class="mb-3">Instale a CLI globalmente via npm:</p>
           <CodeBlock code="npm i -g fabroku" />
@@ -64,6 +69,7 @@
           <v-icon class="mr-2" color="warning">mdi-shield-key</v-icon>
           Autenticação
         </v-card-title>
+
         <v-card-text>
           <p class="mb-3">
             A CLI utiliza autenticação via <strong>GitHub OAuth</strong>. O
@@ -75,6 +81,7 @@
             <v-card-title class="text-subtitle-1">
               <code>fabroku login</code>
             </v-card-title>
+
             <v-card-text>
               <p class="mb-2">Autentica o usuário via GitHub OAuth.</p>
               <p class="mt-3 font-weight-medium">Como funciona:</p>
@@ -90,6 +97,7 @@
             <v-card-title class="text-subtitle-1">
               <code>fabroku logout</code>
             </v-card-title>
+
             <v-card-text>
               <p>Encerra a sessão, limpando o token e dados do usuário.</p>
               <CodeBlock class="mt-2" code="fabroku logout" />
@@ -100,11 +108,13 @@
             <v-card-title class="text-subtitle-1">
               <code>fabroku whoami</code>
             </v-card-title>
+
             <v-card-text>
               <p class="mb-2">
                 Exibe informações do usuário autenticado e verifica se o token é
                 válido.
               </p>
+
               <CodeBlock :code="whoamiExample" />
             </v-card-text>
           </v-card>
@@ -119,11 +129,13 @@
           <v-icon class="mr-2" color="info">mdi-file-check</v-icon>
           Verificação de Arquivos
         </v-card-title>
+
         <v-card-text>
           <v-card class="mb-4" variant="tonal">
             <v-card-title class="text-subtitle-1">
               <code>fabroku verify</code>
             </v-card-title>
+
             <v-card-text>
               <p class="mb-3">
                 Verifica se o projeto contém os arquivos necessários para deploy
@@ -135,6 +147,7 @@
               <p class="font-weight-medium mb-2">
                 Arquivos requeridos por tipo:
               </p>
+
               <v-row>
                 <v-col cols="12" md="6">
                   <v-card variant="outlined">
@@ -142,6 +155,7 @@
                       <v-icon class="mr-1" size="18">mdi-vuejs</v-icon>
                       Frontend (SPA)
                     </v-card-title>
+
                     <v-card-text>
                       <v-list density="compact">
                         <v-list-item
@@ -152,6 +166,7 @@
                           <v-list-item-title>
                             <code>{{ f.name }}</code>
                           </v-list-item-title>
+
                           <v-list-item-subtitle>{{
                             f.desc
                           }}</v-list-item-subtitle>
@@ -172,6 +187,7 @@
                     </v-card-text>
                   </v-card>
                 </v-col>
+
                 <v-col cols="12" md="6">
                   <v-card variant="outlined">
                     <v-card-title class="text-subtitle-2">
@@ -181,6 +197,7 @@
                       >mdi-language-python</v-icon>
                       Backend (Django)
                     </v-card-title>
+
                     <v-card-text>
                       <v-list density="compact">
                         <v-list-item
@@ -191,6 +208,7 @@
                           <v-list-item-title>
                             <code>{{ f.name }}</code>
                           </v-list-item-title>
+
                           <v-list-item-subtitle>{{
                             f.desc
                           }}</v-list-item-subtitle>
@@ -230,28 +248,32 @@
           <v-icon class="mr-2" color="purple">mdi-view-list</v-icon>
           Listar Apps
         </v-card-title>
+
         <v-card-text>
           <v-card variant="tonal">
             <v-card-title class="text-subtitle-1">
               <code>fabroku apps</code>
             </v-card-title>
+
             <v-card-text>
               <p class="mb-3">
                 Lista todos os apps do usuário na plataforma em formato tabular.
               </p>
+
               <FlagTable :flags="appsFlags" />
+
               <CodeBlock
                 class="mt-3"
                 :code="`fabroku apps\nfabroku apps --project 42`"
               />
 
               <p class="mt-3 font-weight-medium">Status possíveis:</p>
+
               <div class="d-flex flex-wrap ga-2 mt-2">
                 <v-chip
                   v-for="s in statusList"
                   :key="s.label"
                   :color="s.color"
-                  size="small"
                 >
                   {{ s.label }}
                 </v-chip>
@@ -269,20 +291,24 @@
           <v-icon class="mr-2" color="success">mdi-rocket-launch</v-icon>
           Deploy
         </v-card-title>
+
         <v-card-text>
           <v-card class="mb-4" variant="tonal">
             <v-card-title class="text-subtitle-1">
               <code>fabroku deploy</code>
             </v-card-title>
+
             <v-card-text>
               <p class="mb-3">
                 Dispara o redeploy de um app. Comando principal da CLI.
               </p>
+
               <FlagTable :flags="deployFlags" />
 
               <v-divider class="my-4" />
 
               <p class="font-weight-medium mb-2">Fluxo de execução:</p>
+
               <v-timeline class="mt-2" density="compact" side="end">
                 <v-timeline-item
                   v-for="(step, i) in deploySteps"
@@ -323,6 +349,7 @@
           <v-icon class="mr-2" color="indigo">mdi-file-cog-outline</v-icon>
           Procfile e Processos
         </v-card-title>
+
         <v-card-text>
           <p class="mb-3">
             O <code>Procfile</code> diz ao Dokku quais comandos existem dentro
@@ -354,13 +381,15 @@
                   <v-icon class="mr-2" :color="process.color">
                     {{ process.icon }}
                   </v-icon>
+
                   <code>{{ process.name }}</code>
                 </v-card-title>
+
                 <v-card-text>
                   <p class="mb-2">{{ process.desc }}</p>
+
                   <v-chip
                     :color="process.managed ? 'success' : 'warning'"
-                    size="small"
                     variant="tonal"
                   >
                     {{ process.managed ? 'Escalavel no Fabroku' : 'Executa no deploy' }}
@@ -374,6 +403,7 @@
             <v-card-title class="text-subtitle-1">
               Exemplo para Django + Celery
             </v-card-title>
+
             <v-card-text>
               <CodeBlock :code="procfileDjangoExample" />
             </v-card-text>
@@ -382,6 +412,7 @@
           <v-list density="compact">
             <v-list-item prepend-icon="mdi-web">
               <v-list-item-title><code>web</code></v-list-item-title>
+
               <v-list-item-subtitle>
                 Processo que recebe HTTP. Normalmente deve ficar em
                 <code>1</code> ou mais. Para parar o app, use o botao Parar em
@@ -391,6 +422,7 @@
 
             <v-list-item prepend-icon="mdi-cog-play">
               <v-list-item-title><code>worker</code></v-list-item-title>
+
               <v-list-item-subtitle>
                 Processo continuo para tarefas em segundo plano, como Celery.
                 Se voce adicionar um worker depois do app existir, faca um novo
@@ -401,6 +433,7 @@
 
             <v-list-item prepend-icon="mdi-run-fast">
               <v-list-item-title><code>release</code></v-list-item-title>
+
               <v-list-item-subtitle>
                 Comando executado uma vez durante o deploy, antes da nova versao
                 ficar ativa. Use para migracoes, por exemplo
@@ -432,16 +465,19 @@
           <v-icon class="mr-2" color="teal">mdi-database-sync</v-icon>
           Importar e Exportar Dados
         </v-card-title>
+
         <v-card-text>
           <v-card class="mb-4" variant="tonal">
             <v-card-title class="text-subtitle-1">
               <code>fabroku run loaddata</code>
             </v-card-title>
+
             <v-card-text>
               <p class="mb-3">
                 Executa <code>loaddata</code> dentro do container do app
                 Django usando um fixture JSON que ja esta no deploy.
               </p>
+
               <FlagTable :flags="runLoaddataFlags" />
 
               <v-alert
@@ -466,12 +502,14 @@
             <v-card-title class="text-subtitle-1">
               <code>fabroku run dumpdata</code>
             </v-card-title>
+
             <v-card-text>
               <p class="mb-3">
                 Executa <code>dumpdata</code> no app Django, gera o JSON no
                 container e baixa o resultado para o caminho local informado em
                 <code>--output</code>.
               </p>
+
               <FlagTable :flags="runDumpdataFlags" />
 
               <v-alert
@@ -502,20 +540,24 @@
           <v-icon class="mr-2" color="orange">mdi-webhook</v-icon>
           Webhook
         </v-card-title>
+
         <v-card-text>
           <v-card variant="tonal">
             <v-card-title class="text-subtitle-1">
               <code>fabroku webhook [appId]</code>
             </v-card-title>
+
             <v-card-text>
               <p class="mb-3">
                 Diagnostica e configura webhooks do GitHub para commit status.
               </p>
+
               <FlagTable :flags="webhookFlags" />
 
               <v-divider class="my-4" />
 
               <p class="font-weight-medium mb-2">Diagnósticos realizados:</p>
+
               <v-list density="compact">
                 <v-list-item
                   v-for="check in webhookChecks"
@@ -525,6 +567,7 @@
                   <v-list-item-title>
                     <code>{{ check.name }}</code>
                   </v-list-item-title>
+
                   <v-list-item-subtitle>{{ check.desc }}</v-list-item-subtitle>
                 </v-list-item>
               </v-list>
@@ -546,21 +589,23 @@
           <v-icon class="mr-2" color="primary">mdi-map-marker-path</v-icon>
           Workflow Completo de Deploy
         </v-card-title>
+
         <v-card-text>
           <p class="mb-4">
             Passo a passo para fazer deploy de uma aplicação do zero:
           </p>
+
           <v-timeline density="compact" side="end">
             <v-timeline-item
               v-for="(step, i) in workflowSteps"
               :key="i"
               :dot-color="step.color"
-              size="small"
             >
               <v-card variant="outlined">
                 <v-card-title class="text-subtitle-2">
                   {{ step.title }}
                 </v-card-title>
+
                 <v-card-text>
                   <p class="text-body-2 mb-2">{{ step.desc }}</p>
                   <CodeBlock v-if="step.code" :code="step.code" />
@@ -606,6 +651,7 @@
           <v-icon class="mr-2" color="error">mdi-lifebuoy</v-icon>
           Troubleshooting
         </v-card-title>
+
         <v-card-text>
           <v-table>
             <thead>
@@ -614,11 +660,13 @@
                 <th>Solução</th>
               </tr>
             </thead>
+
             <tbody>
               <tr v-for="issue in troubleshootingRows" :key="issue.problem">
                 <td>
                   <code>{{ issue.problem }}</code>
                 </td>
+
                 <td>{{ issue.solution }}</td>
               </tr>
             </tbody>

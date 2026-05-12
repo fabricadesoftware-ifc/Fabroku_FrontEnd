@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-10 py-2" fluid>
     <div class="d-flex justify-space-between align-center mb-4">
       <h1 class="text-h4 mb-6">Dashboard</h1>
     </div>
@@ -16,13 +16,13 @@
                 <v-icon class="mr-2" color="primary">mdi-application</v-icon>
                 <span class="text-subtitle-1 font-weight-medium">Apps</span>
               </div>
+
               <v-chip
                 :color="
                   quota.max_apps == null
                     ? 'grey'
                     : getQuotaColor(quota.apps_count, quota.max_apps)
                 "
-                size="small"
                 variant="tonal"
               >
                 {{
@@ -32,12 +32,14 @@
                 }}
               </v-chip>
             </div>
+
             <v-progress-linear
               v-if="quota.max_apps != null"
               :color="getQuotaColor(quota.apps_count, quota.max_apps)"
               :model-value="(quota.apps_count / quota.max_apps) * 100"
               rounded
             />
+
             <v-progress-linear v-else color="grey" :model-value="0" rounded />
           </v-card-text>
         </v-card>
@@ -51,13 +53,13 @@
                 <v-icon class="mr-2" color="secondary">mdi-database</v-icon>
                 <span class="text-subtitle-1 font-weight-medium">Serviços</span>
               </div>
+
               <v-chip
                 :color="
                   quota.max_services == null
                     ? 'grey'
                     : getQuotaColor(quota.services_count, quota.max_services)
                 "
-                size="small"
                 variant="tonal"
               >
                 {{
@@ -67,12 +69,14 @@
                 }}
               </v-chip>
             </div>
+
             <v-progress-linear
               v-if="quota.max_services != null"
               :color="getQuotaColor(quota.services_count, quota.max_services)"
               :model-value="(quota.services_count / quota.max_services) * 100"
               rounded
             />
+
             <v-progress-linear v-else color="grey" :model-value="0" rounded />
           </v-card-text>
         </v-card>
@@ -85,15 +89,17 @@
         <v-card>
           <v-card-title class="d-flex justify-space-between align-center">
             <span>Projetos Recentes</span>
+
             <v-btn
               color="primary"
-              size="small"
+              text="Ver Todos"
               :to="'/projects'"
               variant="text"
             >
               Ver todos
             </v-btn>
           </v-card-title>
+
           <v-list v-if="recentProjects.length > 0">
             <v-list-item
               v-for="project in recentProjects"
@@ -103,15 +109,19 @@
               <template #prepend>
                 <v-icon>mdi-folder</v-icon>
               </template>
+
               <v-list-item-title>{{ project.name }}</v-list-item-title>
+
               <v-list-item-subtitle>
                 Criado em {{ formatDate(project.created_at) }}
               </v-list-item-subtitle>
             </v-list-item>
           </v-list>
+
           <v-card-text v-else class="text-center text-grey">
             <v-icon class="mb-2" size="48">mdi-folder-outline</v-icon>
             <p>Nenhum projeto ainda</p>
+
             <v-btn class="mt-2" color="primary" to="/projects">
               Criar Projeto
             </v-btn>
@@ -123,6 +133,7 @@
       <v-col cols="12" md="6">
         <v-card>
           <v-card-title>Apps Recentes</v-card-title>
+
           <v-list v-if="recentApps.length > 0">
             <v-list-item
               v-for="app in recentApps"
@@ -134,14 +145,18 @@
                   {{ getStatusIcon(app.status) }}
                 </v-icon>
               </template>
+
               <v-list-item-title>{{ app.name }}</v-list-item-title>
+
               <v-list-item-subtitle>
                 {{ formatGitUrl(app.git) }}
               </v-list-item-subtitle>
+
               <v-list-item-subtitle v-if="app.last_commit_sha" class="text-caption">
                 <v-icon class="mr-1" color="primary" size="12">mdi-source-commit</v-icon>
                 {{ app.last_commit_sha.slice(0, 7) }}
               </v-list-item-subtitle>
+
               <template #append>
                 <v-chip :color="getStatusColor(app.status)" size="x-small">
                   {{ formatStatus(app.status) }}
@@ -149,6 +164,7 @@
               </template>
             </v-list-item>
           </v-list>
+
           <v-card-text v-else class="text-center text-grey">
             <v-icon class="mb-2" size="48">mdi-application-outline</v-icon>
             <p>Nenhum app ainda</p>

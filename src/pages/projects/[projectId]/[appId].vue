@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-10 py-2" fluid>
     <v-btn
       class="mb-4"
       prepend-icon="mdi-arrow-left"
@@ -21,8 +21,10 @@
           >
             {{ getStatusIcon(appStore.currentApp.status) }}
           </v-icon>
+
           <div>
             <h1 class="text-h4">{{ appStore.currentApp.name }}</h1>
+
             <v-chip
               class="mt-1"
               :color="getStatusColor(appStore.currentApp.status)"
@@ -32,6 +34,7 @@
             </v-chip>
           </div>
         </div>
+
         <v-btn
           color="primary"
           :loading="refreshing"
@@ -73,12 +76,14 @@
                     : "Criando App..."
               }}
             </v-card-title>
+
             <v-card-text>
               <div v-if="appStore.taskStatus" class="mb-2">
                 <div class="d-flex justify-space-between mb-1">
                   <span>{{ formatStatus(appStore.taskStatus.status) }}</span>
                   <span>{{ appStore.taskStatus.current }}%</span>
                 </div>
+
                 <v-progress-linear
                   :color="
                     appStore.currentApp.status === 'DELETING'
@@ -90,6 +95,7 @@
                   rounded
                 />
               </div>
+
               <div v-else class="text-center">
                 <v-progress-circular indeterminate size="24" />
                 <span class="ml-2">Carregando progresso...</span>
@@ -161,6 +167,7 @@
     <v-dialog v-model="linkServiceDialog" max-width="500" persistent>
       <v-card>
         <v-card-title>Vincular serviço existente</v-card-title>
+
         <v-card-text>
           <v-alert
             v-if="linkServiceError"
@@ -173,6 +180,7 @@
           >
             {{ linkServiceError }}
           </v-alert>
+
           <v-select
             v-model="selectedServiceToLink"
             item-title="name"
@@ -181,6 +189,7 @@
             label="Selecione o serviço"
             variant="outlined"
           />
+
           <v-alert
             v-if="availableServicesToLink.length === 0"
             class="mt-3"
@@ -192,12 +201,15 @@
             <router-link :to="`/projects/${projectId}/services/new`">Serviços do projeto</router-link>.
           </v-alert>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
+
           <v-btn
             variant="text"
             @click="linkServiceDialog = false"
           >Cancelar</v-btn>
+
           <v-btn
             color="primary"
             :disabled="!selectedServiceToLink"

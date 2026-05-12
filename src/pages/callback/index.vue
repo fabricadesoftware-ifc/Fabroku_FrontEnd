@@ -94,6 +94,7 @@ meta:
         <h2 v-if="errorCode === 'user_disabled'" class="text-warning">
           Conta Desabilitada
         </h2>
+
         <h2 v-else-if="errorCode === 'invalid_email'">Email Não Permitido</h2>
         <h2 v-else>Erro na autenticação</h2>
 

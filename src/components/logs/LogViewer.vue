@@ -6,9 +6,11 @@
         <div class="log-terminal__dot log-terminal__dot--red" />
         <div class="log-terminal__dot log-terminal__dot--yellow" />
         <div class="log-terminal__dot log-terminal__dot--green" />
+
         <span class="log-terminal__title ml-2">
           {{ title || "Deploy Logs" }}
         </span>
+
         <v-chip
           v-if="streaming"
           color="success"
@@ -20,6 +22,7 @@
           LIVE
         </v-chip>
       </div>
+
       <div class="d-flex align-center ga-1">
         <v-btn
           v-if="!streaming && taskId"
@@ -30,11 +33,13 @@
           @click="startStream"
         >
           <v-icon color="grey-lighten-1" size="16">mdi-play</v-icon>
+
           <v-tooltip
             activator="parent"
             location="top"
           >Acompanhar ao vivo</v-tooltip>
         </v-btn>
+
         <v-btn
           v-if="streaming"
           density="compact"
@@ -45,6 +50,7 @@
         >
           <v-icon color="error" size="16">mdi-stop</v-icon>
         </v-btn>
+
         <v-btn
           density="compact"
           icon
@@ -63,12 +69,14 @@
     <div v-if="errorSummary.length > 0" class="log-terminal__error-banner">
       <div class="log-terminal__error-banner-header">
         <v-icon color="error" size="16">mdi-alert-circle</v-icon>
+
         <span>{{
           errorSummary.length === 1
             ? "Erro detectado"
             : `${errorSummary.length} erros detectados`
         }}</span>
       </div>
+
       <div
         v-for="(err, idx) in errorSummary"
         :key="idx"
@@ -94,11 +102,13 @@
         :class="line.cls"
       >
         <span v-if="line.time" class="log-line__time">{{ line.time }}</span>
+
         <span
           v-if="line.prefix"
           class="log-line__prefix"
           :class="line.prefixCls"
         >{{ line.prefix }}</span>
+
         <span class="log-line__text">{{ line.text }}</span>
       </div>
 
@@ -109,6 +119,7 @@
           size="16"
           width="2"
         />
+
         <span class="ml-2">Carregando...</span>
       </div>
     </div>

@@ -157,6 +157,18 @@
                           }}</v-list-item-subtitle>
                         </v-list-item>
                       </v-list>
+
+                      <v-alert
+                        class="mt-3"
+                        density="compact"
+                        type="info"
+                        variant="tonal"
+                      >
+                        Para frontend estático, adicione estas variáveis de
+                        ambiente no app antes do deploy:
+                      </v-alert>
+
+                      <CodeBlock class="mt-3" :code="frontendEnvExample" />
                     </v-card-text>
                   </v-card>
                 </v-col>
@@ -427,8 +439,8 @@
             </v-card-title>
             <v-card-text>
               <p class="mb-3">
-                Envia um fixture JSON local para o backend e executa
-                <code>loaddata</code> dentro do container do app Django.
+                Executa <code>loaddata</code> dentro do container do app
+                Django usando um fixture JSON que ja esta no deploy.
               </p>
               <FlagTable :flags="runLoaddataFlags" />
 
@@ -439,13 +451,13 @@
                 variant="tonal"
               >
                 Nesta versao, o fluxo e exclusivo para Django e exige a flag
-                <code>--django</code>. O arquivo deve ser JSON UTF-8 e ter até
-                <code>50 MB</code>.
+                <code>--django</code>. A CLI envia apenas o caminho relativo do
+                fixture; se o arquivo foi criado ou alterado, faca deploy antes.
               </v-alert>
 
               <CodeBlock
                 class="mt-3"
-                :code="`# Fixture na raiz do projeto\nfabroku run loaddata --django ./my_data.json\n\n# Especificando o app manualmente\nfabroku run loaddata --django ./my_data.json --app minha-api\n\n# manage.py fora da raiz do container\nfabroku run loaddata --django ./fixtures/users.json --dir ./backend --manage src/manage.py`"
+                :code="`# Fixture versionado na raiz do app\nfabroku run loaddata --django ./my_data.json\n\n# Especificando o app manualmente\nfabroku run loaddata --django ./my_data.json --app minha-api\n\n# Fixture dentro da pasta usada no deploy\nfabroku run loaddata --django ./fixtures/users.json --dir ./backend --manage src/manage.py`"
               />
             </v-card-text>
           </v-card>
@@ -810,6 +822,9 @@
     { name: 'static.json', desc: 'Configuração SPA (rotas, cache, root)' },
   ]
 
+  const frontendEnvExample = `NGINX_ROOT=dist
+NGINX_DEFAULT_REQUEST=index.html`
+
   const backendFiles = [
     { name: 'Procfile', desc: 'Processos web, worker e release' },
     { name: 'requirements.txt', desc: 'Dependências Python' },
@@ -1035,8 +1050,8 @@ release: python manage.py migrate --noinput`
       solution: 'Use fabroku verify --fix',
     },
     {
-      problem: 'Fixture JSON invalido ou maior que 50 MB',
-      solution: 'Revise o arquivo e reduza o tamanho antes de usar fabroku run loaddata',
+      problem: 'Fixture JSON nao encontrado no container',
+      solution: 'Confira se o arquivo esta no repositorio deployado e rode deploy antes do loaddata',
     },
     {
       problem: 'dumpdata sem --output',
@@ -1094,7 +1109,7 @@ release: python manage.py migrate --noinput`
     {
       method: 'GET',
       endpoint: '/api/apps/apps/{id}/run_loaddata/',
-      desc: 'Upload do fixture e execução do loaddata',
+      desc: 'Execução do loaddata com caminho do fixture',
     },
     {
       method: 'POST',
@@ -1142,8 +1157,8 @@ release: python manage.py migrate --noinput`
       solution: 'Use fabroku verify --fix',
     },
     {
-      problem: 'Fixture JSON invalido ou maior que 50 MB',
-      solution: 'Revise o arquivo e reduza o tamanho antes de usar fabroku run loaddata',
+      problem: 'Fixture JSON nao encontrado no container',
+      solution: 'Confira se o arquivo esta no repositorio deployado e rode deploy antes do loaddata',
     },
     {
       problem: 'dumpdata sem --output',
@@ -1201,7 +1216,7 @@ release: python manage.py migrate --noinput`
     {
       method: 'POST',
       endpoint: '/api/apps/apps/{id}/run_loaddata/',
-      desc: 'Upload do fixture e execucao do loaddata',
+      desc: 'Execucao do loaddata com caminho do fixture',
     },
     {
       method: 'POST',

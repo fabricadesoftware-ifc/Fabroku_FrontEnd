@@ -63,7 +63,7 @@ meta:
         <v-row justify="center">
           <v-col class="text-center" cols="12">
             <p class="text-body-2 ma-0" style="color: #9d9db9">
-              © {{ new Date().getFullYear() }} Fábrica De Software. Todos os
+              © {{ new Date().getFullYear() }} {{ platformStore.organizationName }}. Todos os
               direitos reservados.
             </p>
           </v-col>
@@ -74,9 +74,17 @@ meta:
 </template>
 
 <script setup lang="ts">
+  import { onMounted } from 'vue'
+
   import IconCloudDemo from '@/components/demo/IconCloudDemo.vue'
-  import { useAuthStore } from '@/stores'
+  import { useAuthStore, usePlatformStore } from '@/stores'
+
   const authStore = useAuthStore()
+  const platformStore = usePlatformStore()
+
+  onMounted(() => {
+    platformStore.fetchConfig()
+  })
 
   function login () {
     authStore.login()

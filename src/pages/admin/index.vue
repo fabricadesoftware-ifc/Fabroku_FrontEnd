@@ -194,10 +194,12 @@
                   variant="tonal"
                 >
                   <v-icon size="14" start>mdi-account-hard-hat</v-icon>
-                  Fábrica
+                  {{ platformStore.privilegedRoleLabel }}
                 </v-chip>
 
-                <span v-else class="text-grey text-caption">Aluno</span>
+                <span v-else class="text-grey text-caption">
+                  {{ platformStore.regularRoleLabel }}
+                </span>
               </td>
 
               <td class="text-center">
@@ -416,8 +418,8 @@
           <p class="text-caption text-medium-emphasis mb-4">
             Defina limites personalizados. Deixe vazio para usar o padrão ({{
               quotaUser?.is_fabric
-                ? "5 apps / 3 serviços - Fábrica"
-                : "3 apps / 2 serviços - Aluno"
+                ? `5 apps / 3 serviços - ${platformStore.privilegedRoleLabel}`
+                : `3 apps / 2 serviços - ${platformStore.regularRoleLabel}`
             }}).
           </p>
 
@@ -484,9 +486,10 @@
 
   import AdminService from '@/services/admin'
   import UsersService from '@/services/users'
-  import { useAuthStore, useProjectStore } from '@/stores'
+  import { useAuthStore, usePlatformStore, useProjectStore } from '@/stores'
 
   const authStore = useAuthStore()
+  const platformStore = usePlatformStore()
   const projectStore = useProjectStore()
   const activeTab = ref('projects')
   const filterSelection = ref('all')
@@ -541,6 +544,7 @@
   }
 
   onMounted(() => {
+    platformStore.fetchConfig()
     projectStore.fetchProjects()
     fetchUsers()
   })

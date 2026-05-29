@@ -1,24 +1,20 @@
 <template>
   <v-container class="py-6" fluid>
-    <!-- Breadcrumb -->
     <v-breadcrumbs class="px-0 mb-2" :items="breadcrumbs">
       <template #divider>
         <v-icon size="small">mdi-chevron-right</v-icon>
       </template>
     </v-breadcrumbs>
 
-    <!-- Título -->
     <h1 class="text-h4 font-weight-bold mb-1">Criar Novo App</h1>
 
     <p class="text-body-2 text-medium-emphasis mb-8">
       Configure os detalhes do seu aplicativo para iniciar o deploy automatizado
-      nos servidores da Fábrica de Software.
+      nos servidores configurados para esta instalação.
     </p>
 
     <v-row>
-      <!-- ========== COLUNA ESQUERDA — FORMULÁRIO ========== -->
       <v-col cols="12" lg="8">
-        <!-- Seção 1 — Identificação do App -->
         <v-card class="mb-6 app-card" variant="flat">
           <v-card-title class="d-flex align-center ga-2 pa-5 pb-1">
             <v-icon
@@ -63,7 +59,9 @@
               </v-col>
 
               <v-col class="pl-3" cols="auto">
-                <span class="text-body-2 text-medium-emphasis">.class.fabricadesoftware.ifc.edu.br</span>
+                <span class="text-body-2 text-medium-emphasis">
+                  {{ platformStore.appDomainSuffix }}
+                </span>
               </v-col>
             </v-row>
 
@@ -71,7 +69,6 @@
               Use apenas letras minúsculas, números e hífens.
             </div>
 
-            <!-- Nome personalizado — apenas fabric/admin -->
             <template v-if="canCustomize">
               <v-divider class="my-5" />
 
@@ -96,7 +93,6 @@
           </v-card-text>
         </v-card>
 
-        <!-- Seção 2 — Integração GitHub -->
         <v-card class="mb-6 app-card" variant="flat">
           <v-card-title
             class="d-flex align-center justify-space-between pa-5 pb-1"
@@ -118,7 +114,6 @@
           </v-card-title>
 
           <v-card-text class="pa-5 pt-4">
-            <!-- Toggle manual / github -->
             <v-btn-toggle
               v-model="sourceMode"
               class="mb-5"
@@ -244,7 +239,6 @@
           </v-card-text>
         </v-card>
 
-        <!-- Seção 3 — Variáveis de Ambiente (expansível) -->
         <v-card class="mb-6 app-card" variant="flat">
           <v-expansion-panels variant="accordion">
             <v-expansion-panel elevation="0">
@@ -338,7 +332,6 @@
           </v-expansion-panels>
         </v-card>
 
-        <!-- Seção 4 — Configurações de Build (expansível) -->
         <v-card v-if="false" class="mb-6 app-card" variant="flat">
           <v-expansion-panels variant="accordion">
             <v-expansion-panel elevation="0">
@@ -364,10 +357,8 @@
         </v-card>
       </v-col>
 
-      <!-- ========== COLUNA DIREITA — RESUMO ========== -->
       <v-col cols="12" lg="4">
         <div class="sticky-sidebar">
-          <!-- Card Resumo -->
           <v-card class="mb-4 app-card" variant="flat">
             <v-card-title class="pa-5 pb-3 text-subtitle-1 font-weight-bold">
               Resumo
@@ -466,7 +457,8 @@
 
               <p class="text-caption text-medium-emphasis text-center mt-3">
                 Ao clicar em Deploy, você concorda com as
-                <a class="text-primary" href="#">regras de uso</a> da Fábrica.
+                <a class="text-primary" href="#">regras de uso</a> da
+                plataforma.
               </p>
             </v-card-text>
           </v-card>
@@ -474,7 +466,6 @@
       </v-col>
     </v-row>
 
-    <!-- Dialog Adicionar Variável -->
     <v-dialog v-model="dialogAddEnvVar" max-width="500">
       <v-card>
         <v-card-title>Adicionar Variável</v-card-title>
@@ -518,7 +509,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- Dialog Importar .env -->
     <v-dialog v-model="dialogImportEnv" max-width="600">
       <v-card>
         <v-card-title>Importar Variáveis do .env</v-card-title>
@@ -581,6 +571,7 @@ PORT=3000"
     useAppStore,
     useAuthStore,
     useGitStore,
+    usePlatformStore,
     useProjectStore,
   } from '@/stores'
 
@@ -591,6 +582,7 @@ PORT=3000"
   const appStore = useAppStore()
   const authStore = useAuthStore()
   const gitStore = useGitStore()
+  const platformStore = usePlatformStore()
   const projectStore = useProjectStore()
 
   const canCustomize = computed(() => {
@@ -627,7 +619,6 @@ PORT=3000"
       nameChecking.value = false
       return
     }
-    // Validação local rápida
     if (name.length < 2) {
       nameError.value = 'Nome deve ter pelo menos 2 caracteres.'
       nameAvailable.value = false
@@ -643,7 +634,6 @@ PORT=3000"
     nameCheckTimer = setTimeout(async () => {
       try {
         const result = await AppsService.checkName(name)
-        // Só atualiza se ainda for o mesmo nome digitado
         if (newApp.value.name.trim().toLowerCase() === name) {
           nameAvailable.value = result.available
           nameError.value = result.available
@@ -651,7 +641,6 @@ PORT=3000"
             : result.reason || 'Nome já está em uso.'
         }
       } catch {
-        // Se falhar, não bloqueia o usuário
         nameAvailable.value = null
         nameError.value = ''
       } finally {
@@ -760,6 +749,7 @@ PORT=3000"
   })
 
   onMounted(async () => {
+    platformStore.fetchConfig()
     if (!projectStore.currentProject) {
       await projectStore.fetchProject(projectId)
     }
@@ -894,7 +884,6 @@ PORT=3000"
           : {}),
       })
 
-      // Após criar, buscar status da task para checar erro de deploy key ou permissão de org
       if (app?.id) {
         try {
           const status = await appStore.fetchAppStatus(String(app.id))

@@ -841,9 +841,9 @@
 
   const whoamiExample = `fabroku whoami
 # Logado como: fulano
-#    API: https://fabroku-api.fabricadesoftware.ifc.edu.br
-#    Email: fulano@ifc.edu.br
-# Membro da Fabrica
+#    API: https://api.exemplo.com
+#    Email: fulano@example.com
+# Perfil privilegiado
 # Token valido`
 
   const verifyFlags = [
@@ -1074,7 +1074,7 @@ release: python manage.py migrate --noinput`
   ]
 
   const configExample = `{
-  "api_url": "https://fabroku-api.fabricadesoftware.ifc.edu.br",
+  "api_url": "https://api.exemplo.com",
   "token": "ghp_...",
   "user": "seu-usuario"
 }`

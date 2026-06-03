@@ -35,6 +35,16 @@
     </v-card-title>
 
     <v-card-text>
+      <v-alert
+        v-if="error"
+        class="mb-4"
+        density="compact"
+        type="error"
+        variant="tonal"
+      >
+        {{ error }}
+      </v-alert>
+
       <!-- Sem servicos vinculados -->
       <div v-if="!hasLinkedServices && !creating" class="text-center py-4 text-grey">
         <v-icon class="mb-2" color="grey" size="48">mdi-database-off</v-icon>
@@ -135,6 +145,7 @@
     appName?: string
     creating?: boolean
     linking?: boolean
+    error?: string
     unlinkingId?: number | null
     deletingId?: number | null
     showUnlink?: boolean

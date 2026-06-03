@@ -123,6 +123,7 @@
             :app-name="appStore.currentApp.name_dokku || appStore.currentApp.name"
             :creating="creatingDatabase"
             :deleting-id="deletingService"
+            :error="databaseError"
             :linking="linkingService"
             :services="appServices"
             :unlinking-id="unlinkingService"
@@ -321,6 +322,7 @@
   const linkingService = ref(false)
   const unlinkingService = ref<number | null>(null)
   const deletingService = ref<number | null>(null)
+  const databaseError = ref('')
   const linkServiceDialog = ref(false)
   const availableServicesToLink = ref<Service[]>([])
   const selectedServiceToLink = ref<number | null>(null)
@@ -872,6 +874,7 @@
   async function handleCreateDatabase () {
     if (!appStore.currentApp?.id) return
     creatingDatabase.value = true
+    databaseError.value = ''
     try {
       await ServicesService.createService({
         app: Number(appStore.currentApp.id),
@@ -880,9 +883,13 @@
       await waitForCurrentAppTaskCompletion()
       creatingDatabase.value = false
     } catch (error_) {
+      databaseError.value = formatServiceError(
+        error_,
+        'Nao foi possivel criar o banco de dados. Tente novamente.',
+      )
       if (axios.isAxiosError(error_) && error_.response?.data?.quota) {
         const data = error_.response.data
-        alert(
+        console.error(
           `Limite de serviços atingido: você possui ${data.current} de ${data.limit} serviços permitidos.`,
         )
       } else {
@@ -890,6 +897,27 @@
       }
       creatingDatabase.value = false
     }
+  }
+
+  function formatServiceError (error: unknown, fallback: string) {
+    if (!axios.isAxiosError(error)) return fallback
+
+    const data = error.response?.data
+    if (!data) return fallback
+
+    if (data.quota) {
+      return `Limite de serviÃ§os atingido: vocÃª possui ${data.current} de ${data.limit} serviÃ§os permitidos.`
+    }
+
+    if (typeof data === 'string') return data
+    if (typeof data.error === 'string') return data.error
+    if (typeof data.detail === 'string') return data.detail
+
+    const fieldErrors = data.name || data.non_field_errors
+    if (Array.isArray(fieldErrors)) return fieldErrors.join(' ')
+    if (typeof fieldErrors === 'string') return fieldErrors
+
+    return fallback
   }
 
   async function openLinkDialog () {

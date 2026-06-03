@@ -21,15 +21,15 @@
 
       <v-card-text>
         <v-alert
-          v-if="quotaError"
+          v-if="createError"
           class="mb-4"
           closable
           density="compact"
           type="error"
           variant="tonal"
-          @click:close="quotaError = ''"
+          @click:close="createError = ''"
         >
-          {{ quotaError }}
+          {{ createError }}
         </v-alert>
 
         <v-select
@@ -124,7 +124,7 @@
   const serviceType = ref('postgres')
   const name = ref('')
   const creating = ref(false)
-  const quotaError = ref('')
+  const createError = ref('')
   const createdService = ref<Service | null>(null)
   const taskStatus = ref<TaskStatus | null>(null)
   let pollInterval: ReturnType<typeof setInterval> | null = null
@@ -140,6 +140,7 @@
   async function handleCreate () {
     if (!projectStore.currentProject?.id) return
     creating.value = true
+    createError.value = ''
     createdService.value = null
     taskStatus.value = null
     try {
@@ -157,9 +158,13 @@
         router.push(`/projects/${projectId}/services`)
       }
     } catch (error) {
+      createError.value = formatServiceError(
+        error,
+        'Nao foi possivel criar o servico. Verifique os dados e tente novamente.',
+      )
       if (axios.isAxiosError(error) && error.response?.data?.quota) {
         const data = error.response.data
-        quotaError.value = `Limite de serviços atingido: você possui ${data.current} de ${data.limit} serviços permitidos.`
+        createError.value = `Limite de serviços atingido: você possui ${data.current} de ${data.limit} serviços permitidos.`
       }
       creating.value = false
     }
@@ -184,10 +189,32 @@
           clearInterval(pollInterval)
           pollInterval = null
         }
+        createError.value = status.status || 'Nao foi possivel provisionar o servico.'
         creating.value = false
       }
     } catch {
     // ignora erros de polling
     }
+  }
+
+  function formatServiceError (error: unknown, fallback: string) {
+    if (!axios.isAxiosError(error)) return fallback
+
+    const data = error.response?.data
+    if (!data) return fallback
+
+    if (data.quota) {
+      return `Limite de serviÃ§os atingido: vocÃª possui ${data.current} de ${data.limit} serviÃ§os permitidos.`
+    }
+
+    if (typeof data === 'string') return data
+    if (typeof data.error === 'string') return data.error
+    if (typeof data.detail === 'string') return data.detail
+
+    const fieldErrors = data.name || data.non_field_errors
+    if (Array.isArray(fieldErrors)) return fieldErrors.join(' ')
+    if (typeof fieldErrors === 'string') return fieldErrors
+
+    return fallback
   }
 </script>

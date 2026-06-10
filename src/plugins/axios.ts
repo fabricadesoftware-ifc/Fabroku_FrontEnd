@@ -5,7 +5,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // IMPORTANTE: envia cookies automaticamente em cada requisição
+  withCredentials: true, // Cookies httpOnly sao enviados automaticamente.
 })
 
 let isRefreshing = false
@@ -25,8 +25,25 @@ function processQueue (error: Error | null) {
   failedQueue = []
 }
 
-// Com cookies httpOnly, não precisa de interceptor de request para adicionar token
-// O browser envia o cookie automaticamente graças ao withCredentials: true
+function isAuthCheckRequest (
+  request?: InternalAxiosRequestConfig & { _retry?: boolean },
+) {
+  return request?.url?.includes('/auth/check') ?? false
+}
+
+function isCallbackPage () {
+  return ['/callback', '/callback/'].includes(window.location.pathname)
+}
+
+function shouldRedirectToLogin (
+  request?: InternalAxiosRequestConfig & { _retry?: boolean },
+) {
+  return (
+    window.location.pathname !== '/'
+    && !isCallbackPage()
+    && !isAuthCheckRequest(request)
+  )
+}
 
 apiClient.interceptors.response.use(
   response => response,
@@ -35,7 +52,6 @@ apiClient.interceptors.response.use(
       _retry?: boolean
     }
 
-    // Ignora se não for 401, já tentou retry, ou é a própria rota de refresh
     const isRefreshRoute = originalRequest.url?.includes('/auth/refresh')
     if (
       !error.response
@@ -43,10 +59,9 @@ apiClient.interceptors.response.use(
       || originalRequest._retry
       || isRefreshRoute
     ) {
-      // Se for erro no refresh ou auth/check sem token, redireciona para login
       if (
         (error.response?.status === 401)
-        && window.location.pathname !== '/'
+        && shouldRedirectToLogin(originalRequest)
       ) {
         window.location.href = '/'
         return new Promise(() => {})
@@ -64,19 +79,15 @@ apiClient.interceptors.response.use(
     isRefreshing = true
 
     try {
-      // Chama endpoint de refresh - o backend vai ler o refresh_token do cookie
-      // e setar um novo access_token também via cookie
       await apiClient.post('/auth/refresh/')
       processQueue(null)
 
-      // Repete a requisição original - agora com o novo cookie
       return apiClient(originalRequest)
     } catch (refreshError) {
       processQueue(refreshError as Error)
       isRefreshing = false
 
-      // Se o refresh falhar, redireciona para login
-      if (window.location.pathname !== '/') {
+      if (shouldRedirectToLogin(originalRequest)) {
         window.location.href = '/'
         return new Promise(() => {})
       }

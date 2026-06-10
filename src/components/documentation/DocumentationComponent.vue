@@ -463,10 +463,42 @@
       <v-card>
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2" color="teal">mdi-database-sync</v-icon>
-          Importar e Exportar Dados
+          Rotinas Django
         </v-card-title>
 
         <v-card-text>
+          <v-card class="mb-4" variant="tonal">
+            <v-card-title class="text-subtitle-1">
+              <code>fabroku run migrate</code>
+            </v-card-title>
+
+            <v-card-text>
+              <p class="mb-3">
+                Executa <code>python manage.py migrate</code> dentro do
+                container do app Django. Use para aplicar migrations sem abrir
+                shell no servidor.
+              </p>
+
+              <FlagTable :flags="runMigrateFlags" />
+
+              <v-alert
+                class="mt-3"
+                density="compact"
+                type="info"
+                variant="tonal"
+              >
+                A CLI tenta detectar o app pelo git remote. Se o
+                <code>manage.py</code> estiver em uma pasta, informe
+                <code>--manage</code>.
+              </v-alert>
+
+              <CodeBlock
+                class="mt-3"
+                :code="`# App detectado pelo git remote\nfabroku run migrate\n\n# Especificando o app manualmente\nfabroku run migrate --app minha-api\n\n# manage.py em outra pasta e migrate sem prompts\nfabroku run migrate --manage src/manage.py --noinput`"
+              />
+            </v-card-text>
+          </v-card>
+
           <v-card class="mb-4" variant="tonal">
             <v-card-title class="text-subtitle-1">
               <code>fabroku run loaddata</code>
@@ -953,6 +985,29 @@ NGINX_DEFAULT_REQUEST=index.html`
 worker: celery -A config worker -l info
 release: python manage.py migrate --noinput`
 
+  const runMigrateFlags = [
+    {
+      flag: '-a, --app <name>',
+      desc: 'Nome ou ID do app',
+      default: 'auto-detecta via git',
+    },
+    {
+      flag: '-d, --dir <path>',
+      desc: 'Diretorio local usado para detectar o app',
+      default: '. (atual)',
+    },
+    {
+      flag: '--manage <path>',
+      desc: 'Caminho relativo do manage.py dentro do app',
+      default: 'manage.py',
+    },
+    {
+      flag: '--noinput',
+      desc: 'Adiciona --noinput ao comando Django migrate',
+      default: 'desativado',
+    },
+  ]
+
   const runLoaddataFlags = [
     {
       flag: '--django',
@@ -1155,7 +1210,12 @@ release: python manage.py migrate --noinput`
       desc: 'Status/progresso do deploy',
     },
     {
-      method: 'GET',
+      method: 'POST',
+      endpoint: '/api/apps/apps/{id}/run_migrate/',
+      desc: 'Execução do Django migrate',
+    },
+    {
+      method: 'POST',
       endpoint: '/api/apps/apps/{id}/run_loaddata/',
       desc: 'Execução do loaddata com caminho do fixture',
     },
@@ -1260,6 +1320,11 @@ release: python manage.py migrate --noinput`
       method: 'GET',
       endpoint: '/api/apps/apps/{id}/get_app_status/',
       desc: 'Status e progresso do deploy',
+    },
+    {
+      method: 'POST',
+      endpoint: '/api/apps/apps/{id}/run_migrate/',
+      desc: 'Execucao do Django migrate',
     },
     {
       method: 'POST',

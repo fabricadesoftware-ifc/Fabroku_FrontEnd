@@ -52,7 +52,7 @@ meta:
     if (errorParam) {
       errorCode.value = errorParam
       error.value = messageParam
-        ? decodeURIComponent(messageParam)
+        ? messageParam
         : getDefaultErrorMessage(errorParam)
       loading.value = false
       return

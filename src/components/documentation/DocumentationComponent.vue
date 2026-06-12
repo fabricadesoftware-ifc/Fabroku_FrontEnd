@@ -581,7 +581,8 @@
 
             <v-card-text>
               <p class="mb-3">
-                Diagnostica e configura webhooks do GitHub para commit status.
+                Diagnostica e configura webhooks do GitHub para auto deploy e
+                commit status.
               </p>
 
               <FlagTable :flags="webhookFlags" />
@@ -1079,7 +1080,7 @@ release: python manage.py migrate --noinput`
       desc: 'Pelo menos 1 membro do projeto tem token GitHub',
     },
     { name: 'git_url_parseable', desc: 'URL git do app é válida' },
-    { name: 'webhook_exists', desc: 'Webhook existe no repositório GitHub' },
+    { name: 'webhook_exists', desc: 'Webhook existe, esta ativo, usa JSON e escuta push' },
     { name: 'last_commit', desc: 'Último commit detectado no repositório' },
   ]
 

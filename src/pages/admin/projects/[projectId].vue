@@ -58,9 +58,14 @@
               <v-chip
                 v-for="u in projectStore.currentProject.users_detail || []"
                 :key="u.id"
-                :prepend-avatar="u.avatar_url || undefined"
                 size="small"
               >
+                <UserAvatar
+                  :alt="u.name || u.email"
+                  :src="u.avatar_url"
+                  size="24"
+                  start
+                />
                 {{ u.name || u.email }}
               </v-chip>
             </div>
@@ -145,6 +150,7 @@
   import { computed, onMounted, ref } from 'vue'
   import { useRoute } from 'vue-router'
 
+  import UserAvatar from '@/components/ui/UserAvatar.vue'
   import { useAppStore, useProjectStore } from '@/stores'
   import { formatStatus, getStatusColor, getStatusIcon } from '@/utils/status'
 

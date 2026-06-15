@@ -33,13 +33,13 @@
           color="primary"
           prepend-icon="mdi-account-check"
         >
-          <v-avatar v-if="authStore.user.avatar_url" size="24" start>
-            <v-img :src="authStore.user.avatar_url" />
-          </v-avatar>
-
-          <v-avatar v-else color="grey" size="24" start>
-            <v-icon size="small">mdi-account</v-icon>
-          </v-avatar>
+          <UserAvatar
+            :alt="authStore.user.name || authStore.user.email"
+            :src="authStore.user.avatar_url"
+            icon-size="small"
+            size="24"
+            start
+          />
           {{
             authStore.user.name ||
               authStore.user.username ||
@@ -70,9 +70,13 @@
         >
           <template #chip="{ item, props: chipProps }">
             <v-chip v-bind="chipProps">
-              <v-avatar v-if="getUserSlotItem(item).avatar_url" size="24" start>
-                <v-img :src="getUserSlotItem(item).avatar_url!" />
-              </v-avatar>
+              <UserAvatar
+                :alt="formatUserName(getUserSlotItem(item))"
+                :src="getUserSlotItem(item).avatar_url"
+                icon-size="small"
+                size="24"
+                start
+              />
               {{ formatUserName(getUserSlotItem(item)) }}
             </v-chip>
           </template>
@@ -80,13 +84,11 @@
           <template #item="{ item, props: itemProps }">
             <v-list-item v-bind="itemProps">
               <template #prepend>
-                <v-avatar v-if="getUserSlotItem(item).avatar_url" size="32">
-                  <v-img :src="getUserSlotItem(item).avatar_url!" />
-                </v-avatar>
-
-                <v-avatar v-else color="grey" size="32">
-                  <v-icon>mdi-account</v-icon>
-                </v-avatar>
+                <UserAvatar
+                  :alt="formatUserName(getUserSlotItem(item))"
+                  :src="getUserSlotItem(item).avatar_url"
+                  size="32"
+                />
               </template>
 
               <v-list-item-title>{{ formatUserName(getUserSlotItem(item)) }}</v-list-item-title>
@@ -141,6 +143,7 @@
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
 
+  import UserAvatar from '@/components/ui/UserAvatar.vue'
   import { UsersService } from '@/services'
   import { useAuthStore, useProjectStore } from '@/stores'
 

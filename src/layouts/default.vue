@@ -8,9 +8,9 @@
             elevation="0"
             rounded="lg"
           >
-            <v-avatar
-              :image="authStore.user?.avatar_url ?? undefined"
-              :name="authStore.user?.name"
+            <UserAvatar
+              :alt="authStore.user?.name || 'Usuario'"
+              :src="authStore.user?.avatar_url"
             />
 
             <div class="ml-2">
@@ -85,6 +85,7 @@
 
 <script setup lang="ts">
   import { onMounted } from 'vue'
+  import UserAvatar from '@/components/ui/UserAvatar.vue'
   import { useAuthStore } from '@/stores'
   const authStore = useAuthStore()
 

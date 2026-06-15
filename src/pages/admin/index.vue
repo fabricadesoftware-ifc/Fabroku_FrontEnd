@@ -72,9 +72,14 @@
                     <v-chip
                       v-for="u in project.users_detail || []"
                       :key="u.id"
-                      :prepend-avatar="u.avatar_url || undefined"
                       size="small"
                     >
+                      <UserAvatar
+                        :alt="u.name || u.email"
+                        :src="u.avatar_url"
+                        size="24"
+                        start
+                      />
                       {{ u.name || u.email }}
                     </v-chip>
 
@@ -164,9 +169,11 @@
             <tr v-for="u in filteredUsers" :key="u.id">
               <td>
                 <div class="d-flex align-center ga-2 py-2">
-                  <v-avatar :image="u.avatar_url || undefined" size="32">
-                    <v-icon v-if="!u.avatar_url">mdi-account</v-icon>
-                  </v-avatar>
+                  <UserAvatar
+                    :alt="u.name || u.email"
+                    :src="u.avatar_url"
+                    size="32"
+                  />
 
                   <span>{{ u.name || "-" }}</span>
                 </div>
@@ -484,6 +491,7 @@
 
   import { computed, onMounted, ref, watch } from 'vue'
 
+  import UserAvatar from '@/components/ui/UserAvatar.vue'
   import AdminService from '@/services/admin'
   import UsersService from '@/services/users'
   import { useAuthStore, usePlatformStore, useProjectStore } from '@/stores'

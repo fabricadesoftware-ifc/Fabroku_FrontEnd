@@ -93,9 +93,14 @@
               <v-chip
                 v-for="user in currentProject.users_detail || []"
                 :key="user.id"
-                :prepend-avatar="user.avatar_url || undefined"
                 size="small"
               >
+                <UserAvatar
+                  :alt="formatUserName(user)"
+                  :src="user.avatar_url"
+                  size="24"
+                  start
+                />
                 {{ formatUserName(user) }}
               </v-chip>
             </div>
@@ -125,13 +130,13 @@
               prepend-icon="mdi-account-check"
               variant="tonal"
             >
-              <v-avatar v-if="fixedMember.avatar_url" size="24" start>
-                <v-img :src="fixedMember.avatar_url" />
-              </v-avatar>
-
-              <v-avatar v-else color="grey" size="24" start>
-                <v-icon size="small">mdi-account</v-icon>
-              </v-avatar>
+              <UserAvatar
+                :alt="formatUserName(fixedMember)"
+                :src="fixedMember.avatar_url"
+                icon-size="small"
+                size="24"
+                start
+              />
               {{ formatUserName(fixedMember) }} (voce)
             </v-chip>
 
@@ -155,10 +160,14 @@
               @update:search="handleTeamSearch"
             >
               <template #chip="{ item, props: chipProps }">
-                <v-chip
-                  v-bind="chipProps"
-                  :prepend-avatar="getUserSlotItem(item).avatar_url || undefined"
-                >
+                <v-chip v-bind="chipProps">
+                  <UserAvatar
+                    :alt="formatUserName(getUserSlotItem(item))"
+                    :src="getUserSlotItem(item).avatar_url"
+                    icon-size="small"
+                    size="24"
+                    start
+                  />
                   {{ formatUserName(getUserSlotItem(item)) }}
                 </v-chip>
               </template>
@@ -166,13 +175,11 @@
               <template #item="{ item, props: itemProps }">
                 <v-list-item v-bind="itemProps">
                   <template #prepend>
-                    <v-avatar v-if="getUserSlotItem(item).avatar_url" size="32">
-                      <v-img :src="getUserSlotItem(item).avatar_url!" />
-                    </v-avatar>
-
-                    <v-avatar v-else color="grey" size="32">
-                      <v-icon>mdi-account</v-icon>
-                    </v-avatar>
+                    <UserAvatar
+                      :alt="formatUserName(getUserSlotItem(item))"
+                      :src="getUserSlotItem(item).avatar_url"
+                      size="32"
+                    />
                   </template>
 
                   <v-list-item-subtitle v-if="getUserSlotItem(item).email">
@@ -318,6 +325,7 @@
   import { computed, nextTick, onMounted, ref, watch } from 'vue'
   import { useRoute } from 'vue-router'
 
+  import UserAvatar from '@/components/ui/UserAvatar.vue'
   import { UsersService } from '@/services'
   import { useAppStore, useAuthStore, useProjectStore } from '@/stores'
   import { formatStatus, getStatusColor, getStatusIcon } from '@/utils/status'

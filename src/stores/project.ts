@@ -16,8 +16,7 @@ export const useProjectStore = defineStore('project', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await ProjectsService.getProjects()
-      projects.value = response.results
+      projects.value = await ProjectsService.getAllProjects()
       return projects.value
     } catch (error_) {
       error.value = 'Erro ao carregar projetos'

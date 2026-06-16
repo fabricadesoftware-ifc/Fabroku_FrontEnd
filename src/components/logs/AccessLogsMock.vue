@@ -249,7 +249,7 @@
     '187.33.200.17 - - [15/Jun/2026:23:03:18 -0300] "GET /api/logs/app-runtime/?app=112&num=200 HTTP/2.0" 500 682 "https://fabroku.fabricadesoftware.ifc.edu.br/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0"',
   ]
 
-  const entries = computed(() => MOCK_ACCESS_LOGS.map(log => parseAccessLog(log)).filter(Boolean) as AccessEntry[])
+  const entries = computed(() => MOCK_ACCESS_LOGS.map((log, index) => parseAccessLog(log, index)).filter(Boolean) as AccessEntry[])
 
   const filteredEntries = computed(() => {
     const query = search.value.trim().toLowerCase()

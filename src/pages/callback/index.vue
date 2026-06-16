@@ -51,9 +51,7 @@ meta:
 
     if (errorParam) {
       errorCode.value = errorParam
-      error.value = messageParam
-        ? messageParam
-        : getDefaultErrorMessage(errorParam)
+      error.value = messageParam || getDefaultErrorMessage(errorParam)
       loading.value = false
       return
     }

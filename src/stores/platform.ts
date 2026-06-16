@@ -23,7 +23,9 @@ export const usePlatformStore = defineStore('platform', () => {
   const appDomainSuffix = computed(() => config.value.app_domain_suffix)
 
   async function fetchConfig (force = false) {
-    if (loaded.value && !force) return config.value
+    if (loaded.value && !force) {
+      return config.value
+    }
 
     loading.value = true
     try {

@@ -62,8 +62,8 @@
               >
                 <UserAvatar
                   :alt="u.name || u.email"
-                  :src="u.avatar_url"
                   size="24"
+                  :src="u.avatar_url"
                   start
                 />
                 {{ u.name || u.email }}

@@ -97,8 +97,8 @@
               >
                 <UserAvatar
                   :alt="formatUserName(user)"
-                  :src="user.avatar_url"
                   size="24"
+                  :src="user.avatar_url"
                   start
                 />
                 {{ formatUserName(user) }}
@@ -132,9 +132,9 @@
             >
               <UserAvatar
                 :alt="formatUserName(fixedMember)"
-                :src="fixedMember.avatar_url"
                 icon-size="small"
                 size="24"
+                :src="fixedMember.avatar_url"
                 start
               />
               {{ formatUserName(fixedMember) }} (voce)
@@ -163,9 +163,9 @@
                 <v-chip v-bind="chipProps">
                   <UserAvatar
                     :alt="formatUserName(getUserSlotItem(item))"
-                    :src="getUserSlotItem(item).avatar_url"
                     icon-size="small"
                     size="24"
+                    :src="getUserSlotItem(item).avatar_url"
                     start
                   />
                   {{ formatUserName(getUserSlotItem(item)) }}
@@ -177,8 +177,8 @@
                   <template #prepend>
                     <UserAvatar
                       :alt="formatUserName(getUserSlotItem(item))"
-                      :src="getUserSlotItem(item).avatar_url"
                       size="32"
+                      :src="getUserSlotItem(item).avatar_url"
                     />
                   </template>
 

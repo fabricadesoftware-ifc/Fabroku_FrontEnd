@@ -76,8 +76,8 @@
                     >
                       <UserAvatar
                         :alt="u.name || u.email"
-                        :src="u.avatar_url"
                         size="24"
+                        :src="u.avatar_url"
                         start
                       />
                       {{ u.name || u.email }}
@@ -171,8 +171,8 @@
                 <div class="d-flex align-center ga-2 py-2">
                   <UserAvatar
                     :alt="u.name || u.email"
-                    :src="u.avatar_url"
                     size="32"
+                    :src="u.avatar_url"
                   />
 
                   <span>{{ u.name || "-" }}</span>

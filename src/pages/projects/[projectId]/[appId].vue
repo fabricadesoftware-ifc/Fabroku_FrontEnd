@@ -227,15 +227,21 @@
     <v-row v-if="appStore.currentApp">
       <v-col cols="12">
         <AppLogsCard
+          :live-active="runtimeLogsLive"
+          :live-available="isRunning"
           :loading="logsLoading"
           :logs="displayLogs"
           :output="commandOutput"
           :running="runningCommand"
+          :status="appStore.currentApp.status"
           :success="commandSuccess"
           :task-id="deployTaskId"
           :title="logsTitle"
           @clear="handleClearCommand"
           @run="handleRunCommand"
+          @start-live="startRuntimeLogsPolling"
+          @stop-live="stopRuntimeLogsPolling"
+          @stop-stream="stopLogStream"
           @stream-logs="handleStreamLogs"
         />
       </v-col>
@@ -343,6 +349,7 @@
   // Logs runtime (quando app está RUNNING)
   const runtimeLogsLines = ref<string[]>([])
   const runtimeLogsLoading = ref(false)
+  const runtimeLogsLive = ref(false)
   let runtimePollInterval: ReturnType<typeof setInterval> | null = null
 
   const isRunning = computed(() => appStore.currentApp?.status === 'RUNNING')
@@ -398,12 +405,15 @@
   }
 
   function startRuntimeLogsPolling () {
+    if (!isRunning.value) return
+    runtimeLogsLive.value = true
     if (runtimePollInterval) return
     fetchRuntimeLogs()
     runtimePollInterval = setInterval(fetchRuntimeLogs, 4000)
   }
 
   function stopRuntimeLogsPolling () {
+    runtimeLogsLive.value = false
     if (runtimePollInterval) {
       clearInterval(runtimePollInterval)
       runtimePollInterval = null

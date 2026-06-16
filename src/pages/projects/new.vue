@@ -35,9 +35,9 @@
         >
           <UserAvatar
             :alt="authStore.user.name || authStore.user.email"
-            :src="authStore.user.avatar_url"
             icon-size="small"
             size="24"
+            :src="authStore.user.avatar_url"
             start
           />
           {{
@@ -72,9 +72,9 @@
             <v-chip v-bind="chipProps">
               <UserAvatar
                 :alt="formatUserName(getUserSlotItem(item))"
-                :src="getUserSlotItem(item).avatar_url"
                 icon-size="small"
                 size="24"
+                :src="getUserSlotItem(item).avatar_url"
                 start
               />
               {{ formatUserName(getUserSlotItem(item)) }}
@@ -86,8 +86,8 @@
               <template #prepend>
                 <UserAvatar
                   :alt="formatUserName(getUserSlotItem(item))"
-                  :src="getUserSlotItem(item).avatar_url"
                   size="32"
+                  :src="getUserSlotItem(item).avatar_url"
                 />
               </template>
 

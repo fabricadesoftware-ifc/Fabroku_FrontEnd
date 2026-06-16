@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AccessLogsMock: typeof import('./components/logs/AccessLogsMock.vue')['default']
     AppActionsCard: typeof import('./components/projects/AppActionsCard.vue')['default']
     AppConsoleCard: typeof import('./components/projects/AppConsoleCard.vue')['default']
     AppDatabaseCard: typeof import('./components/projects/AppDatabaseCard.vue')['default']
@@ -31,6 +32,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SettingComponent: typeof import('./components/settings/SettingComponent.vue')['default']
+    UnifiedLogsMock: typeof import('./components/logs/UnifiedLogsMock.vue')['default']
     UserAvatar: typeof import('./components/ui/UserAvatar.vue')['default']
   }
 }

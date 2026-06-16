@@ -1,15 +1,41 @@
 <template>
   <div class="logs-and-console">
-    <LogViewer
-      :loading="loading"
-      :logs="logs"
-      :task-id="taskId"
-      :title="title"
-      @stop-stream="emit('stop-stream')"
-      @stream-logs="(tid, afterId) => emit('stream-logs', tid, afterId)"
-    />
+    <div class="logs-tabs">
+      <v-tabs v-model="activeTab" density="compact">
+        <v-tab value="logs">
+          <v-icon size="16" start>mdi-console</v-icon>
+          Logs
+        </v-tab>
 
-    <div class="logs-console__prompt">
+      </v-tabs>
+    </div>
+
+    <v-tabs-window v-model="activeTab">
+      <v-tabs-window-item value="logs">
+        <UnifiedLogsMock
+          :live-active="liveActive"
+          :live-available="liveAvailable"
+          :loading="loading"
+          :logs="logs"
+          :output="output"
+          :running="running"
+          :status="status"
+          :success="success"
+          :task-id="taskId"
+          :title="title"
+          @clear-output="emit('clear')"
+          @start-live="emit('start-live')"
+          @stop-live="emit('stop-live')"
+          @stop-stream="emit('stop-stream')"
+          @stream-logs="(tid, afterId) => emit('stream-logs', tid, afterId)"
+        />
+      </v-tabs-window-item>
+    </v-tabs-window>
+
+    <div
+      v-if="activeTab === 'logs'"
+      class="logs-console__prompt"
+    >
       <span v-if="running" class="logs-console__prompt-spinner">
         <v-progress-circular indeterminate size="14" width="2" />
       </span>
@@ -26,25 +52,13 @@
       >
     </div>
 
-    <div v-if="output" class="logs-console__output">
-      <pre :class="success ? 'text-success' : 'text-error'">{{ output }}</pre>
-
-      <v-btn
-        icon
-        size="x-small"
-        variant="text"
-        @click="emit('clear')"
-      >
-        <v-icon size="small">mdi-close</v-icon>
-      </v-btn>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref } from 'vue'
 
-  import LogViewer from '@/components/logs/LogViewer.vue'
+  import UnifiedLogsMock from '@/components/logs/UnifiedLogsMock.vue'
 
   defineProps<{
     logs: any[]
@@ -54,16 +68,22 @@
     running?: boolean
     output?: string
     success?: boolean
+    status?: string
+    liveAvailable?: boolean
+    liveActive?: boolean
   }>()
 
   const emit = defineEmits<{
     'stream-logs': [taskId: string, afterId?: number]
     'stop-stream': []
+    'start-live': []
+    'stop-live': []
     'run': [command: string]
     'clear': []
   }>()
 
   const commandInput = ref('')
+  const activeTab = ref<'logs'>('logs')
 
   function submitCommand () {
     const cmd = commandInput.value.trim()
@@ -75,7 +95,37 @@
 
 <style scoped>
 .logs-and-console {
+  --logs-border: rgba(255, 255, 255, 0.08);
+
+  border-radius: 8px;
   overflow: hidden;
+}
+
+.logs-tabs {
+  background: #0d1117;
+  border: 1px solid var(--logs-border);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  padding: 0 8px;
+}
+
+.logs-tabs :deep(.v-tab) {
+  color: #8b949e;
+  font-size: 12px;
+  letter-spacing: 0;
+  min-height: 38px;
+  text-transform: none;
+}
+
+.logs-tabs :deep(.v-tab--selected) {
+  color: #c9d1d9;
+}
+
+.logs-tabs + :deep(.v-window) .unified-log-panel {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .logs-console__prompt {
@@ -84,7 +134,9 @@
   gap: 8px;
   padding: 10px 16px;
   background: #161b22;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--logs-border);
+  border-radius: 0 0 8px 8px;
+  border-top: 0;
   font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
   font-size: 13px;
 }
@@ -117,22 +169,4 @@
   cursor: not-allowed;
 }
 
-.logs-console__output {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #1e1e1e;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
-  font-size: 12px;
-}
-
-.logs-console__output pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-  flex: 1;
-}
 </style>

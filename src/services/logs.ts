@@ -56,6 +56,17 @@ class LogsService {
     const response = await apiClient.get(`/logs/app-runtime/?${params.toString()}`)
     return response.data
   }
+
+  getAppRuntimeStreamUrl (appId: number, tail = 200): string {
+    const rawBaseUrl = apiClient.defaults.baseURL || '/api'
+    const baseUrl = rawBaseUrl.startsWith('http')
+      ? rawBaseUrl
+      : `${window.location.origin}${rawBaseUrl}`
+    const url = new URL(`${baseUrl.replace(/\/$/, '')}/logs/app-runtime-stream/`)
+    url.searchParams.set('app', appId.toString())
+    url.searchParams.set('tail', tail.toString())
+    return url.toString()
+  }
 }
 
 export default new LogsService()

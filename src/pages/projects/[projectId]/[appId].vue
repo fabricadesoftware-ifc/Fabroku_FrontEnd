@@ -351,6 +351,8 @@
   const runtimeLogsLoading = ref(false)
   const runtimeLogsLive = ref(false)
   let runtimePollInterval: ReturnType<typeof setInterval> | null = null
+  let runtimeEventSource: EventSource | null = null
+  let runtimeStreamFallbackStarted = false
 
   const isRunning = computed(() => appStore.currentApp?.status === 'RUNNING')
   const envVariables = computed(() => (
@@ -404,16 +406,90 @@
     }
   }
 
-  function startRuntimeLogsPolling () {
-    if (!isRunning.value) return
-    runtimeLogsLive.value = true
-    if (runtimePollInterval) return
+  function appendRuntimeLogLine (line?: string) {
+    const normalized = line?.trim()
+    if (!normalized) return
+    runtimeLogsLines.value = [...runtimeLogsLines.value, normalized].slice(-500)
+  }
+
+  function startRuntimeLogsFallback () {
+    if (!runtimeLogsLive.value || runtimePollInterval) return
+    runtimeStreamFallbackStarted = true
+    closeRuntimeEventSource()
     fetchRuntimeLogs()
     runtimePollInterval = setInterval(fetchRuntimeLogs, 4000)
   }
 
+  function closeRuntimeEventSource () {
+    if (runtimeEventSource) {
+      runtimeEventSource.close()
+      runtimeEventSource = null
+    }
+  }
+
+  function parseRuntimeStreamPayload (event: Event) {
+    try {
+      return JSON.parse((event as MessageEvent).data || '{}')
+    } catch {
+      return {}
+    }
+  }
+
+  function startRuntimeLogsPolling () {
+    if (!isRunning.value) return
+    runtimeLogsLive.value = true
+    runtimeStreamFallbackStarted = false
+    if (runtimeEventSource || runtimePollInterval) return
+    runtimeLogsLoading.value = true
+
+    const currentAppId = appStore.currentApp?.id
+    if (!currentAppId) return
+
+    try {
+      const source = new EventSource(
+        LogsService.getAppRuntimeStreamUrl(currentAppId, 200),
+        { withCredentials: true },
+      )
+      runtimeEventSource = source
+
+      source.onopen = () => {
+        runtimeLogsLoading.value = false
+      }
+
+      source.addEventListener('snapshot', event => {
+        const payload = parseRuntimeStreamPayload(event)
+        runtimeLogsLines.value = Array.isArray(payload.lines)
+          ? payload.lines
+          : []
+        runtimeLogsLoading.value = false
+      })
+
+      source.addEventListener('line', event => {
+        const payload = parseRuntimeStreamPayload(event)
+        appendRuntimeLogLine(payload.line)
+        runtimeLogsLoading.value = false
+      })
+
+      source.addEventListener('error', event => {
+        if (event instanceof MessageEvent && event.data) {
+          console.warn('Erro do stream de logs:', event.data)
+          return
+        }
+        if (!runtimeStreamFallbackStarted) {
+          console.warn('Stream de logs indisponível, usando fallback HTTP.')
+          startRuntimeLogsFallback()
+        }
+      })
+    } catch (error) {
+      console.error('Erro ao iniciar stream de logs:', error)
+      startRuntimeLogsFallback()
+    }
+  }
+
   function stopRuntimeLogsPolling () {
     runtimeLogsLive.value = false
+    runtimeStreamFallbackStarted = false
+    closeRuntimeEventSource()
     if (runtimePollInterval) {
       clearInterval(runtimePollInterval)
       runtimePollInterval = null

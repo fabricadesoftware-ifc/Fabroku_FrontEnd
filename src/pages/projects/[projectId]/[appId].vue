@@ -1053,14 +1053,11 @@
   async function handleDeleteService (serviceId: number) {
     deletingService.value = serviceId
     try {
-      await ServicesService.deleteService(serviceId)
-      setTimeout(async () => {
-        await appStore.fetchApp(appId)
-        await fetchServices()
-        deletingService.value = null
-      }, 3000)
+      const result = await ServicesService.deleteService(serviceId)
+      await waitForCurrentAppTaskCompletion(result.task_id)
     } catch (error_) {
       console.error('Erro ao deletar serviço:', error_)
+    } finally {
       deletingService.value = null
     }
   }

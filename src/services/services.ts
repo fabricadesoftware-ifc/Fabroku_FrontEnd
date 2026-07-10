@@ -27,8 +27,9 @@ class ServicesService {
     return response.data
   }
 
-  async deleteService (id: number): Promise<void> {
-    await apiClient.delete(`/apps/services/${id}/`)
+  async deleteService (id: number): Promise<{ task_id: string }> {
+    const response = await apiClient.delete(`/apps/services/${id}/`)
+    return response.data
   }
 
   async linkService (serviceId: number, appId: number): Promise<{ task_id: string }> {

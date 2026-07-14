@@ -42,18 +42,6 @@
           variant="outlined"
         />
 
-        <v-alert
-          v-if="serviceType === 'postgis'"
-          class="mt-3"
-          density="compact"
-          icon="mdi-map-marker-radius"
-          type="info"
-          variant="tonal"
-        >
-          PostGIS inclui PostgreSQL e habilita automaticamente a extensão para
-          consultas e campos geoespaciais.
-        </v-alert>
-
         <v-text-field
           v-model="name"
           class="mt-4"

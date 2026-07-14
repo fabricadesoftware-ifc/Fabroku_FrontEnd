@@ -657,6 +657,99 @@
       </v-card>
     </section>
 
+    <!-- MCP -->
+    <section :id="'mcp'" class="mb-6">
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2" color="primary">mdi-robot-outline</v-icon>
+          MCP para ferramentas de IA
+        </v-card-title>
+
+        <v-card-text>
+          <p class="mb-3">
+            O comando <code>fabroku mcp</code> inicia um servidor local do
+            Model Context Protocol via <code>stdio</code>. Assim, ferramentas
+            de IA podem consultar e operar o Fabroku usando o mesmo login e as
+            mesmas permissões da CLI.
+          </p>
+
+          <v-alert class="mb-4" density="compact" type="info" variant="tonal">
+            Execute <code>fabroku login</code> antes de conectar o MCP. Nenhum
+            token precisa ser colocado na configuração da ferramenta de IA.
+          </v-alert>
+
+          <v-row>
+            <v-col cols="12" md="6">
+              <p class="font-weight-medium mb-2">Configuração MCP</p>
+              <CodeBlock :code="mcpConfigExample" />
+            </v-col>
+
+            <v-col cols="12" md="6">
+              <p class="font-weight-medium mb-2">Configuração no Codex</p>
+              <CodeBlock :code="mcpCodexConfigExample" />
+            </v-col>
+          </v-row>
+
+          <v-divider class="my-4" />
+
+          <p class="font-weight-medium mb-2">Ferramentas disponíveis:</p>
+          <v-row>
+            <v-col
+              v-for="tool in mcpTools"
+              :key="tool.name"
+              cols="12"
+              md="6"
+            >
+              <v-card height="100%" variant="outlined">
+                <v-card-title class="text-subtitle-2 d-flex align-center">
+                  <v-icon
+                    class="mr-2"
+                    :color="tool.mutates ? 'warning' : 'info'"
+                    size="18"
+                  >
+                    {{ tool.mutates ? 'mdi-play-circle-outline' : 'mdi-eye-outline' }}
+                  </v-icon>
+                  <code>{{ tool.name }}</code>
+                </v-card-title>
+                <v-card-text class="text-body-2">
+                  {{ tool.desc }}
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <v-divider class="my-4" />
+
+          <p class="font-weight-medium mb-2">Redeploy seguro pela IA:</p>
+          <v-timeline density="compact" side="end">
+            <v-timeline-item
+              v-for="(step, index) in mcpRedeploySteps"
+              :key="step.text"
+              :dot-color="step.color"
+              size="x-small"
+            >
+              <span class="text-body-2">
+                <strong>{{ index + 1 }}.</strong> {{ step.text }}
+              </span>
+            </v-timeline-item>
+          </v-timeline>
+
+          <v-alert class="mt-3" density="compact" type="warning" variant="tonal">
+            O MCP não cria commits nem envia arquivos locais. A ferramenta
+            <code>fabroku_redeploy</code> exige a confirmação
+            <code>confirmed_committed_and_pushed=true</code> e publica somente
+            o conteúdo que já estiver no repositório remoto.
+          </v-alert>
+
+          <v-alert class="mt-3" density="compact" type="success" variant="tonal">
+            Valores de variáveis de ambiente, senhas e credenciais não são
+            retornados pelo MCP. Todas as ações continuam passando pelas
+            permissões e validações da API do Fabroku.
+          </v-alert>
+        </v-card-text>
+      </v-card>
+    </section>
+
     <!-- Workflow Completo -->
     <section :id="'workflow'" class="mb-6">
       <v-card>
@@ -893,6 +986,7 @@
     { id: 'servicos', label: 'PostGIS', icon: 'mdi-map-marker-radius' },
     { id: 'run', label: 'Run', icon: 'mdi-database-sync' },
     { id: 'webhook', label: 'Webhook', icon: 'mdi-webhook' },
+    { id: 'mcp', label: 'MCP', icon: 'mdi-robot-outline' },
     { id: 'workflow', label: 'Workflow', icon: 'mdi-map-marker-path' },
     { id: 'troubleshooting', label: 'Troubleshooting', icon: 'mdi-lifebuoy' },
   ]
@@ -1125,6 +1219,70 @@ release: python manage.py migrate --noinput`
     { name: 'git_url_parseable', desc: 'URL git do app é válida' },
     { name: 'webhook_exists', desc: 'Webhook existe, esta ativo, usa JSON e escuta push' },
     { name: 'last_commit', desc: 'Último commit detectado no repositório' },
+  ]
+
+  const mcpConfigExample = `{
+  "mcpServers": {
+    "fabroku": {
+      "command": "fabroku",
+      "args": ["mcp"]
+    }
+  }
+}`
+
+  const mcpCodexConfigExample = `[mcp_servers.fabroku]
+command = "fabroku"
+args = ["mcp"]`
+
+  const mcpTools = [
+    {
+      name: 'fabroku_list_projects',
+      desc: 'Lista os projetos acessíveis ao usuário autenticado.',
+      mutates: false,
+    },
+    {
+      name: 'fabroku_list_apps',
+      desc: 'Lista apps e permite filtrar por projeto.',
+      mutates: false,
+    },
+    {
+      name: 'fabroku_get_app',
+      desc: 'Consulta estado, repositório, branch, serviços e nomes das envs.',
+      mutates: false,
+    },
+    {
+      name: 'fabroku_list_services',
+      desc: 'Lista os serviços associados a apps ou projetos.',
+      mutates: false,
+    },
+    {
+      name: 'fabroku_get_status',
+      desc: 'Consulta o estado da tarefa atual de um app.',
+      mutates: false,
+    },
+    {
+      name: 'fabroku_get_runtime_logs',
+      desc: 'Obtém as últimas linhas dos logs com dados sensíveis mascarados.',
+      mutates: false,
+    },
+    {
+      name: 'fabroku_run_migrate',
+      desc: 'Executa migrations Django usando um manage.py validado.',
+      mutates: true,
+    },
+    {
+      name: 'fabroku_redeploy',
+      desc: 'Publica o código já commitado e enviado ao repositório remoto.',
+      mutates: true,
+    },
+  ]
+
+  const mcpRedeploySteps = [
+    { text: 'Alterar o código e revisar o diff.', color: 'info' },
+    { text: 'Executar os testes apropriados.', color: 'info' },
+    { text: 'Criar um commit com as alterações.', color: 'primary' },
+    { text: 'Executar git push para a branch configurada no app.', color: 'primary' },
+    { text: 'Chamar fabroku_redeploy e acompanhar o resultado.', color: 'success' },
   ]
 
   const workflowSteps = [

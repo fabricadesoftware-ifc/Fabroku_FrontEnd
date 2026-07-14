@@ -7,18 +7,37 @@
       </span>
 
       <div class="d-flex ga-2">
-        <v-btn
-          v-if="!hasPostgres"
-          color="primary"
-          :disabled="!appName"
-          :loading="creating"
-          prepend-icon="mdi-database-plus"
-          size="small"
-          variant="flat"
-          @click="emit('create')"
-        >
-          Criar PostgreSQL
-        </v-btn>
+        <v-menu>
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              color="primary"
+              :disabled="!appName"
+              :loading="creating"
+              prepend-icon="mdi-database-plus"
+              size="small"
+              variant="flat"
+            >
+              Criar banco
+            </v-btn>
+          </template>
+
+          <v-list density="compact">
+            <v-list-item
+              prepend-icon="mdi-database"
+              subtitle="Banco relacional padrão"
+              title="PostgreSQL"
+              @click="emit('create', 'postgres')"
+            />
+
+            <v-list-item
+              prepend-icon="mdi-map-marker-radius"
+              subtitle="PostgreSQL com dados geoespaciais"
+              title="PostGIS"
+              @click="emit('create', 'postgis')"
+            />
+          </v-list>
+        </v-menu>
 
         <v-btn
           color="primary"
@@ -51,8 +70,8 @@
         <p class="mb-2">Nenhum serviço vinculado</p>
 
         <p class="text-caption">
-          Crie ou vincule PostgreSQL/Redis e a variável
-          <code>DATABASE_URL</code> ou <code>REDIS_URL</code> será sincronizada no app.
+          Crie ou vincule PostgreSQL, PostGIS ou Redis. As variáveis de conexão
+          serão sincronizadas automaticamente no app.
         </p>
       </div>
 
@@ -85,12 +104,21 @@
               <span class="font-weight-medium">{{ service.name }}</span>
 
               <v-chip class="ml-2" color="blue" size="x-small" variant="tonal">
-                {{ service.service_type }}
+                {{ serviceTypeLabel(service.service_type) }}
               </v-chip>
             </v-list-item-title>
 
             <v-list-item-subtitle>
               Contêiner: <code>{{ service.container_name || "-" }}</code>
+            </v-list-item-subtitle>
+
+            <v-list-item-subtitle v-if="service.env_key">
+              Variável: <code>{{ service.env_key }}</code>
+            </v-list-item-subtitle>
+
+            <v-list-item-subtitle v-if="service.image">
+              Imagem:
+              <code>{{ service.image }}<template v-if="service.image_version">:{{ service.image_version }}</template></code>
             </v-list-item-subtitle>
 
             <template #append>
@@ -152,14 +180,18 @@
   }>()
 
   const emit = defineEmits<{
-    create: []
+    create: [serviceType: 'postgres' | 'postgis']
     link: []
     unlink: [serviceId: number]
     delete: [serviceId: number]
   }>()
 
   const hasLinkedServices = computed(() => props.services.length > 0)
-  const hasPostgres = computed(() =>
-    props.services.some(service => service.service_type === 'postgres'),
-  )
+
+  function serviceTypeLabel (serviceType: Service['service_type']) {
+    if (serviceType === 'postgres') return 'PostgreSQL'
+    if (serviceType === 'postgis') return 'PostGIS'
+    if (serviceType === 'redis') return 'Redis'
+    return 'RabbitMQ'
+  }
 </script>

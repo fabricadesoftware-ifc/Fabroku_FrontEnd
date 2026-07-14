@@ -458,6 +458,48 @@
       </v-card>
     </section>
 
+    <!-- Serviços de dados -->
+    <section :id="'servicos'" class="mb-6">
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2" color="green-darken-1">mdi-map-marker-radius</v-icon>
+          PostgreSQL e PostGIS
+        </v-card-title>
+
+        <v-card-text>
+          <p class="mb-3">
+            O PostGIS e um PostgreSQL preparado para armazenar e consultar
+            coordenadas, mapas e geometrias. Ao criar esse tipo de servico, o
+            Fabroku configura a imagem geoespacial e habilita a extensao
+            <code>postgis</code> automaticamente.
+          </p>
+
+          <v-alert class="mb-4" density="compact" type="info" variant="tonal">
+            Para GeoDjango, use o backend
+            <code>django.contrib.gis.db.backends.postgis</code> e leia a conexao
+            pela variavel atribuida ao servico.
+          </v-alert>
+
+          <p class="mb-3">
+            O primeiro PostgreSQL ou PostGIS vinculado ao app recebe
+            <code>DATABASE_URL</code>. Bancos adicionais recebem nomes baseados
+            no servico, como <code>MAPAS_DB_URL</code>. A variavel aparece no
+            card do servico e na area de variaveis do app.
+          </p>
+
+          <CodeBlock
+            :code="`# Banco principal\nDATABASE_URL=postgres://...\n\n# Banco geoespacial adicional\nMAPAS_DB_URL=postgres://...`"
+          />
+
+          <v-alert class="mt-4" density="compact" type="warning" variant="tonal">
+            Remover um servico apaga seus dados. Se o banco principal for
+            removido, o Fabroku promove o banco mais antigo restante para
+            <code>DATABASE_URL</code>.
+          </v-alert>
+        </v-card-text>
+      </v-card>
+    </section>
+
     <!-- Run -->
     <section :id="'run'" class="mb-6">
       <v-card>
@@ -848,6 +890,7 @@
     { id: 'apps', label: 'Apps', icon: 'mdi-view-list' },
     { id: 'deploy', label: 'Deploy', icon: 'mdi-rocket-launch' },
     { id: 'procfile', label: 'Procfile', icon: 'mdi-file-cog-outline' },
+    { id: 'servicos', label: 'PostGIS', icon: 'mdi-map-marker-radius' },
     { id: 'run', label: 'Run', icon: 'mdi-database-sync' },
     { id: 'webhook', label: 'Webhook', icon: 'mdi-webhook' },
     { id: 'workflow', label: 'Workflow', icon: 'mdi-map-marker-path' },

@@ -184,7 +184,7 @@
 
           <v-select
             v-model="selectedServiceToLink"
-            item-title="name"
+            :item-title="formatServiceOption"
             item-value="id"
             :items="availableServicesToLink"
             label="Selecione o serviço"
@@ -452,9 +452,9 @@
       )
       runtimeEventSource = source
 
-      source.onopen = () => {
+      source.addEventListener('open', () => {
         runtimeLogsLoading.value = false
-      }
+      })
 
       source.addEventListener('snapshot', event => {
         const payload = parseRuntimeStreamPayload(event)
@@ -957,14 +957,14 @@
     return Boolean(service.container_name) && !service.task_id
   }
 
-  async function handleCreateDatabase () {
+  async function handleCreateDatabase (serviceType: 'postgres' | 'postgis') {
     if (!appStore.currentApp?.id) return
     creatingDatabase.value = true
     databaseError.value = ''
     try {
       await ServicesService.createService({
         app: Number(appStore.currentApp.id),
-        service_type: 'postgres',
+        service_type: serviceType,
       })
       await waitForCurrentAppTaskCompletion()
       creatingDatabase.value = false
@@ -983,6 +983,17 @@
       }
       creatingDatabase.value = false
     }
+  }
+
+  function formatServiceOption (service: Service) {
+    const labels: Record<Service['service_type'], string> = {
+      postgres: 'PostgreSQL',
+      postgis: 'PostGIS',
+      redis: 'Redis',
+      rabbitmq: 'RabbitMQ',
+    }
+    const label = labels[service.service_type]
+    return `${service.name} · ${label}`
   }
 
   function formatServiceError (error: unknown, fallback: string) {

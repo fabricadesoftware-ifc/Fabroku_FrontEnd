@@ -52,7 +52,7 @@
 
             <v-card-subtitle>
               <v-chip color="blue" size="small" variant="tonal">
-                {{ service.service_type }}
+                {{ serviceTypeLabel(service.service_type) }}
               </v-chip>
 
               <span v-if="service.app" class="ml-2 text-caption">
@@ -73,11 +73,20 @@
                 Contêiner: <code>{{ service.container_name }}</code>
               </p>
 
-              <p v-else-if="service.task_id" class="text-caption text-primary">
+              <p v-if="service.env_key" class="text-caption mb-1">
+                Variável: <code>{{ service.env_key }}</code>
+              </p>
+
+              <p v-if="service.image" class="text-caption mb-1">
+                Imagem:
+                <code>{{ service.image }}<template v-if="service.image_version">:{{ service.image_version }}</template></code>
+              </p>
+
+              <p v-if="service.task_id" class="text-caption text-primary">
                 Provisionando...
               </p>
 
-              <p v-else class="text-caption text-warning">
+              <p v-else-if="!isServiceReady(service)" class="text-caption text-warning">
                 Provisionamento ainda não concluído. Aguarde ou recrie o serviço.
               </p>
             </v-card-text>
@@ -131,7 +140,7 @@
             <h3 class="text-h6 mb-2">Nenhum serviço neste projeto</h3>
 
             <p class="text-grey mb-4">
-              Crie um PostgreSQL ou Redis para começar. Você pode vincular o
+              Crie um PostgreSQL, PostGIS ou Redis para começar. Você pode vincular o
               serviço a qualquer app do projeto depois.
             </p>
 
@@ -240,6 +249,13 @@
 
   function isServiceReady (service: Service) {
     return Boolean(service.container_name) && !service.task_id
+  }
+
+  function serviceTypeLabel (serviceType: Service['service_type']) {
+    if (serviceType === 'postgres') return 'PostgreSQL'
+    if (serviceType === 'postgis') return 'PostGIS'
+    if (serviceType === 'redis') return 'Redis'
+    return 'RabbitMQ'
   }
 
   function openLinkDialog (service: Service) {

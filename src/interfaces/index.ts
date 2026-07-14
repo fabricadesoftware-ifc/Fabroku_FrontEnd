@@ -91,10 +91,13 @@ interface AppProcessScale {
 interface Service {
   id?: number
   name: string
-  service_type: 'postgres' | 'redis' | 'rabbitmq'
+  service_type: 'postgres' | 'postgis' | 'redis' | 'rabbitmq'
   app?: number | null
   project: string | number
   container_name?: string | null
+  env_key?: string | null
+  image?: string | null
+  image_version?: string | null
   host?: string
   port?: number
   task_id?: string | null

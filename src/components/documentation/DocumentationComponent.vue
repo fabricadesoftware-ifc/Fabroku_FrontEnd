@@ -675,7 +675,9 @@
 
           <v-alert class="mb-4" density="compact" type="info" variant="tonal">
             Execute <code>fabroku login</code> antes de conectar o MCP. Nenhum
-            token precisa ser colocado na configuração da ferramenta de IA.
+            token precisa ser colocado na configuração da ferramenta de IA. O
+            próprio cliente inicia <code>fabroku mcp</code> automaticamente;
+            normalmente não é necessário deixar esse comando aberto à mão.
           </v-alert>
 
           <v-row>
@@ -693,6 +695,7 @@
           <v-divider class="my-4" />
 
           <p class="font-weight-medium mb-2">Ferramentas disponíveis:</p>
+
           <v-row>
             <v-col
               v-for="tool in mcpTools"
@@ -709,8 +712,10 @@
                   >
                     {{ tool.mutates ? 'mdi-play-circle-outline' : 'mdi-eye-outline' }}
                   </v-icon>
+
                   <code>{{ tool.name }}</code>
                 </v-card-title>
+
                 <v-card-text class="text-body-2">
                   {{ tool.desc }}
                 </v-card-text>
@@ -721,6 +726,7 @@
           <v-divider class="my-4" />
 
           <p class="font-weight-medium mb-2">Redeploy seguro pela IA:</p>
+
           <v-timeline density="compact" side="end">
             <v-timeline-item
               v-for="(step, index) in mcpRedeploySteps"
@@ -1341,6 +1347,10 @@ args = ["mcp"]`
     {
       problem: 'Token expirado ou invalido',
       solution: 'Execute fabroku login novamente',
+    },
+    {
+      problem: 'Cliente de IA nao conecta ao MCP',
+      solution: 'Confirme que a CLI esta instalada globalmente, execute fabroku login e reinicie o cliente de IA',
     },
     {
       problem: 'Timeout na autenticacao (2min)',

@@ -722,36 +722,6 @@
               </v-card>
             </v-col>
           </v-row>
-
-          <v-divider class="my-4" />
-
-          <p class="font-weight-medium mb-2">Redeploy seguro pela IA:</p>
-
-          <v-timeline density="compact" side="end">
-            <v-timeline-item
-              v-for="(step, index) in mcpRedeploySteps"
-              :key="step.text"
-              :dot-color="step.color"
-              size="x-small"
-            >
-              <span class="text-body-2">
-                <strong>{{ index + 1 }}.</strong> {{ step.text }}
-              </span>
-            </v-timeline-item>
-          </v-timeline>
-
-          <v-alert class="mt-3" density="compact" type="warning" variant="tonal">
-            O MCP não cria commits nem envia arquivos locais. A ferramenta
-            <code>fabroku_redeploy</code> exige a confirmação
-            <code>confirmed_committed_and_pushed=true</code> e publica somente
-            o conteúdo que já estiver no repositório remoto.
-          </v-alert>
-
-          <v-alert class="mt-3" density="compact" type="success" variant="tonal">
-            Valores de variáveis de ambiente, senhas e credenciais não são
-            retornados pelo MCP. Todas as ações continuam passando pelas
-            permissões e validações da API do Fabroku.
-          </v-alert>
         </v-card-text>
       </v-card>
     </section>

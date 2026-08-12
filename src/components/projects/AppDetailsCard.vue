@@ -98,11 +98,11 @@
 </template>
 
 <script setup lang="ts">
-  import type { App } from '@/interfaces'
+  import type { App } from '@/modules/applications/domain/models'
 
   import { onMounted, ref } from 'vue'
 
-  import apiClient from '@/plugins/axios'
+  import { appRepository } from '@/modules/applications/infrastructure/http/app-repository'
 
   const props = defineProps<{
     app: App
@@ -113,9 +113,9 @@
   onMounted(async () => {
     if (!props.app.id) return
     try {
-      const response = await apiClient.get(`/apps/apps/${props.app.id}/last_commit/`)
-      if (response.data && !response.data.error) {
-        lastCommit.value = response.data
+      const commit = await appRepository.getLastCommit(props.app.id)
+      if (!('error' in commit)) {
+        lastCommit.value = commit
       }
     } catch {
       // Silently fail — commit info is supplementary

@@ -1,22 +1,34 @@
-import type { Project } from '@/interfaces'
+import type { Project } from '@/modules/projects/domain/models'
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import ProjectsService from '@/services/projects'
+import {
+  CreateProject,
+  DeleteProject,
+  GetProject,
+  ListProjects,
+  UpdateProject,
+} from '@/modules/projects'
+import { projectRepository } from '@/modules/projects/infrastructure/http/project-repository'
 
 export const useProjectStore = defineStore('project', () => {
   const projects = ref<Project[]>([])
   const currentProject = ref<Project | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const listProjects = new ListProjects(projectRepository)
+  const getProject = new GetProject(projectRepository)
+  const createProjectUseCase = new CreateProject(projectRepository)
+  const updateProjectUseCase = new UpdateProject(projectRepository)
+  const deleteProjectUseCase = new DeleteProject(projectRepository)
 
   // Buscar todos os projetos
   const fetchProjects = async () => {
     loading.value = true
     error.value = null
     try {
-      projects.value = await ProjectsService.getAllProjects()
+      projects.value = await listProjects.execute()
       return projects.value
     } catch (error_) {
       error.value = 'Erro ao carregar projetos'
@@ -32,7 +44,7 @@ export const useProjectStore = defineStore('project', () => {
     loading.value = true
     error.value = null
     try {
-      currentProject.value = await ProjectsService.getProject(projectId)
+      currentProject.value = await getProject.execute(projectId)
       return currentProject.value
     } catch (error_) {
       error.value = 'Erro ao carregar projeto'
@@ -50,7 +62,7 @@ export const useProjectStore = defineStore('project', () => {
     loading.value = true
     error.value = null
     try {
-      const newProject = await ProjectsService.createProject(project)
+      const newProject = await createProjectUseCase.execute(project)
       projects.value.push(newProject)
       return newProject
     } catch (error_) {
@@ -67,10 +79,7 @@ export const useProjectStore = defineStore('project', () => {
     loading.value = true
     error.value = null
     try {
-      const updatedProject = await ProjectsService.updateProject(
-        projectId,
-        data,
-      )
+      const updatedProject = await updateProjectUseCase.execute(projectId, data)
       const index = projects.value.findIndex(p => p.id === projectId)
       if (index !== -1) {
         projects.value[index] = updatedProject
@@ -93,7 +102,7 @@ export const useProjectStore = defineStore('project', () => {
     loading.value = true
     error.value = null
     try {
-      await ProjectsService.deleteProject(projectId)
+      await deleteProjectUseCase.execute(projectId)
       projects.value = projects.value.filter(p => p.id !== projectId)
       if (currentProject.value?.id === projectId) {
         currentProject.value = null

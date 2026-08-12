@@ -1,9 +1,10 @@
-import type { PlatformConfig } from '@/interfaces'
+import type { PlatformConfig } from '@/modules/platform/domain/models'
 
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import PlatformService from '@/services/platform'
+import { GetPlatformConfig } from '@/modules/platform/application/use-cases/get-platform-config'
+import { platformRepository } from '@/modules/platform/infrastructure/http/platform-repository'
 
 const DEFAULT_PLATFORM_CONFIG: PlatformConfig = {
   organization_name: 'Fábrica de Software',
@@ -16,6 +17,7 @@ export const usePlatformStore = defineStore('platform', () => {
   const config = ref<PlatformConfig>({ ...DEFAULT_PLATFORM_CONFIG })
   const loading = ref(false)
   const loaded = ref(false)
+  const getPlatformConfig = new GetPlatformConfig(platformRepository)
 
   const organizationName = computed(() => config.value.organization_name)
   const privilegedRoleLabel = computed(() => config.value.privileged_role_label)
@@ -29,7 +31,7 @@ export const usePlatformStore = defineStore('platform', () => {
 
     loading.value = true
     try {
-      config.value = await PlatformService.getConfig()
+      config.value = await getPlatformConfig.execute()
       loaded.value = true
     } catch (error) {
       console.warn('Não foi possível carregar a configuração da instalação.', error)

@@ -320,13 +320,15 @@
 </template>
 
 <script setup lang="ts">
-  import type { Project, ProjectUser, User } from '@/interfaces'
+  import type { AuthUser as User } from '@/modules/auth/domain/models'
+  import type { Project, ProjectUser } from '@/modules/projects/domain/models'
 
   import { computed, nextTick, onMounted, ref, watch } from 'vue'
   import { useRoute } from 'vue-router'
 
   import UserAvatar from '@/components/ui/UserAvatar.vue'
-  import { UsersService } from '@/services'
+  import { projectMemberDirectory } from '@/modules/projects/infrastructure/http/project-member-directory'
+  import { useProjectMemberSearch } from '@/modules/projects/presentation/composables/use-project-member-search'
   import { useAppStore, useAuthStore, useProjectStore } from '@/stores'
   import { formatStatus, getStatusColor, getStatusIcon } from '@/utils/status'
 
@@ -346,12 +348,9 @@
   const projectNameField = ref<{ focus?: () => void } | null>(null)
   const teamDialog = ref(false)
   const teamSaving = ref(false)
-  const teamSearching = ref(false)
   const teamSearchQuery = ref('')
-  const teamSearchResults = ref<User[]>([])
   const editableTeamMembers = ref<User[]>([])
   const teamFeedback = ref<{ type: 'success' | 'error', message: string } | null>(null)
-  const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
 
   function sortNumericIds (ids: number[]) {
     // eslint-disable-next-line unicorn/no-array-sort -- tsconfig target does not include ES2023 Array#toSorted.
@@ -359,6 +358,12 @@
   }
 
   const currentProject = computed(() => projectStore.currentProject)
+  const memberSearch = useProjectMemberSearch(
+    projectMemberDirectory,
+    user => isUserAlreadySelected(user.id),
+  )
+  const teamSearching = memberSearch.searching
+  const teamSearchResults = memberSearch.results
 
   watch(
     currentProject,
@@ -550,7 +555,7 @@
 
     editableTeamMembers.value = members.filter(user => user.id !== lockedMemberId)
     teamSearchQuery.value = ''
-    teamSearchResults.value = []
+    memberSearch.clear()
     teamFeedback.value = null
   }
 
@@ -567,28 +572,7 @@
   }
 
   async function handleTeamSearch (query: string) {
-    if (searchTimeout.value) {
-      clearTimeout(searchTimeout.value)
-    }
-
-    if (!query || query.length < 2) {
-      teamSearchResults.value = []
-      return
-    }
-
-    searchTimeout.value = setTimeout(async () => {
-      teamSearching.value = true
-
-      try {
-        const results = await UsersService.searchByUsername(query)
-        teamSearchResults.value = results.filter(user => !isUserAlreadySelected(user.id))
-      } catch (error_) {
-        console.error('Erro ao buscar usuarios para o projeto:', error_)
-        teamSearchResults.value = []
-      } finally {
-        teamSearching.value = false
-      }
-    }, 300)
+    memberSearch.search(query)
   }
 
   function resetTeamSelection () {

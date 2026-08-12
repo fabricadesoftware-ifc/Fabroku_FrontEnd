@@ -167,10 +167,9 @@
 </template>
 
 <script setup lang="ts">
-  import type { AppLog, LogCategory, LogLevel } from '@/interfaces'
+  import type { AppLog, LogCategory, LogLevel } from '@/modules/logs/domain/models'
 
-  import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
-
+  import { computed, nextTick, ref, watch } from 'vue'
   type UnifiedLogLevel = 'info' | 'warning' | 'error' | 'success'
   type LogSource = 'app' | 'deploy' | 'command'
   type SourceFilter = 'all' | LogSource
@@ -188,6 +187,7 @@
     autoScroll?: boolean
     liveAvailable?: boolean
     liveActive?: boolean
+    taskStreamActive?: boolean
   }
 
   interface UnifiedLogEntry {
@@ -212,7 +212,7 @@
   })
 
   const emit = defineEmits<{
-    'stream-logs': [taskId: string, afterId?: number]
+    'start-stream': []
     'stop-stream': []
     'start-live': []
     'stop-live': []
@@ -226,7 +226,6 @@
   const selectedRange = ref('Ultima 1 hora')
   const copied = ref(false)
   const streaming = ref(false)
-  const streamInterval = ref<number | null>(null)
 
   const ERROR_PATTERNS = /\berror\b|erro|failed|failure|falhou|fatal|denied|cannot|couldn't|could not|exception|traceback|no such file|exit status|healthcheck failed|timeout/i
   const WARNING_PATTERNS = /\bwarning\b|aviso|deprecated|skipping|already exists|unhealthy|timeout|not found/i
@@ -254,7 +253,8 @@
 
   const rangeOptions = ['Tudo', 'Ultima 1 hora', 'Ultimas 6 horas', 'Hoje', '7 dias']
 
-  const isLive = computed(() => (props.liveAvailable ? props.liveActive : streaming.value))
+  const taskStreamLive = computed(() => props.taskStreamActive ?? streaming.value)
+  const isLive = computed(() => (props.liveAvailable ? props.liveActive : taskStreamLive.value))
 
   const operationRunning = computed(() =>
     ['DEPLOYING', 'STARTING', 'DELETING', 'RESTARTING', 'STOPPING'].includes(props.status),
@@ -550,18 +550,11 @@
     URL.revokeObjectURL(url)
   }
 
-  function getLastLogId (): number | undefined {
-    return props.logs.length > 0 ? props.logs.at(-1)?.id : undefined
-  }
-
   function startStream () {
     if (!props.taskId) return
 
     streaming.value = true
-    emit('stream-logs', props.taskId, getLastLogId())
-    streamInterval.value = window.setInterval(() => {
-      emit('stream-logs', props.taskId!, getLastLogId())
-    }, 2000)
+    emit('start-stream')
   }
 
   function toggleLive () {
@@ -575,7 +568,7 @@
       return
     }
 
-    if (streaming.value) {
+    if (taskStreamLive.value) {
       stopStream()
       return
     }
@@ -585,10 +578,6 @@
 
   function stopStream () {
     streaming.value = false
-    if (streamInterval.value) {
-      clearInterval(streamInterval.value)
-      streamInterval.value = null
-    }
     emit('stop-stream')
   }
 
@@ -604,7 +593,6 @@
     },
   )
 
-  onBeforeUnmount(() => stopStream())
 </script>
 
 <style scoped lang="scss">

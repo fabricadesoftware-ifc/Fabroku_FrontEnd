@@ -93,244 +93,24 @@
           </v-card-text>
         </v-card>
 
-        <v-card class="mb-6 app-card" variant="flat">
-          <v-card-title
-            class="d-flex align-center justify-space-between pa-5 pb-1"
-          >
-            <div class="d-flex align-center ga-2">
-              <v-icon color="primary" size="small">mdi-github</v-icon>
-              Integração GitHub
-            </div>
+        <AppCreationSourceCard
+          v-model:manual-branch="newApp.branch"
+          v-model:manual-git="newApp.git"
+          v-model:selected-branch="selectedBranch"
+          v-model:selected-repo="selectedRepo"
+          v-model:source-mode="sourceMode"
+          :branch-options="branchOptions"
+          :loading="gitStore.loading"
+          :repos="gitStore.repos"
+          @search="handleRepoSearch"
+        />
 
-            <v-chip
-              v-if="gitStore.repos.length > 0 || selectedRepo"
-              color="success"
-              prepend-icon="mdi-check-circle"
-              size="small"
-              variant="flat"
-            >
-              Conectado
-            </v-chip>
-          </v-card-title>
-
-          <v-card-text class="pa-5 pt-4">
-            <v-btn-toggle
-              v-model="sourceMode"
-              class="mb-5"
-              color="primary"
-              density="comfortable"
-              mandatory
-              rounded="lg"
-              variant="outlined"
-            >
-              <v-btn value="github">
-                <v-icon class="mr-1" size="small">mdi-github</v-icon>
-                Repositório GitHub
-              </v-btn>
-
-              <v-btn value="manual">
-                <v-icon class="mr-1" size="small">mdi-link-variant</v-icon>
-                URL Manual
-              </v-btn>
-            </v-btn-toggle>
-
-            <template v-if="sourceMode === 'github'">
-              <div class="text-body-2 text-medium-emphasis mb-1">
-                Repositório
-              </div>
-
-              <v-autocomplete
-                v-model="selectedRepo"
-                chips
-                clearable
-                density="comfortable"
-                hide-details
-                item-title="full_name"
-                :items="gitStore.repos"
-                :loading="gitStore.loading"
-                no-data-text="Nenhum repositório encontrado"
-                placeholder="Buscar repositório..."
-                prepend-inner-icon="mdi-source-repository"
-                return-object
-                variant="outlined"
-                @update:search="handleRepoSearch"
-              >
-                <template #chip="{ item }">
-                  <v-icon
-                    class="mr-1"
-                    size="small"
-                  >mdi-source-repository</v-icon>
-                  {{ getRepoSlotItem(item).full_name }}
-                </template>
-
-                <template #item="{ item, props: itemProps }">
-                  <v-list-item v-bind="itemProps">
-                    <template #prepend>
-                      <v-icon
-                        :color="getRepoSlotItem(item).private ? 'warning' : 'success'"
-                        size="small"
-                      >
-                        {{
-                          getRepoSlotItem(item).private
-                            ? "mdi-lock"
-                            : "mdi-source-repository"
-                        }}
-                      </v-icon>
-                    </template>
-
-                    <template #append>
-                      <v-chip size="x-small" variant="outlined">{{
-                        getRepoSlotItem(item).default_branch
-                      }}</v-chip>
-                    </template>
-                  </v-list-item>
-                </template>
-              </v-autocomplete>
-
-              <div class="text-body-2 text-medium-emphasis mt-5 mb-1">
-                Branch de Produção
-              </div>
-
-              <v-select
-                v-model="selectedBranch"
-                density="comfortable"
-                hide-details
-                :items="branchOptions"
-                prepend-inner-icon="mdi-source-branch"
-                variant="outlined"
-              />
-
-              <div class="text-caption text-medium-emphasis mt-1">
-                Esta branch será usada para builds automáticos em cada push.
-              </div>
-            </template>
-
-            <template v-else>
-              <div class="text-body-2 text-medium-emphasis mb-1">
-                URL do Repositório Git
-              </div>
-
-              <v-text-field
-                v-model="newApp.git"
-                density="comfortable"
-                hide-details
-                placeholder="https://github.com/user/repo.git"
-                prepend-inner-icon="mdi-link-variant"
-                variant="outlined"
-              />
-
-              <div class="text-body-2 text-medium-emphasis mt-5 mb-1">
-                Branch
-              </div>
-
-              <v-text-field
-                v-model="newApp.branch"
-                density="comfortable"
-                hide-details
-                placeholder="main"
-                prepend-inner-icon="mdi-source-branch"
-                variant="outlined"
-              />
-
-              <div class="text-caption text-medium-emphasis mt-1">
-                Deixe vazio para usar a branch padrão.
-              </div>
-            </template>
-          </v-card-text>
-        </v-card>
-
-        <v-card class="mb-6 app-card" variant="flat">
-          <v-expansion-panels variant="accordion">
-            <v-expansion-panel elevation="0">
-              <v-expansion-panel-title class="pa-5">
-                <div class="d-flex align-center ga-2">
-                  <v-icon color="primary" size="small">mdi-key-variant</v-icon>
-                  <span class="text-subtitle-1 font-weight-medium">Variáveis de Ambiente</span>
-
-                  <v-chip
-                    v-if="envVars.length > 0"
-                    color="primary"
-                    size="x-small"
-                  >
-                    {{ envVars.length }}
-                  </v-chip>
-                </div>
-              </v-expansion-panel-title>
-
-              <v-expansion-panel-text>
-                <div class="d-flex ga-2 mb-4">
-                  <v-btn
-                    color="primary"
-                    prepend-icon="mdi-plus"
-                    size="small"
-                    variant="tonal"
-                    @click="
-                      dialogAddEnvVar = true;
-                      tempEnvVar = { key: '', value: '' };
-                    "
-                  >
-                    Adicionar
-                  </v-btn>
-
-                  <v-btn
-                    prepend-icon="mdi-file-import"
-                    size="small"
-                    variant="tonal"
-                    @click="dialogImportEnv = true"
-                  >
-                    Importar .env
-                  </v-btn>
-                </div>
-
-                <v-table v-if="envVars.length > 0" density="compact">
-                  <thead>
-                    <tr>
-                      <th>Chave</th>
-                      <th>Valor</th>
-                      <th class="text-right" width="60" />
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr v-for="(envVar, index) in envVars" :key="index">
-                      <td>
-                        <code class="text-primary">{{ envVar.key }}</code>
-                      </td>
-
-                      <td class="text-medium-emphasis">
-                        <code>{{ maskValue(envVar.value) }}</code>
-                      </td>
-
-                      <td class="text-right">
-                        <v-btn
-                          color="error"
-                          icon
-                          size="x-small"
-                          variant="text"
-                          @click="envVars.splice(index, 1)"
-                        >
-                          <v-icon size="small">mdi-delete</v-icon>
-                        </v-btn>
-                      </td>
-                    </tr>
-                  </tbody>
-                </v-table>
-
-                <div v-else class="text-center py-4">
-                  <v-icon
-                    class="mb-2"
-                    color="grey"
-                    size="32"
-                  >mdi-variable</v-icon>
-
-                  <p class="text-body-2 text-medium-emphasis">
-                    Nenhuma variável adicionada ainda.
-                  </p>
-                </div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </v-card>
+        <AppCreationEnvironmentSection
+          :variables="envVars"
+          @add="openAddEnvDialog"
+          @import="dialogImportEnv = true"
+          @remove="envVars.splice($event, 1)"
+        />
 
         <v-card v-if="false" class="mb-6 app-card" variant="flat">
           <v-expansion-panels variant="accordion">
@@ -359,109 +139,21 @@
 
       <v-col cols="12" lg="4">
         <div class="sticky-sidebar">
-          <v-card class="mb-4 app-card" variant="flat">
-            <v-card-title class="pa-5 pb-3 text-subtitle-1 font-weight-bold">
-              Resumo
-            </v-card-title>
+          <AppCreationSummary
+            :branch="summaryBranch"
+            :can-deploy="canDeploy"
+            :custom-name="canCustomize ? customDokkuName.trim() : ''"
+            :loading="creating"
+            :project="projectStore.currentProject?.name || projectId"
+            :quota-error="quotaError"
+            :repo="summaryRepo"
+            :variables-count="envVars.length"
+            :visibility="summaryVisibility"
+            :visibility-icon="summaryVisibilityIcon"
+            @clear-error="quotaError = ''"
+            @deploy="handleDeploy"
+          />
 
-            <v-divider />
-
-            <v-card-text class="pa-5">
-              <div class="d-flex justify-space-between mb-3">
-                <span class="text-body-2 text-medium-emphasis">Repositório</span>
-
-                <span
-                  class="text-body-2 font-weight-medium text-truncate ml-3"
-                  style="max-width: 180px"
-                >
-                  {{ summaryRepo }}
-                </span>
-              </div>
-
-              <div class="d-flex justify-space-between mb-3">
-                <span class="text-body-2 text-medium-emphasis">Branch</span>
-
-                <span class="text-body-2 font-weight-medium">
-                  <v-icon size="x-small">mdi-source-branch</v-icon>
-                  {{ summaryBranch }}
-                </span>
-              </div>
-
-              <div class="d-flex justify-space-between mb-3">
-                <span class="text-body-2 text-medium-emphasis">Visibilidade</span>
-
-                <span class="text-body-2 font-weight-medium">
-                  <v-icon size="x-small">{{ summaryVisibilityIcon }}</v-icon>
-                  {{ summaryVisibility }}
-                </span>
-              </div>
-
-              <div
-                v-if="envVars.length > 0"
-                class="d-flex justify-space-between mb-3"
-              >
-                <span class="text-body-2 text-medium-emphasis">Variáveis</span>
-                <span class="text-body-2 font-weight-medium">{{ envVars.length }} configurada(s)</span>
-              </div>
-
-              <div
-                v-if="canCustomize && customDokkuName.trim()"
-                class="d-flex justify-space-between mb-3"
-              >
-                <span class="text-body-2 text-medium-emphasis">Nome Dokku</span>
-
-                <span class="text-body-2 font-weight-medium">
-                  <v-icon color="amber" size="x-small">mdi-star</v-icon>
-                  {{ customDokkuName.trim() }}
-                </span>
-              </div>
-
-              <div class="d-flex justify-space-between">
-                <span class="text-body-2 text-medium-emphasis">Projeto</span>
-
-                <span
-                  class="text-body-2 font-weight-medium text-truncate ml-3"
-                  style="max-width: 180px"
-                >
-                  {{ projectStore.currentProject?.name || projectId }}
-                </span>
-              </div>
-            </v-card-text>
-
-            <v-divider />
-
-            <v-card-text class="pa-5">
-              <v-alert
-                v-if="quotaError"
-                class="mb-3"
-                closable
-                density="compact"
-                type="error"
-                variant="tonal"
-                @click:close="quotaError = ''"
-              >
-                {{ quotaError }}
-              </v-alert>
-
-              <v-btn
-                block
-                color="primary"
-                :disabled="!canDeploy"
-                :loading="creating"
-                prepend-icon="mdi-rocket-launch"
-                size="large"
-                @click="handleDeploy"
-              >
-                Deploy App
-              </v-btn>
-
-              <p class="text-caption text-medium-emphasis text-center mt-3">
-                Ao clicar em Deploy, você concorda com as
-                <a class="text-primary" href="#">regras de uso</a> da
-                plataforma.
-              </p>
-            </v-card-text>
-          </v-card>
         </div>
       </v-col>
     </v-row>
@@ -560,15 +252,18 @@ PORT=3000"
 </template>
 
 <script setup lang="ts">
-  import type { GitRepo } from '@/interfaces'
+  import type { GitRepo } from '@/modules/git/domain/models'
 
-  import axios from 'axios'
   import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
 
-  import AppsService from '@/services/apps'
+  import AppCreationEnvironmentSection from '@/components/projects/AppCreationEnvironmentSection.vue'
+  import AppCreationSourceCard from '@/components/projects/AppCreationSourceCard.vue'
+  import AppCreationSummary from '@/components/projects/AppCreationSummary.vue'
+  import { appRepository } from '@/modules/applications'
+  import { useApplicationCreation } from '@/modules/applications/presentation/composables/use-application-creation'
+  import { getHttpErrorData } from '@/shared/errors/http-error'
   import {
-    useAppStore,
     useAuthStore,
     useGitStore,
     usePlatformStore,
@@ -579,19 +274,19 @@ PORT=3000"
   const router = useRouter()
   const projectId = (route.params as { projectId: string }).projectId || ''
 
-  const appStore = useAppStore()
   const authStore = useAuthStore()
   const gitStore = useGitStore()
   const platformStore = usePlatformStore()
   const projectStore = useProjectStore()
+  const applicationCreation = useApplicationCreation(appRepository)
 
   const canCustomize = computed(() => {
     return authStore.user?.is_fabric || authStore.user?.is_superuser || false
   })
 
   const sourceMode = ref<'github' | 'manual'>('github')
-  const creating = ref(false)
-  const quotaError = ref('')
+  const creating = applicationCreation.creating
+  const quotaError = applicationCreation.quotaError
   const customDokkuName = ref('')
   const newApp = ref({ name: '', git: '', branch: '' })
   const selectedRepo = ref<GitRepo | null>(null)
@@ -633,7 +328,7 @@ PORT=3000"
     nameChecking.value = true
     nameCheckTimer = setTimeout(async () => {
       try {
-        const result = await AppsService.checkName(name)
+        const result = await applicationCreation.checkName(name)
         if (newApp.value.name.trim().toLowerCase() === name) {
           nameAvailable.value = result.available
           nameError.value = result.available
@@ -764,13 +459,9 @@ PORT=3000"
     }
   }
 
-  function getRepoSlotItem (item: GitRepo | { raw: GitRepo }): GitRepo {
-    return 'raw' in item ? item.raw : item
-  }
-
-  function maskValue (value: string) {
-    if (value.length <= 4) return '••••'
-    return value.slice(0, 4) + '••••••'
+  function openAddEnvDialog () {
+    dialogAddEnvVar.value = true
+    tempEnvVar.value = { key: '', value: '' }
   }
 
   function buildVariables (): Record<string, string> | undefined {
@@ -873,7 +564,7 @@ PORT=3000"
 
     creating.value = true
     try {
-      const app = await appStore.createApp({
+      const { app, status } = await applicationCreation.create({
         name,
         git,
         branch,
@@ -886,7 +577,6 @@ PORT=3000"
 
       if (app?.id) {
         try {
-          const status = await appStore.fetchAppStatus(String(app.id))
           if (
             status?.state === 'FAILURE'
             && (status as any).error_type === 'DeployKeysDisabled'
@@ -915,8 +605,8 @@ PORT=3000"
         router.push(`/projects/${projectId}`)
       }
     } catch (error_) {
-      if (axios.isAxiosError(error_) && error_.response?.data?.quota) {
-        const data = error_.response.data
+      const data = getHttpErrorData(error_)
+      if (data && typeof data !== 'string' && data.quota) {
         quotaError.value = `Limite de apps atingido: você possui ${data.current} de ${data.limit} apps permitidos.`
       } else {
         console.error('Erro ao criar app:', error_)

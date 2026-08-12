@@ -1,9 +1,11 @@
-import type { AppLog, LogCategory, LogLevel } from '@/interfaces'
+import type { AppLog, LogCategory, LogLevel } from '@/modules/logs/domain/models'
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import LogsService from '@/services/logs'
+import { GetLog, ListLogs, StreamTaskLogs } from '@/modules/logs'
+import { appendUniqueLogs } from '@/modules/logs/domain/log-collection'
+import { logRepository } from '@/modules/logs/infrastructure/http/log-repository'
 
 interface LogFilters {
   app?: number
@@ -15,6 +17,9 @@ interface LogFilters {
 }
 
 export const useLogStore = defineStore('log', () => {
+  const listLogs = new ListLogs(logRepository)
+  const getLog = new GetLog(logRepository)
+  const streamTaskLogs = new StreamTaskLogs(logRepository)
   const logs = ref<AppLog[]>([])
   const currentLog = ref<AppLog | null>(null)
   const loading = ref(false)
@@ -28,7 +33,7 @@ export const useLogStore = defineStore('log', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await LogsService.getLogs(filters)
+      const response = await listLogs.execute(filters)
       logs.value = response.results
       totalCount.value = response.count
       hasMore.value = !!response.next
@@ -48,7 +53,7 @@ export const useLogStore = defineStore('log', () => {
     loading.value = true
     error.value = null
     try {
-      currentLog.value = await LogsService.getLog(logId)
+      currentLog.value = await getLog.execute(logId)
       return currentLog.value
     } catch (error_) {
       error.value = 'Erro ao carregar log'
@@ -62,16 +67,17 @@ export const useLogStore = defineStore('log', () => {
   // Stream de logs em tempo real (polling)
   const streamLogs = async (taskId: string, afterId?: number) => {
     try {
-      const newLogs = await LogsService.streamLogs(taskId, afterId)
-      // Adiciona novos logs ao final
-      if (newLogs.length > 0) {
-        logs.value = [...logs.value, ...newLogs]
-      }
+      const newLogs = await streamTaskLogs.execute(taskId, afterId)
+      logs.value = appendUniqueLogs(logs.value, newLogs)
       return newLogs
     } catch (error_) {
       console.error('Erro no stream de logs:', error_)
       throw error_
     }
+  }
+
+  const appendLogs = (newLogs: AppLog[]) => {
+    logs.value = appendUniqueLogs(logs.value, newLogs)
   }
 
   // Buscar logs por app
@@ -112,6 +118,7 @@ export const useLogStore = defineStore('log', () => {
     fetchLogs,
     fetchLog,
     streamLogs,
+    appendLogs,
     fetchLogsByApp,
     fetchLogsByTask,
     loadMore,

@@ -181,19 +181,21 @@
 </template>
 
 <script setup lang="ts">
-  import type { GitRepo } from '@/interfaces'
+  import type { GitRepo } from '@/modules/git/domain/models'
 
   import { computed, onMounted, ref } from 'vue'
   import { useRouter } from 'vue-router'
 
   import RepoSelector from '@/components/git/RepoSelector.vue'
-  import UsersService from '@/services/users'
+  import { GetMyQuota } from '@/modules/administration'
+  import { adminUserRepository } from '@/modules/administration/infrastructure/http/administration-repositories'
   import { useAppStore, useProjectStore } from '@/stores'
   import { formatStatus, getStatusColor, getStatusIcon } from '@/utils/status'
 
   const router = useRouter()
   const projectStore = useProjectStore()
   const appStore = useAppStore()
+  const getMyQuota = new GetMyQuota(adminUserRepository)
 
   const loading = ref(true)
   const showRepos = ref(false)
@@ -239,7 +241,7 @@
       await Promise.all([
         projectStore.fetchProjects(),
         appStore.fetchApps(),
-        UsersService.getMyQuota()
+        getMyQuota.execute()
           .then(q => {
             quota.value = q
           })

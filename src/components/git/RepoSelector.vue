@@ -101,27 +101,28 @@
 </template>
 
 <script setup lang="ts">
-  import type { GitRepo } from '@/interfaces'
+  import type { GitRepo } from '@/modules/git/domain/models'
   import { computed, onMounted, ref } from 'vue'
-  import { useGitStore } from '@/stores'
+  import { ListRepositories } from '@/modules/git/application/use-cases/list-repositories'
+  import { gitRepository } from '@/modules/git/infrastructure/http/git-repository'
 
   const emit = defineEmits<{
     cancel: []
     select: [repo: GitRepo]
   }>()
 
-  const gitStore = useGitStore()
   const search = ref('')
   const selectedRepo = ref<GitRepo | null>(null)
-
-  const loading = computed(() => gitStore.loading)
+  const repos = ref<GitRepo[]>([])
+  const loading = ref(false)
+  const listRepositories = new ListRepositories(gitRepository)
 
   const filteredRepos = computed(() => {
     if (!search.value) {
-      return gitStore.repos
+      return repos.value
     }
     const query = search.value.toLowerCase()
-    return gitStore.repos.filter(
+    return repos.value.filter(
       repo =>
         repo.name.toLowerCase().includes(query)
         || repo.full_name.toLowerCase().includes(query)
@@ -130,13 +131,16 @@
   })
 
   onMounted(() => {
-    if (gitStore.repos.length === 0) {
-      loadRepos()
-    }
+    void loadRepos()
   })
 
   async function loadRepos () {
-    await gitStore.fetchRepos()
+    loading.value = true
+    try {
+      repos.value = await listRepositories.execute()
+    } finally {
+      loading.value = false
+    }
   }
 
   function selectRepo (repo: GitRepo) {

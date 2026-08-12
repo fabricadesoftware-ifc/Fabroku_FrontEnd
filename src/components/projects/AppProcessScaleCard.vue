@@ -129,7 +129,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { AppProcessScale } from '@/interfaces'
+  import type { AppProcessScale } from '@/modules/applications/domain/models'
 
   import { computed, ref, watch } from 'vue'
 

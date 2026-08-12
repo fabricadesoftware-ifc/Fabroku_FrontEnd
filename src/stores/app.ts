@@ -1,9 +1,32 @@
-import type { App, TaskStatus } from '@/interfaces'
+import type { App, TaskStatus } from '@/modules/applications/domain/models'
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import AppsService from '@/services/apps'
+import {
+  appRepository,
+  CreateApplication,
+  DeleteApplication,
+  GetApplication,
+  GetApplicationStatus,
+  ListApplications,
+  ListProjectApplications,
+  RestartApplication,
+  StartApplication,
+  StopApplication,
+  UpdateApplication,
+} from '@/modules/applications'
+
+const listApplications = new ListApplications(appRepository)
+const listProjectApplications = new ListProjectApplications(appRepository)
+const getApplication = new GetApplication(appRepository)
+const createApplication = new CreateApplication(appRepository)
+const updateApplication = new UpdateApplication(appRepository)
+const deleteApplication = new DeleteApplication(appRepository)
+const getApplicationStatus = new GetApplicationStatus(appRepository)
+const startApplication = new StartApplication(appRepository)
+const stopApplication = new StopApplication(appRepository)
+const restartApplication = new RestartApplication(appRepository)
 
 export const useAppStore = defineStore('app', () => {
   const apps = ref<App[]>([])
@@ -17,7 +40,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await AppsService.getApps()
+      const response = await listApplications.execute()
       apps.value = response.results
       return apps.value
     } catch (error_) {
@@ -34,7 +57,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      currentApp.value = await AppsService.getApp(appId)
+      currentApp.value = await getApplication.execute(appId)
       return currentApp.value
     } catch (error_) {
       error.value = 'Erro ao carregar app'
@@ -55,7 +78,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      const newApp = await AppsService.createApp(app)
+      const newApp = await createApplication.execute(app)
       apps.value.push(newApp)
       return newApp
     } catch (error_) {
@@ -72,7 +95,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      const updatedApp = await AppsService.patchApp(appId, data)
+      const updatedApp = await updateApplication.execute(appId, data)
       const index = apps.value.findIndex(a => String(a.id) === appId)
       if (index !== -1) {
         apps.value[index] = updatedApp
@@ -95,7 +118,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      const result = await AppsService.deleteApp(appId)
+      const result = await deleteApplication.execute(appId)
       // Não remove da lista nem limpa currentApp imediatamente
       // para o usuário acompanhar o progresso nos logs
       return result
@@ -111,7 +134,7 @@ export const useAppStore = defineStore('app', () => {
   // Buscar status da task do app (progresso de criação/deploy)
   const fetchAppStatus = async (appId: string): Promise<TaskStatus | null> => {
     try {
-      const status = await AppsService.getAppStatus(appId)
+      const status = await getApplicationStatus.execute(appId)
       taskStatus.value = status
       return status
     } catch (error_) {
@@ -131,7 +154,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await AppsService.getAppsByProject(projectId)
+      const response = await listProjectApplications.execute(projectId)
       apps.value = response.results
       return apps.value
     } catch (error_) {
@@ -159,7 +182,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      const updatedApp = await AppsService.startApp(appId)
+      const updatedApp = await startApplication.execute(appId)
       if (String(currentApp.value?.id) === appId) {
         currentApp.value = updatedApp
       }
@@ -182,7 +205,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      const updatedApp = await AppsService.stopApp(appId)
+      const updatedApp = await stopApplication.execute(appId)
       if (String(currentApp.value?.id) === appId) {
         currentApp.value = updatedApp
       }
@@ -205,7 +228,7 @@ export const useAppStore = defineStore('app', () => {
     loading.value = true
     error.value = null
     try {
-      const updatedApp = await AppsService.restartApp(appId)
+      const updatedApp = await restartApplication.execute(appId)
       if (String(currentApp.value?.id) === appId) {
         currentApp.value = updatedApp
       }

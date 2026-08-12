@@ -164,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { Service } from '@/interfaces'
+  import type { Service } from '@/modules/services/domain/models'
 
   import { computed } from 'vue'
 

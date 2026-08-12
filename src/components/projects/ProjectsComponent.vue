@@ -124,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { Project } from '@/interfaces'
+  import type { Project } from '@/modules/projects/domain/models'
 
   import { computed, onMounted, ref } from 'vue'
 

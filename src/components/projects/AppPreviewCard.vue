@@ -115,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { App } from '@/interfaces'
+  import type { App } from '@/modules/applications/domain/models'
 
   import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 

@@ -138,13 +138,14 @@
 </template>
 
 <script setup lang="ts">
-  import type { User } from '@/interfaces'
+  import type { AuthUser as User } from '@/modules/auth/domain/models'
 
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
 
   import UserAvatar from '@/components/ui/UserAvatar.vue'
-  import { UsersService } from '@/services'
+  import { projectMemberDirectory } from '@/modules/projects/infrastructure/http/project-member-directory'
+  import { useProjectMemberSearch } from '@/modules/projects/presentation/composables/use-project-member-search'
   import { useAuthStore, useProjectStore } from '@/stores'
 
   const router = useRouter()
@@ -153,11 +154,14 @@
 
   const projectName = ref('')
   const creating = ref(false)
-  const searching = ref(false)
   const searchQuery = ref('')
-  const searchResults = ref<User[]>([])
   const selectedUsers = ref<User[]>([])
-  const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
+  const memberSearch = useProjectMemberSearch(
+    projectMemberDirectory,
+    user => user.id === authStore.user?.id,
+  )
+  const searching = memberSearch.searching
+  const searchResults = memberSearch.results
 
   function getUserSlotItem (item: User | { raw: User }): User {
     return 'raw' in item ? item.raw : item
@@ -168,27 +172,7 @@
   }
 
   async function handleSearch (query: string) {
-    if (searchTimeout.value) {
-      clearTimeout(searchTimeout.value)
-    }
-
-    if (!query || query.length < 2) {
-      searchResults.value = []
-      return
-    }
-
-    searchTimeout.value = setTimeout(async () => {
-      searching.value = true
-      try {
-        const results = await UsersService.searchByUsername(query)
-        searchResults.value = results.filter(u => u.id !== authStore.user?.id)
-      } catch (error_) {
-        console.error('Erro ao buscar usuários:', error_)
-        searchResults.value = []
-      } finally {
-        searching.value = false
-      }
-    }, 300)
+    memberSearch.search(query)
   }
 
   async function handleCreate () {

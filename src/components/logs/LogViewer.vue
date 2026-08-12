@@ -197,9 +197,8 @@
 </template>
 
 <script setup lang="ts">
-  import type { AppLog } from '@/interfaces'
-  import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
-
+  import type { AppLog } from '@/modules/logs/domain/models'
+  import { computed, nextTick, ref, watch } from 'vue'
   type FilterValue = 'all' | 'attention' | 'errors' | 'steps' | 'success' | 'raw'
   type Severity = 'error' | 'warning' | 'success' | 'step' | 'info' | 'raw'
 
@@ -239,13 +238,12 @@
   })
 
   const emit = defineEmits<{
-    'stream-logs': [taskId: string, afterId?: number]
+    'start-stream': []
     'stop-stream': []
   }>()
 
   const terminalBody = ref<HTMLElement | null>(null)
   const streaming = ref(false)
-  const streamInterval = ref<number | null>(null)
   const expanded = ref(false)
   const search = ref('')
   const activeFilter = ref<FilterValue>('all')
@@ -504,25 +502,14 @@
     }
   }
 
-  function getLastLogId (): number | undefined {
-    return props.logs.length > 0 ? props.logs.at(-1)?.id : undefined
-  }
-
   function startStream () {
     if (!props.taskId) return
     streaming.value = true
-    emit('stream-logs', props.taskId, getLastLogId())
-    streamInterval.value = window.setInterval(() => {
-      emit('stream-logs', props.taskId!, getLastLogId())
-    }, 2000)
+    emit('start-stream')
   }
 
   function stopStream () {
     streaming.value = false
-    if (streamInterval.value) {
-      clearInterval(streamInterval.value)
-      streamInterval.value = null
-    }
     emit('stop-stream')
   }
 
@@ -551,7 +538,6 @@
     nextTick(scrollToBottom)
   })
 
-  onBeforeUnmount(() => stopStream())
 </script>
 
 <style scoped lang="scss">

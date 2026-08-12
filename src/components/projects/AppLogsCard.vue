@@ -22,12 +22,13 @@
           :status="status"
           :success="success"
           :task-id="taskId"
+          :task-stream-active="taskStreamActive"
           :title="title"
           @clear-output="emit('clear')"
           @start-live="emit('start-live')"
+          @start-stream="emit('start-stream')"
           @stop-live="emit('stop-live')"
           @stop-stream="emit('stop-stream')"
-          @stream-logs="(tid, afterId) => emit('stream-logs', tid, afterId)"
         />
       </v-tabs-window-item>
     </v-tabs-window>
@@ -56,12 +57,13 @@
 </template>
 
 <script setup lang="ts">
+  import type { AppLog } from '@/modules/logs/domain/models'
   import { ref } from 'vue'
 
   import UnifiedLogsMock from '@/components/logs/UnifiedLogsMock.vue'
 
   defineProps<{
-    logs: any[]
+    logs: AppLog[]
     loading?: boolean
     taskId?: string
     title?: string
@@ -71,10 +73,11 @@
     status?: string
     liveAvailable?: boolean
     liveActive?: boolean
+    taskStreamActive?: boolean
   }>()
 
   const emit = defineEmits<{
-    'stream-logs': [taskId: string, afterId?: number]
+    'start-stream': []
     'stop-stream': []
     'start-live': []
     'stop-live': []

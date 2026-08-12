@@ -164,64 +164,18 @@
       </v-row>
     </template>
 
-    <!-- Dialog para vincular serviço existente -->
-    <v-dialog v-model="linkServiceDialog" max-width="500" persistent>
-      <v-card>
-        <v-card-title>Vincular serviço existente</v-card-title>
-
-        <v-card-text>
-          <v-alert
-            v-if="linkServiceError"
-            class="mb-4"
-            closable
-            density="compact"
-            type="error"
-            variant="tonal"
-            @click:close="linkServiceError = ''"
-          >
-            {{ linkServiceError }}
-          </v-alert>
-
-          <v-select
-            v-model="selectedServiceToLink"
-            :item-title="formatServiceOption"
-            item-value="id"
-            :items="availableServicesToLink"
-            label="Selecione o serviço"
-            variant="outlined"
-          />
-
-          <v-alert
-            v-if="availableServicesToLink.length === 0"
-            class="mt-3"
-            color="info"
-            density="compact"
-            variant="tonal"
-          >
-            Nenhum serviço disponível. Crie um em
-            <router-link :to="`/projects/${projectId}/services/new`">Serviços do projeto</router-link>.
-          </v-alert>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer />
-
-          <v-btn
-            variant="text"
-            @click="linkServiceDialog = false"
-          >Cancelar</v-btn>
-
-          <v-btn
-            color="primary"
-            :disabled="!selectedServiceToLink"
-            :loading="linkingService"
-            @click="handleLinkService"
-          >
-            Vincular
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <AppServiceLinkDialog
+      v-model="linkServiceDialog"
+      :error="linkServiceError"
+      :format-option="formatServiceOption"
+      :loading="linkingService"
+      :selected-service="selectedServiceToLink"
+      :services="availableServicesToLink"
+      :services-route="`/projects/${projectId}/services/new`"
+      @clear-error="linkServiceError = ''"
+      @confirm="handleLinkService"
+      @update:selected-service="selectedServiceToLink = $event"
+    />
 
     <!-- Logs da Aplicação -->
     <v-row v-if="appStore.currentApp">
@@ -236,13 +190,14 @@
           :status="appStore.currentApp.status"
           :success="commandSuccess"
           :task-id="deployTaskId"
+          :task-stream-active="taskLogStreamActive"
           :title="logsTitle"
           @clear="handleClearCommand"
           @run="handleRunCommand"
           @start-live="startRuntimeLogsPolling"
+          @start-stream="startTaskLogStream"
           @stop-live="stopRuntimeLogsPolling"
           @stop-stream="stopLogStream"
-          @stream-logs="handleStreamLogs"
         />
       </v-col>
     </v-row>
@@ -250,10 +205,6 @@
 </template>
 
 <script setup lang="ts">
-// Diagnóstico manual de erro
-  import type { AppProcessScale, Service } from '@/interfaces'
-
-  import axios from 'axios'
   import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
 
@@ -264,9 +215,18 @@
   import AppLogsCard from '@/components/projects/AppLogsCard.vue'
   import AppPreviewCard from '@/components/projects/AppPreviewCard.vue'
   import AppProcessScaleCard from '@/components/projects/AppProcessScaleCard.vue'
-  import AppsService from '@/services/apps'
-  import LogsService from '@/services/logs'
-  import ServicesService from '@/services/services'
+  import AppServiceLinkDialog from '@/components/projects/AppServiceLinkDialog.vue'
+  import { appRepository } from '@/modules/applications'
+  import { useAppActions } from '@/modules/applications/presentation/composables/use-app-actions'
+  import { useAppCommand } from '@/modules/applications/presentation/composables/use-app-command'
+  import { useAppEnvironment } from '@/modules/applications/presentation/composables/use-app-environment'
+  import { useAppProcesses } from '@/modules/applications/presentation/composables/use-app-processes'
+  import { useAppServices } from '@/modules/applications/presentation/composables/use-app-services'
+  import { useAppTaskPolling } from '@/modules/applications/presentation/composables/use-app-task-polling'
+  import { logRepository } from '@/modules/logs/infrastructure/http/log-repository'
+  import { useRuntimeLogStream } from '@/modules/logs/presentation/composables/use-runtime-log-stream'
+  import { useTaskLogStream } from '@/modules/logs/presentation/composables/use-task-log-stream'
+  import { serviceRepository } from '@/modules/services/infrastructure/http/service-repository'
   import { useAppStore, useAuthStore, useLogStore } from '@/stores'
   import { formatStatus, getStatusColor, getStatusIcon } from '@/utils/status'
   async function diagnoseAppError () {
@@ -314,47 +274,25 @@
   const logStore = useLogStore()
   const loading = ref(true)
   const refreshing = ref(false)
-  const savingEnvVar = ref(false)
-  const deleting = ref(false)
-  const starting = ref(false)
-  const stopping = ref(false)
-  const restarting = ref(false)
-  const redeploying = ref(false)
-  const taskPollingInterval = ref<ReturnType<typeof setInterval> | null>(null)
-
-  // Estado do banco de dados
-  const appServices = ref<Service[]>([])
-  const creatingDatabase = ref(false)
-  const linkingService = ref(false)
-  const unlinkingService = ref<number | null>(null)
-  const deletingService = ref<number | null>(null)
-  const databaseError = ref('')
   const linkServiceDialog = ref(false)
-  const availableServicesToLink = ref<Service[]>([])
   const selectedServiceToLink = ref<number | null>(null)
-  const linkServiceError = ref('')
 
-  // Estado da escala de processos Dokku
-  const appProcesses = ref<AppProcessScale[]>([])
-  const processesLoading = ref(false)
-  const scalingProcesses = ref(false)
-  const processScaleError = ref('')
-  const processMaxInstances = ref(5)
-
-  // Estado do console de comandos
-  const runningCommand = ref(false)
-  const commandOutput = ref('')
-  const commandSuccess = ref(true)
+  const taskLogStream = useTaskLogStream(logRepository, {
+    getTaskId: () => appStore.currentApp?.task_id ?? undefined,
+    onLogs: logs => logStore.appendLogs(logs),
+  })
+  const taskLogStreamActive = taskLogStream.active
 
   // Logs runtime (quando app está RUNNING)
-  const runtimeLogsLines = ref<string[]>([])
-  const runtimeLogsLoading = ref(false)
-  const runtimeLogsLive = ref(false)
-  let runtimePollInterval: ReturnType<typeof setInterval> | null = null
-  let runtimeEventSource: EventSource | null = null
-  let runtimeStreamFallbackStarted = false
-
   const isRunning = computed(() => appStore.currentApp?.status === 'RUNNING')
+  const runtimeLogs = useRuntimeLogStream(
+    logRepository,
+    () => appStore.currentApp?.id,
+    () => isRunning.value,
+  )
+  const runtimeLogsLines = runtimeLogs.lines
+  const runtimeLogsLoading = runtimeLogs.loading
+  const runtimeLogsLive = runtimeLogs.live
   const envVariables = computed(() => (
     appStore.currentApp?.variables as Record<string, string> | undefined
   ))
@@ -364,6 +302,7 @@
         id: i,
         message: line,
         level: 'DOKKU' as const,
+        category: 'SYSTEM' as const,
         app: appStore.currentApp?.id ?? 0,
         created_at: undefined,
       }))
@@ -389,111 +328,87 @@
     Boolean(authStore.user?.is_fabric || authStore.user?.is_superuser),
   )
 
-  async function fetchRuntimeLogs () {
-    if (!appStore.currentApp?.id || !appStore.currentApp?.name_dokku) return
-    runtimeLogsLoading.value = true
-    try {
-      const { lines } = await LogsService.getAppRuntimeLogs(
-        appStore.currentApp.id,
-        200,
-      )
-      runtimeLogsLines.value = lines
-    } catch (error) {
-      console.error('Erro ao buscar logs do app:', error)
-      runtimeLogsLines.value = []
-    } finally {
-      runtimeLogsLoading.value = false
-    }
-  }
+  const taskPolling = useAppTaskPolling({
+    getApp: () => appStore.currentApp,
+    fetchApp: () => appStore.fetchApp(appId),
+    fetchStatus: () => appStore.fetchAppStatus(appId),
+    onCompleted: async status => {
+      if (appStore.currentApp?.status === 'DELETING' && status.state === 'SUCCESS') {
+        stopLogStream()
+        await router.push(`/projects/${projectId}`)
+        return
+      }
+      await appStore.fetchApp(appId)
+      if (canManageProcesses.value) await fetchAppProcesses(true)
+    },
+  })
 
-  function appendRuntimeLogLine (line?: string) {
-    const normalized = line?.trim()
-    if (!normalized) return
-    runtimeLogsLines.value = [...runtimeLogsLines.value, normalized].slice(-500)
-  }
+  const appActions = useAppActions({
+    repository: appRepository,
+    appId,
+    getApp: () => appStore.currentApp,
+    setApp: app => {
+      appStore.currentApp = app
+    },
+  })
+  const environment = useAppEnvironment(
+    appRepository,
+    appId,
+    () => appStore.currentApp,
+    app => {
+      appStore.currentApp = app
+    },
+  )
+  const appProcessesState = useAppProcesses({
+    repository: appRepository,
+    appId,
+    canManage: () => canManageProcesses.value,
+    waitForTask: taskPolling.waitForCompletion,
+  })
+  const appServicesState = useAppServices({
+    serviceRepository,
+    appId: () => appStore.currentApp?.id,
+    projectId,
+    waitForTask: taskPolling.waitForCompletion,
+  })
+  const command = useAppCommand({
+    repository: appRepository,
+    appId,
+    setTaskId: taskId => {
+      if (appStore.currentApp) appStore.currentApp.task_id = taskId
+    },
+  })
 
-  function startRuntimeLogsFallback () {
-    if (!runtimeLogsLive.value || runtimePollInterval) return
-    runtimeStreamFallbackStarted = true
-    closeRuntimeEventSource()
-    fetchRuntimeLogs()
-    runtimePollInterval = setInterval(fetchRuntimeLogs, 4000)
-  }
-
-  function closeRuntimeEventSource () {
-    if (runtimeEventSource) {
-      runtimeEventSource.close()
-      runtimeEventSource = null
-    }
-  }
-
-  function parseRuntimeStreamPayload (event: Event) {
-    try {
-      return JSON.parse((event as MessageEvent).data || '{}')
-    } catch {
-      return {}
-    }
-  }
+  const savingEnvVar = environment.saving
+  const deleting = appActions.deleting
+  const starting = appActions.starting
+  const stopping = appActions.stopping
+  const restarting = appActions.restarting
+  const redeploying = appActions.redeploying
+  const appServices = appServicesState.services
+  const formatServiceOption = appServicesState.formatOption
+  const creatingDatabase = appServicesState.creating
+  const linkingService = appServicesState.linking
+  const unlinkingService = appServicesState.unlinkingId
+  const deletingService = appServicesState.deletingId
+  const databaseError = appServicesState.error
+  const availableServicesToLink = appServicesState.availableServices
+  const linkServiceError = appServicesState.linkError
+  const appProcesses = appProcessesState.processes
+  const processesLoading = appProcessesState.loading
+  const scalingProcesses = appProcessesState.saving
+  const processScaleError = appProcessesState.error
+  const processMaxInstances = appProcessesState.maxInstances
+  const runningCommand = command.running
+  const commandOutput = command.output
+  const commandSuccess = command.success
 
   function startRuntimeLogsPolling () {
-    if (!isRunning.value) return
-    runtimeLogsLive.value = true
-    runtimeStreamFallbackStarted = false
-    if (runtimeEventSource || runtimePollInterval) return
-    runtimeLogsLoading.value = true
-
-    const currentAppId = appStore.currentApp?.id
-    if (!currentAppId) return
-
-    try {
-      const source = new EventSource(
-        LogsService.getAppRuntimeStreamUrl(currentAppId, 200),
-        { withCredentials: true },
-      )
-      runtimeEventSource = source
-
-      source.addEventListener('open', () => {
-        runtimeLogsLoading.value = false
-      })
-
-      source.addEventListener('snapshot', event => {
-        const payload = parseRuntimeStreamPayload(event)
-        runtimeLogsLines.value = Array.isArray(payload.lines)
-          ? payload.lines
-          : []
-        runtimeLogsLoading.value = false
-      })
-
-      source.addEventListener('line', event => {
-        const payload = parseRuntimeStreamPayload(event)
-        appendRuntimeLogLine(payload.line)
-        runtimeLogsLoading.value = false
-      })
-
-      source.addEventListener('error', event => {
-        if (event instanceof MessageEvent && event.data) {
-          console.warn('Erro do stream de logs:', event.data)
-          return
-        }
-        if (!runtimeStreamFallbackStarted) {
-          console.warn('Stream de logs indisponível, usando fallback HTTP.')
-          startRuntimeLogsFallback()
-        }
-      })
-    } catch (error) {
-      console.error('Erro ao iniciar stream de logs:', error)
-      startRuntimeLogsFallback()
-    }
+    runtimeLogs.start()
   }
 
   function stopRuntimeLogsPolling () {
-    runtimeLogsLive.value = false
-    runtimeStreamFallbackStarted = false
-    closeRuntimeEventSource()
-    if (runtimePollInterval) {
-      clearInterval(runtimePollInterval)
-      runtimePollInterval = null
-    }
+    runtimeLogs.stop()
   }
 
   // --- Stream de logs em tempo real ---
@@ -509,13 +424,19 @@
     if (!appStore.currentApp?.task_id || logStreamActive) return
     if (shouldStreamLogs()) {
       logStreamActive = true
-      await handleStreamLogs(appStore.currentApp.task_id)
+      taskLogStream.start()
     }
+  }
+
+  function startTaskLogStream () {
+    if (!appStore.currentApp?.task_id) return
+    logStreamActive = true
+    taskLogStream.start()
   }
 
   function stopLogStream () {
     logStreamActive = false
-  // Não há método explícito para parar, mas o componente LogViewer já para o polling
+    taskLogStream.stop()
   }
 
   onMounted(async () => {
@@ -541,6 +462,7 @@
   onUnmounted(() => {
     stopTaskPolling()
     stopRuntimeLogsPolling()
+    stopLogStream()
   })
 
   watch(
@@ -579,48 +501,11 @@
 
   // --- Task Polling ---
   function startTaskPollingIfNeeded () {
-    const app = appStore.currentApp
-    if (
-      !app?.task_id
-      || !['STARTING', 'DELETING', 'DEPLOYING'].includes(app.status ?? '')
-    )
-      return
-    stopTaskPolling()
-    pollTaskStatus()
-    taskPollingInterval.value = setInterval(pollTaskStatus, 2000)
+    taskPolling.start()
   }
 
   function stopTaskPolling () {
-    if (taskPollingInterval.value) {
-      clearInterval(taskPollingInterval.value)
-      taskPollingInterval.value = null
-    }
-  }
-
-  async function pollTaskStatus () {
-    try {
-      const status = await appStore.fetchAppStatus(appId)
-      if (status?.state === 'SUCCESS' || status?.state === 'FAILURE') {
-        stopTaskPolling()
-        if (appStore.currentApp?.status === 'DELETING' && status?.state === 'SUCCESS') {
-          stopLogStream()
-          router.push(`/projects/${projectId}`)
-          return
-        }
-        await appStore.fetchApp(appId)
-        if (canManageProcesses.value) {
-          await fetchAppProcesses(true)
-        }
-        // Se era delete, navegar de volta após concluir
-        if (appStore.currentApp?.status === 'DELETING' && status?.state === 'SUCCESS') {
-          // App foi deletado
-          stopLogStream()
-          router.push(`/projects/${projectId}`)
-        }
-      }
-    } catch (error_) {
-      console.error('Erro ao buscar status da task:', error_)
-    }
+    taskPolling.stop()
   }
 
   async function refreshStatus () {
@@ -636,392 +521,118 @@
   }
 
   // --- Variáveis de Ambiente ---
-  function sleep (ms: number) {
-    return new Promise(resolve => {
-      setTimeout(resolve, ms)
-    })
-  }
-
-  async function waitForCurrentAppTaskCompletion (taskId?: string) {
-    const timeoutMs = 45_000
-    const pollIntervalMs = 1500
-    const startedAt = Date.now()
-    let currentTaskId = taskId
-
-    while (Date.now() - startedAt < timeoutMs) {
-      try {
-        if (currentTaskId && appStore.currentApp) {
-          appStore.currentApp.task_id = currentTaskId
-        } else {
-          await appStore.fetchApp(appId)
-          currentTaskId = appStore.currentApp?.task_id ?? undefined
-          if (!currentTaskId) {
-            await sleep(pollIntervalMs)
-            continue
-          }
-        }
-
-        const status = await appStore.fetchAppStatus(appId)
-        if (status?.state === 'SUCCESS' || status?.state === 'FAILURE') {
-          await appStore.fetchApp(appId)
-          await fetchServices()
-          return status
-        }
-      } catch (error_) {
-        console.error('Erro ao aguardar task do app:', error_)
-      }
-
-      await sleep(pollIntervalMs)
-    }
-
-    await appStore.fetchApp(appId)
-    await fetchServices()
-    return null
-  }
-
   async function handleAddEnvVar (envVar: { key: string, value: string }) {
-    savingEnvVar.value = true
-    try {
-      const currentVars = appStore.currentApp?.variables || {}
-      await saveEnvVars({ ...currentVars, [envVar.key]: envVar.value })
-    } finally {
-      savingEnvVar.value = false
-    }
+    await environment.add(envVar)
   }
 
   async function handleAddMultipleEnvVars (
     envVars: Array<{ key: string, value: string }>,
   ) {
-    savingEnvVar.value = true
-    try {
-      const currentVars = { ...appStore.currentApp?.variables }
-      for (const envVar of envVars) {
-        currentVars[envVar.key] = envVar.value
-      }
-      await saveEnvVars(currentVars)
-    } finally {
-      savingEnvVar.value = false
-    }
+    await environment.addMultiple(envVars)
   }
 
   async function handleUpdateEnvVar (
     oldKey: string,
     envVar: { key: string, value: string },
   ) {
-    savingEnvVar.value = true
-    try {
-      const currentVars = { ...appStore.currentApp?.variables }
-      if (oldKey !== envVar.key) {
-        delete currentVars[oldKey]
-      }
-      currentVars[envVar.key] = envVar.value
-      await saveEnvVars(currentVars)
-    } finally {
-      savingEnvVar.value = false
-    }
+    await environment.update(oldKey, envVar)
   }
 
   async function removeEnvVar (key: string) {
-    savingEnvVar.value = true
-    const currentVars = { ...appStore.currentApp?.variables }
-    try {
-      delete currentVars[key]
-      await saveEnvVars(currentVars)
-    } finally {
-      savingEnvVar.value = false
-    }
-  }
-
-  async function saveEnvVars (variables: Record<string, string>) {
-    const response = await AppsService.updateEnvVars(appId, variables)
-    appStore.currentApp = response.app
+    await environment.remove(key)
   }
 
   // --- Controle do App ---
   async function handleDeleteApp () {
-    deleting.value = true
     try {
-      const result = await appStore.deleteApp(appId)
-      if (appStore.currentApp) {
-        appStore.currentApp.task_id = result.task_id
-        appStore.currentApp.status = 'DELETING'
-        await startLogStreamIfNeeded()
-        startTaskPollingIfNeeded()
-      }
+      await appActions.remove()
+      await startLogStreamIfNeeded()
+      startTaskPollingIfNeeded()
     // Não navega imediatamente — deixa o usuário acompanhar o progresso nos logs
     // A navegação ocorre quando o watch detectar status 'RUNNING' ou 'SUCCESS'
     } catch (error_) {
       console.error('Erro ao deletar app:', error_)
-    } finally {
-      deleting.value = false
     }
   }
 
   async function handleStartApp () {
-    starting.value = true
     try {
-      const result = await appStore.startApp(appId)
-      if (appStore.currentApp && result.task_id) {
-        appStore.currentApp.task_id = result.task_id
-        appStore.currentApp.status = 'STARTING'
-      }
+      await appActions.start()
       await startLogStreamIfNeeded()
       startTaskPollingIfNeeded()
     } catch (error_) {
       console.error('Erro ao iniciar app:', error_)
-    } finally {
-      starting.value = false
     }
   }
 
   async function handleStopApp () {
-    stopping.value = true
     try {
-      await appStore.stopApp(appId)
+      await appActions.stop()
       await appStore.fetchApp(appId)
     } catch (error_) {
       console.error('Erro ao parar app:', error_)
-    } finally {
-      stopping.value = false
     }
   }
 
   async function handleRestartApp () {
-    restarting.value = true
     try {
-      const result = await appStore.restartApp(appId)
-      if (appStore.currentApp && result.task_id) {
-        appStore.currentApp.task_id = result.task_id
-        appStore.currentApp.status = 'STARTING'
-      }
+      await appActions.restart()
       await startLogStreamIfNeeded()
       startTaskPollingIfNeeded()
     } catch (error_) {
       console.error('Erro ao reiniciar app:', error_)
-    } finally {
-      restarting.value = false
     }
   }
 
   async function handleRedeployApp () {
-    redeploying.value = true
     try {
-      const result = await AppsService.redeployApp(appId)
-      if (appStore.currentApp) {
-        appStore.currentApp.task_id = result.task_id
-        appStore.currentApp.status = 'DEPLOYING'
-      }
+      await appActions.redeploy()
       await startLogStreamIfNeeded()
       startTaskPollingIfNeeded()
     } catch (error_) {
       console.error('Erro ao fazer redeploy:', error_)
-    } finally {
-      redeploying.value = false
     }
   }
 
   // --- Console / Comandos ---
   function handleClearCommand () {
-    commandOutput.value = ''
-    commandSuccess.value = true
+    command.clear()
   }
 
-  async function handleRunCommand (command: string) {
-    if (!command.trim() || !appStore.currentApp?.id) return
-    runningCommand.value = true
-    commandOutput.value = ''
-    commandSuccess.value = true
-
-    try {
-      const result = await AppsService.runCommand(appId, command.trim())
-
-      if (result.task_id) {
-        if (appStore.currentApp) {
-          appStore.currentApp.task_id = result.task_id
-        }
-
-        const pollCommandResult = async () => {
-          try {
-            const status = await AppsService.getAppStatus(appId)
-            if (status.state === 'SUCCESS') {
-              commandOutput.value
-                = 'Comando executado com sucesso! Veja detalhes nos Logs abaixo.'
-              commandSuccess.value = true
-              runningCommand.value = false
-              return true
-            } else if (status.state === 'FAILURE') {
-              commandOutput.value = status.status || 'Erro ao executar comando'
-              commandSuccess.value = false
-              runningCommand.value = false
-              return true
-            }
-            return false
-          } catch {
-            return false
-          }
-        }
-
-        let attempts = 0
-        const interval = setInterval(async () => {
-          attempts++
-          const done = await pollCommandResult()
-          if (done || attempts > 30) {
-            clearInterval(interval)
-            if (attempts > 30 && runningCommand.value) {
-              commandOutput.value
-                = 'Comando ainda em execução. Acompanhe o progresso nos Logs abaixo.'
-              commandSuccess.value = true
-              runningCommand.value = false
-            }
-          }
-        }, 2000)
-      }
-    } catch (error_: any) {
-      const errorData = error_?.response?.data
-      if (errorData?.error) {
-        commandOutput.value = errorData.error
-        if (errorData.allowed_commands) {
-          commandOutput.value
-            += '\n\nComandos permitidos:\n' + errorData.allowed_commands.join('\n')
-        }
-      } else {
-        commandOutput.value = 'Erro ao executar comando'
-      }
-      commandSuccess.value = false
-      runningCommand.value = false
-    }
+  async function handleRunCommand (commandValue: string) {
+    await command.run(commandValue)
   }
 
   async function fetchAppProcesses (refresh = false) {
-    if (!appStore.currentApp?.id || !canManageProcesses.value) return
-    processesLoading.value = true
-    processScaleError.value = ''
-
-    try {
-      const response = await AppsService.getAppProcesses(appId, refresh)
-      appProcesses.value = response.processes
-      processMaxInstances.value = response.max_instances
-    } catch (error_: any) {
-      processScaleError.value = error_?.response?.data?.error || 'Erro ao buscar processos do app'
-      console.error('Erro ao buscar processos do app:', error_)
-    } finally {
-      processesLoading.value = false
-    }
+    await appProcessesState.fetch(refresh)
   }
 
   async function handleRefreshProcesses () {
-    await fetchAppProcesses(true)
+    await appProcessesState.refresh()
   }
 
   async function handleScaleProcesses (processes: Record<string, number>) {
-    if (!appStore.currentApp?.id || !canManageProcesses.value) return
-    scalingProcesses.value = true
-    processScaleError.value = ''
-
-    try {
-      const result = await AppsService.scaleAppProcesses(appId, processes)
-      if (appStore.currentApp) {
-        appStore.currentApp.task_id = result.task_id
-      }
-
-      const status = await waitForCurrentAppTaskCompletion(result.task_id)
-      if (status?.state === 'FAILURE') {
-        processScaleError.value = status.status || 'Erro ao aplicar escala de processos'
-      }
-
-      await fetchAppProcesses(true)
-    } catch (error_: any) {
-      processScaleError.value = error_?.response?.data?.error || 'Erro ao aplicar escala de processos'
-      console.error('Erro ao aplicar escala de processos:', error_)
-    } finally {
-      scalingProcesses.value = false
-    }
+    await appProcessesState.scale(processes)
   }
 
   async function fetchServices () {
-    if (!appStore.currentApp?.id) return
-    try {
-      const response = await ServicesService.getServicesByApp(
-        Number(appStore.currentApp.id),
-      )
-      appServices.value = response.results
-    } catch (error_) {
-      console.error('Erro ao buscar serviços:', error_)
-      if (appStore.currentApp?.services) {
-        appServices.value = appStore.currentApp.services
-      }
+    await appServicesState.fetch()
+    if (appServices.value.length === 0 && appStore.currentApp?.services) {
+      appServices.value = appStore.currentApp.services
     }
-  }
-
-  function isServiceReady (service: Service) {
-    return Boolean(service.container_name) && !service.task_id
   }
 
   async function handleCreateDatabase (serviceType: 'postgres' | 'postgis') {
-    if (!appStore.currentApp?.id) return
-    creatingDatabase.value = true
-    databaseError.value = ''
     try {
-      await ServicesService.createService({
-        app: Number(appStore.currentApp.id),
-        service_type: serviceType,
-      })
-      await waitForCurrentAppTaskCompletion()
-      creatingDatabase.value = false
+      await appServicesState.createDatabase(serviceType)
     } catch (error_) {
-      databaseError.value = formatServiceError(
-        error_,
-        'Nao foi possivel criar o banco de dados. Tente novamente.',
-      )
-      if (axios.isAxiosError(error_) && error_.response?.data?.quota) {
-        const data = error_.response.data
-        console.error(
-          `Limite de serviços atingido: você possui ${data.current} de ${data.limit} serviços permitidos.`,
-        )
-      } else {
-        console.error('Erro ao criar banco de dados:', error_)
-      }
-      creatingDatabase.value = false
+      console.error('Erro ao criar banco de dados:', error_)
     }
-  }
-
-  function formatServiceOption (service: Service) {
-    const labels: Record<Service['service_type'], string> = {
-      postgres: 'PostgreSQL',
-      postgis: 'PostGIS',
-      redis: 'Redis',
-      rabbitmq: 'RabbitMQ',
-    }
-    const label = labels[service.service_type]
-    return `${service.name} · ${label}`
-  }
-
-  function formatServiceError (error: unknown, fallback: string) {
-    if (!axios.isAxiosError(error)) return fallback
-
-    const data = error.response?.data
-    if (!data) return fallback
-
-    if (data.quota) {
-      return `Limite de serviÃ§os atingido: vocÃª possui ${data.current} de ${data.limit} serviÃ§os permitidos.`
-    }
-
-    if (typeof data === 'string') return data
-    if (typeof data.error === 'string') return data.error
-    if (typeof data.detail === 'string') return data.detail
-
-    const fieldErrors = data.name || data.non_field_errors
-    if (Array.isArray(fieldErrors)) return fieldErrors.join(' ')
-    if (typeof fieldErrors === 'string') return fieldErrors
-
-    return fallback
   }
 
   async function openLinkDialog () {
     try {
-      const response = await ServicesService.getServicesByProject(projectId)
-      linkServiceError.value = ''
-      availableServicesToLink.value = response.results.filter(s => !s.app && isServiceReady(s))
+      await appServicesState.openLinkOptions()
       selectedServiceToLink.value = availableServicesToLink.value[0]?.id ?? null
       linkServiceDialog.value = true
     } catch (error_) {
@@ -1030,50 +641,30 @@
   }
 
   async function handleLinkService () {
-    if (!selectedServiceToLink.value || !appStore.currentApp?.id) return
-    linkingService.value = true
-    linkServiceError.value = ''
+    if (!selectedServiceToLink.value) return
     try {
-      const result = await ServicesService.linkService(
-        selectedServiceToLink.value,
-        appStore.currentApp.id,
-      )
+      await appServicesState.link(selectedServiceToLink.value)
       linkServiceDialog.value = false
       selectedServiceToLink.value = null
-      await waitForCurrentAppTaskCompletion(result.task_id)
     } catch (error_) {
       console.error('Erro ao vincular serviço:', error_)
-      linkServiceError.value = (error_ as any)?.response?.data?.error || 'Nao foi possivel vincular o servico.'
-    } finally {
-      linkingService.value = false
     }
   }
 
   async function handleUnlinkService (serviceId: number) {
-    unlinkingService.value = serviceId
     try {
-      const result = await ServicesService.unlinkService(serviceId)
-      await waitForCurrentAppTaskCompletion(result.task_id)
-      unlinkingService.value = null
+      await appServicesState.unlink(serviceId)
     } catch (error_) {
       console.error('Erro ao desvincular serviço:', error_)
-      unlinkingService.value = null
     }
   }
 
   async function handleDeleteService (serviceId: number) {
-    deletingService.value = serviceId
     try {
-      const result = await ServicesService.deleteService(serviceId)
-      await waitForCurrentAppTaskCompletion(result.task_id)
+      await appServicesState.remove(serviceId)
     } catch (error_) {
       console.error('Erro ao deletar serviço:', error_)
-    } finally {
-      deletingService.value = null
     }
   }
 
-  async function handleStreamLogs (taskId: string, afterId?: number) {
-    await logStore.streamLogs(taskId, afterId)
-  }
 </script>

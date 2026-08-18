@@ -24,7 +24,7 @@
       </thead>
 
       <tbody>
-        <tr v-for="user in filteredUsers" :key="user.id">
+        <tr v-for="user in filteredUsers" :key="user.id" class="clickable-row" @click="navigateToUser(user.id)">
           <td>
             <div class="d-flex align-center ga-2 py-2">
               <UserAvatar :alt="user.name || user.email" size="32" :src="user.avatar_url" />
@@ -64,7 +64,7 @@
             </v-chip>
           </td>
 
-          <td class="text-center">
+          <td class="text-center" @click.stop>
             <div class="d-flex justify-center align-center flex-wrap ga-2">
               <v-btn
                 :color="user.is_superuser ? 'warning' : 'grey'"
@@ -100,6 +100,17 @@
                 <v-icon start>{{ user.is_active ? 'mdi-account-off' : 'mdi-account-check' }}</v-icon>
                 {{ user.is_active ? 'Desabilitar' : 'Habilitar' }}
               </v-btn>
+
+              <v-btn
+                color="primary"
+                icon
+                size="small"
+                variant="text"
+                @click.stop="navigateToUser(user.id)"
+              >
+                <v-icon size="18">mdi-eye</v-icon>
+                <v-tooltip activator="parent" location="top">Ver detalhes</v-tooltip>
+              </v-btn>
             </div>
           </td>
         </tr>
@@ -115,6 +126,7 @@
 <script setup lang="ts">
   import type { AdminUser } from '@/modules/administration/domain/models'
   import { computed } from 'vue'
+  import { useRouter } from 'vue-router'
 
   import UserAvatar from '@/components/ui/UserAvatar.vue'
 
@@ -136,6 +148,8 @@
     'update:search': [search: string]
   }>()
 
+  const router = useRouter()
+
   const filteredUsers = computed(() => {
     const query = props.search.trim().toLowerCase()
     if (!query) return props.users
@@ -155,4 +169,19 @@
     if (ratio >= 0.8) return 'warning'
     return 'success'
   }
+
+  function navigateToUser (userId: number) {
+    router.push(`/admin/users/${userId}`)
+  }
 </script>
+
+<style scoped>
+  .clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .clickable-row:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+</style>

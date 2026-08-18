@@ -11,6 +11,44 @@
       <v-chip value="others">Outros Usuários</v-chip>
     </v-chip-group>
 
+    <v-autocomplete
+      v-model="selectedUserId"
+      class="mb-4"
+      clearable
+      :items="allUsers"
+      item-title="label"
+      item-value="id"
+      label="Filtrar por usuário específico"
+      prepend-inner-icon="mdi-account-filter"
+      variant="outlined"
+      density="compact"
+      hide-details
+    >
+      <template #item="{ props: itemProps, item }">
+        <v-list-item v-bind="itemProps">
+          <template #prepend>
+            <UserAvatar
+              :alt="item.raw.name || item.raw.email"
+              :src="item.raw.avatar_url"
+              size="32"
+              class="mr-2"
+            />
+          </template>
+        </v-list-item>
+      </template>
+      <template #selection="{ item }">
+        <div class="d-flex align-center">
+          <UserAvatar
+            :alt="item.raw.name || item.raw.email"
+            :src="item.raw.avatar_url"
+            size="24"
+            class="mr-2"
+          />
+          {{ item.raw.label }}
+        </div>
+      </template>
+    </v-autocomplete>
+
     <v-progress-linear v-if="loading" indeterminate />
 
     <v-row v-if="!loading">
@@ -89,7 +127,7 @@
 
 <script setup lang="ts">
   import type { Project } from '@/modules/projects/domain/models'
-  import { computed } from 'vue'
+  import { computed, ref } from 'vue'
 
   import UserAvatar from '@/components/ui/UserAvatar.vue'
 
@@ -106,13 +144,56 @@
     'update:filter': [filter: ProjectFilter]
   }>()
 
+  const selectedUserId = ref<number | null>(null)
+
+  // Extrai todos os usuários únicos de todos os projetos
+  const allUsers = computed(() => {
+    const usersMap = new Map()
+
+    props.projects.forEach(project => {
+      project.users_detail?.forEach(user => {
+        if (!usersMap.has(user.id)) {
+          usersMap.set(user.id, {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            avatar_url: user.avatar_url,
+            label: user.name || user.email
+          })
+        }
+      })
+    })
+
+    return Array.from(usersMap.values()).sort((a, b) =>
+      (a.label || '').localeCompare(b.label || '')
+    )
+  })
+
   const filteredProjects = computed(() => {
-    if (props.filter === 'mine') return props.projects.filter(project => project.is_owner)
-    if (props.filter === 'others') return props.projects.filter(project => !project.is_owner)
-    return props.projects
+    let filtered = props.projects
+
+    // Filtra por tipo (mine/others/all)
+    if (props.filter === 'mine') {
+      filtered = filtered.filter(project => project.is_owner)
+    } else if (props.filter === 'others') {
+      filtered = filtered.filter(project => !project.is_owner)
+    }
+
+    // Filtra por usuário específico se selecionado
+    if (selectedUserId.value !== null) {
+      filtered = filtered.filter(project =>
+        project.users_detail?.some(user => user.id === selectedUserId.value)
+      )
+    }
+
+    return filtered
   })
 
   const emptyMessage = computed(() => {
+    if (selectedUserId.value !== null) {
+      const user = allUsers.value.find(u => u.id === selectedUserId.value)
+      return `Nenhum projeto encontrado para ${user?.label || 'este usuário'}`
+    }
     if (props.filter === 'mine') return 'Você não possui projetos'
     if (props.filter === 'others') return 'Não há projetos de outros usuários'
     return 'Nenhum projeto no sistema'

@@ -44,6 +44,13 @@ declare module 'vue-router/auto-routes' {
       { projectId: ParamValue<false> },
       | never
     >,
+    '/admin/users/[userId]': RouteRecordInfo<
+      '/admin/users/[userId]',
+      '/admin/users/:userId',
+      { userId: ParamValue<true> },
+      { userId: ParamValue<false> },
+      | never
+    >,
     '/callback/': RouteRecordInfo<
       '/callback/',
       '/callback',
@@ -163,6 +170,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/admin/projects/[projectId].vue': {
       routes:
         | '/admin/projects/[projectId]'
+      views:
+        | never
+    }
+    'src/pages/admin/users/[userId].vue': {
+      routes:
+        | '/admin/users/[userId]'
       views:
         | never
     }

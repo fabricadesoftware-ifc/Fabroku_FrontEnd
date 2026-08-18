@@ -967,23 +967,23 @@
     { id: 'troubleshooting', label: 'Troubleshooting', icon: 'mdi-lifebuoy' },
   ]
 
-  const loginFlags = [
-    {
-      flag: '--api-url <url>',
-      desc: 'URL base da API Fabroku (sobrescreve o padrão)',
-    },
-  ]
+  // const loginFlags = [
+  //   {
+  //     flag: '--api-url <url>',
+  //     desc: 'URL base da API Fabroku (sobrescreve o padrão)',
+  //   },
+  // ]
 
-  const loginSteps = [
-    { text: 'Verifica se já existe sessão ativa', color: 'grey' },
-    { text: 'Busca uma porta livre e abre o navegador', color: 'info' },
-    { text: 'Servidor HTTP local aguarda callback OAuth', color: 'warning' },
-    {
-      text: 'Recebe o token e salva em ~/.fabroku/config.json',
-      color: 'success',
-    },
-    { text: 'Timeout de 2 minutos se não receber callback', color: 'error' },
-  ]
+  // const loginSteps = [
+  //   { text: 'Verifica se já existe sessão ativa', color: 'grey' },
+  //   { text: 'Busca uma porta livre e abre o navegador', color: 'info' },
+  //   { text: 'Servidor HTTP local aguarda callback OAuth', color: 'warning' },
+  //   {
+  //     text: 'Recebe o token e salva em ~/.fabroku/config.json',
+  //     color: 'success',
+  //   },
+  //   { text: 'Timeout de 2 minutos se não receber callback', color: 'error' },
+  // ]
 
   const whoamiExample = `fabroku whoami
 # Logado como: fulano
@@ -992,23 +992,23 @@
 # Perfil privilegiado
 # Token valido`
 
-  const verifyFlags = [
-    {
-      flag: '-d, --dir <path>',
-      desc: 'Diretório do projeto',
-      default: '. (atual)',
-    },
-    {
-      flag: '-t, --type <type>',
-      desc: 'Forçar tipo: frontend ou backend',
-      default: 'auto-detecta',
-    },
-    {
-      flag: '--fix',
-      desc: 'Gerar arquivos faltantes automaticamente',
-      default: 'false',
-    },
-  ]
+  // const verifyFlags = [
+  //   {
+  //     flag: '-d, --dir <path>',
+  //     desc: 'Diretório do projeto',
+  //     default: '. (atual)',
+  //   },
+  //   {
+  //     flag: '-t, --type <type>',
+  //     desc: 'Forçar tipo: frontend ou backend',
+  //     default: 'auto-detecta',
+  //   },
+  //   {
+  //     flag: '--fix',
+  //     desc: 'Gerar arquivos faltantes automaticamente',
+  //     default: 'false',
+  //   },
+  // ]
 
   const frontendFiles = [
     { name: '.buildpacks', desc: 'Buildpacks Node.js + Nginx' },

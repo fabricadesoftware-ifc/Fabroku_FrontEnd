@@ -1,0 +1,414 @@
+# Fabroku CLI
+
+> Documentação completa da ferramenta de linha de comando para gerenciar apps na plataforma Fabroku.
+
+Requer Node.js 18+ · Licença MIT · Versão publicada via semantic-release (confira a instalada com `fabroku --version`, não fixe um número aqui)
+
+## Instalação
+
+Instale a CLI globalmente via npm:
+
+```bash
+npm i -g fabroku
+```
+
+## Autenticação
+
+A CLI utiliza autenticação via GitHub OAuth. O login abre o navegador automaticamente e recebe o token via callback.
+
+### `fabroku login`
+
+Autentica o usuário via GitHub OAuth.
+
+```bash
+fabroku login
+```
+
+### `fabroku logout`
+
+Encerra a sessão, limpando o token e dados do usuário.
+
+```bash
+fabroku logout
+```
+
+### `fabroku whoami`
+
+Exibe informações do usuário autenticado e verifica se o token é válido.
+
+```bash
+fabroku whoami
+# Logado como: fulano
+#    API: https://api.exemplo.com
+#    Email: fulano@example.com
+#    🏭 Membro da Fábrica   (label dinâmico, só se is_fabric)
+#    🔑 Administrador       (só se is_superuser)
+#    ✅ Token válido
+```
+
+## Verificação de Arquivos
+
+### `fabroku verify`
+
+Verifica se o projeto contém os arquivos necessários para deploy no Dokku.
+
+Arquivos requeridos por tipo:
+
+**Frontend (SPA)**
+- `.buildpacks` — Buildpacks Node.js + Nginx
+- `.static` — Marcador de aplicação estática
+- `static.json` — Configuração SPA (rotas, cache, root)
+
+`fabroku verify`/`--fix` não configura isso: além dos arquivos acima, adicione manualmente estas variáveis de ambiente no app pelo painel Fabroku antes do deploy, para o buildpack Nginx servir a pasta certa:
+```
+NGINX_ROOT=dist
+NGINX_DEFAULT_REQUEST=index.html
+```
+
+**Backend (Django)**
+- `Procfile` — Processos web, worker e release
+- `requirements.txt` — Dependências Python
+- `.python-version` — Versão do Python (ex: `python-3.13.2`)
+
+A auto-detecção identifica o tipo pelo `package.json` (frontend) ou por `manage.py`, `requirements.txt`, `setup.py`, `pyproject.toml`, `Pipfile` (backend). Exceção: se houver `package.json` e um `Procfile` que mencione `node`/`npm`, é tratado como backend Node, não frontend.
+
+| Flag | Descrição |
+|---|---|
+| `-d, --dir <path>` | Diretório do projeto (padrão: `.`) |
+| `-t, --type <type>` | Força o tipo (`frontend` ou `backend`) em vez de auto-detectar |
+| `--fix` | Gera os arquivos faltantes automaticamente |
+
+```bash
+fabroku verify
+fabroku verify --fix
+fabroku verify --type backend --fix
+```
+
+## Listar Apps
+
+### `fabroku apps`
+
+Lista todos os apps do usuário na plataforma em formato tabular.
+
+| Flag | Descrição |
+|---|---|
+| `-p, --project <id>` | Filtrar por ID do projeto |
+
+```bash
+fabroku apps
+fabroku apps --project 42
+```
+
+Status possíveis: `RUNNING`, `STOPPED`, `ERROR`, `STARTING`, `DEPLOYING`, `DELETING`, `RESTARTING`
+
+## Deploy
+
+### `fabroku deploy`
+
+Dispara o redeploy de um app. Comando principal da CLI.
+
+| Flag | Descrição | Padrão |
+|---|---|---|
+| `-a, --app <name>` | Nome ou ID do app | auto-detecta via git |
+| `-d, --dir <path>` | Diretório do projeto | `.` (atual) |
+| `--skip-verify` | Pular verificação de arquivos | `false` |
+| `--no-wait` | Não aguardar o deploy terminar | `false` |
+
+Fluxo de execução:
+1. Verifica autenticação
+2. Identifica o app (por nome, ID ou git remote)
+3. Roda `fabroku verify` (se não `--skip-verify`)
+4. Dispara redeploy via API
+5. Polling de progresso com barra em tempo real
+6. Exibe resultado: URL do domínio ou erro
+
+Se `--app` não for especificado, a CLI detecta o app automaticamente comparando a URL do git remote origin com os apps registrados na plataforma.
+
+```bash
+# Na raiz do repositório (auto-detecta o app)
+fabroku deploy
+
+# Especificando o app
+fabroku deploy --app meu-app
+
+# Pular verificação e não aguardar
+fabroku deploy --skip-verify --no-wait
+
+# Diretório específico
+fabroku deploy --dir ./meu-projeto
+```
+
+## Procfile e Processos
+
+O Procfile diz ao Dokku quais comandos existem dentro do app. Cada linha segue o formato `tipo: comando`. No Fabroku, os tipos mais importantes são `web`, `worker` e `release`.
+
+O arquivo deve ficar na raiz do repositório que será enviado para deploy. Se o app usa uma pasta interna, garanta que o deploy esteja apontando para essa pasta.
+
+- **web** — Servidor HTTP do app. Exemplo: `gunicorn`, `uvicorn` ou `npm start`. Escalável no Fabroku.
+- **worker** — Processo contínuo para filas e tarefas em background. Escalável no Fabroku.
+- **release** — Comando único que roda durante o deploy, antes da nova versão subir. Executa no deploy.
+
+Exemplo para Django + Celery:
+```
+web: gunicorn config.wsgi:application --log-file -
+worker: celery -A config worker -l info
+release: python manage.py migrate --noinput
+```
+
+Notas:
+- **web**: processo que recebe HTTP. Normalmente deve ficar em 1 ou mais. Para parar o app, use o botão Parar em vez de colocar `web=0` pela tela de Processos.
+- **worker**: processo contínuo para tarefas em segundo plano, como Celery. Se adicionar um worker depois do app existir, faça um novo deploy para o Dokku detectar o processo e depois ajuste a escala na tela de Processos.
+- **release**: comando executado uma vez durante o deploy, antes da nova versão ficar ativa. Use para migrações, por exemplo `python manage.py migrate --noinput`. Não fica rodando, não aparece como processo escalável e não substitui um worker.
+
+Evite colocar comandos demorados ou interativos no `release`. Se o comando travar, o deploy pode ficar preso ou falhar.
+
+## PostgreSQL e PostGIS
+
+O PostGIS é um PostgreSQL preparado para armazenar e consultar coordenadas, mapas e geometrias. Ao criar esse tipo de serviço, o Fabroku configura a imagem geoespacial e habilita a extensão `postgis` automaticamente.
+
+Para GeoDjango, use o backend `django.contrib.gis.db.backends.postgis` e leia a conexão pela variável atribuída ao serviço.
+
+O primeiro PostgreSQL ou PostGIS vinculado ao app recebe `DATABASE_URL`. Bancos adicionais recebem nomes baseados no serviço, como `MAPAS_DB_URL`. A variável aparece no card do serviço e na área de variáveis do app.
+
+```
+# Banco principal
+DATABASE_URL=postgres://...
+
+# Banco geoespacial adicional
+MAPAS_DB_URL=postgres://...
+```
+
+Remover um serviço apaga seus dados. Se o banco principal for removido, o Fabroku promove o banco mais antigo restante para `DATABASE_URL`.
+
+## Rotinas Django
+
+Todos os comandos `fabroku run *` fazem polling do status a cada 3s por até 12 minutos antes de reportar timeout.
+
+### `fabroku run migrate`
+
+Executa `python manage.py migrate` dentro do container do app Django. Use para aplicar migrations sem abrir shell no servidor.
+
+| Flag | Descrição | Padrão |
+|---|---|---|
+| `-a, --app <name>` | Nome ou ID do app | auto-detecta via git |
+| `-d, --dir <path>` | Diretório local usado para detectar o app | `.` (atual) |
+| `--manage <path>` | Caminho relativo do manage.py dentro do app | `manage.py` |
+| `--noinput` | Adiciona `--noinput` ao comando Django migrate | desativado |
+
+A CLI tenta detectar o app pelo git remote. Se o `manage.py` estiver em uma pasta, informe `--manage`.
+
+```bash
+# App detectado pelo git remote
+fabroku run migrate
+
+# Especificando o app manualmente
+fabroku run migrate --app minha-api
+
+# manage.py em outra pasta e migrate sem prompts
+fabroku run migrate --manage src/manage.py --noinput
+```
+
+### `fabroku run loaddata <fixture>`
+
+Executa `loaddata` dentro do container do app Django usando um fixture JSON que já está no deploy. `<fixture>` é argumento posicional (caminho relativo ao app), não valor de uma flag.
+
+| Flag | Descrição | Padrão |
+|---|---|---|
+| `--django` | Ativa o fluxo Django para loaddata | obrigatório |
+| `-a, --app <name>` | Nome ou ID do app | auto-detecta via git |
+| `-d, --dir <path>` | Diretório local usado para detectar o app | `.` (atual) |
+| `--manage <path>` | Caminho relativo do manage.py dentro do app | `manage.py` |
+
+Nesta versão, o fluxo é exclusivo para Django e exige a flag `--django`. A CLI envia apenas o caminho relativo do fixture; se o arquivo foi criado ou alterado, faça deploy antes.
+
+```bash
+# Fixture versionado na raiz do app
+fabroku run loaddata ./my_data.json --django
+
+# Especificando o app manualmente
+fabroku run loaddata ./my_data.json --django --app minha-api
+
+# Fixture dentro da pasta usada no deploy
+fabroku run loaddata ./fixtures/users.json --django --dir ./backend --manage src/manage.py
+```
+
+### `fabroku run dumpdata`
+
+Executa `dumpdata` no app Django, gera o JSON no container e baixa o resultado para o caminho local informado em `--output`.
+
+| Flag | Descrição | Padrão |
+|---|---|---|
+| `--django` | Ativa o fluxo Django para dumpdata | obrigatório |
+| `-o, --output <path>` | Arquivo JSON local onde o dump será salvo | obrigatório |
+| `-a, --app <name>` | Nome ou ID do app | auto-detecta via git |
+| `-d, --dir <path>` | Diretório local usado para detectar o app | `.` (atual) |
+| `--manage <path>` | Caminho relativo do manage.py dentro do app | `manage.py` |
+| `-- [args]` | Argumentos repassados diretamente ao Django dumpdata | — |
+
+Os argumentos do Django devem vir depois de `--`, para não conflitar com as flags da CLI. O arquivo de saída local é obrigatório.
+
+```bash
+# Dump completo para arquivo local
+fabroku run dumpdata --django --output ./dump.json
+
+# Com filtros e flags do Django após --
+fabroku run dumpdata --django --output ./users.json -- --indent 2 auth.User
+
+# Usando app detectado por git remote e manage.py customizado
+fabroku run dumpdata --django --dir ./backend --manage src/manage.py --output ./backups/auth.json -- auth.User
+```
+
+### `fabroku run createsuperuser`
+
+Abre uma sessão interativa (via WebSocket, com fallback para SSE) de `python manage.py createsuperuser` dentro do container do app. A CLI faz o proxy dos prompts (usuário, email, senha) direto no terminal local; senha é digitada com input oculto.
+
+| Flag | Descrição | Padrão |
+|---|---|---|
+| `-a, --app <name>` | Nome ou ID do app | auto-detecta via git |
+| `-d, --dir <path>` | Diretório local usado para detectar o app | `.` (atual) |
+| `--manage <path>` | Caminho relativo do manage.py dentro do app | `manage.py` |
+
+```bash
+fabroku run createsuperuser
+fabroku run createsuperuser --app minha-api --manage src/manage.py
+```
+
+## Banco de Dados
+
+### `fabroku db connect`
+
+Abre uma sessão interativa e auditada em um PostgreSQL ou PostGIS vinculado ao app (via `psql` dentro do container).
+
+| Flag | Descrição | Padrão |
+|---|---|---|
+| `-a, --app <name>` | Nome ou ID do app | auto-detecta via git |
+| `-d, --dir <path>` | Diretório local usado para detectar o app | `.` (atual) |
+| `-s, --service <name>` | Nome ou ID do banco, quando o app tem mais de um vinculado | — |
+
+```bash
+fabroku db connect
+fabroku db connect --app minha-api
+fabroku db connect --app minha-api --service mapas-db
+```
+
+## Webhook
+
+### `fabroku webhook [appId]`
+
+Diagnostica e configura webhooks do GitHub para auto deploy e commit status.
+
+| Flag | Descrição |
+|---|---|
+| `--setup` | Criar/recriar o webhook automaticamente |
+| `--test` | Testar se commit status funciona |
+
+Diagnósticos realizados:
+- `backend_url_public` — URL do backend é pública (não localhost)
+- `user_git_token` — Token GitHub do usuário é válido
+- `project_git_token` — Pelo menos 1 membro do projeto tem token GitHub
+- `git_url_parseable` — URL git do app é válida
+- `webhook_exists` — Webhook existe, está ativo, usa JSON e escuta push
+- `last_commit` — Último commit detectado no repositório
+
+```bash
+# Listar apps disponíveis
+fabroku webhook
+
+# Diagnosticar app
+fabroku webhook 15
+
+# Criar/recriar webhook
+fabroku webhook 15 --setup
+
+# Testar commit status
+fabroku webhook 15 --test
+
+# Tudo junto
+fabroku webhook 15 --setup --test
+```
+
+## MCP para ferramentas de IA
+
+O comando `fabroku mcp` inicia um servidor local do Model Context Protocol via stdio. Assim, ferramentas de IA podem consultar e operar o Fabroku usando o mesmo login e as mesmas permissões da CLI.
+
+Execute `fabroku login` antes de conectar o MCP. Nenhum token precisa ser colocado na configuração da ferramenta de IA. O próprio cliente inicia `fabroku mcp` automaticamente; normalmente não é necessário deixar esse comando aberto à mão.
+
+Configuração MCP (formato padrão):
+```json
+{
+  "mcpServers": {
+    "fabroku": {
+      "command": "fabroku",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+Configuração no Codex:
+```toml
+[mcp_servers.fabroku]
+command = "fabroku"
+args = ["mcp"]
+```
+
+Ferramentas disponíveis:
+- `fabroku_list_projects` — Lista os projetos acessíveis ao usuário autenticado.
+- `fabroku_list_apps` — Lista apps e permite filtrar por projeto.
+- `fabroku_get_app` — Consulta estado, repositório, branch, serviços e nomes das envs.
+- `fabroku_list_services` — Lista os serviços associados a apps ou projetos.
+- `fabroku_get_status` — Consulta o estado da tarefa atual de um app.
+- `fabroku_get_runtime_logs` — Obtém as últimas linhas dos logs com dados sensíveis mascarados.
+- `fabroku_run_migrate` — Executa migrations Django usando um manage.py validado.
+- `fabroku_redeploy` — Publica o código já commitado e enviado ao repositório remoto.
+
+## Workflow Completo de Deploy
+
+Passo a passo para fazer deploy de uma aplicação do zero:
+
+1. **Instalar a CLI** — Instale globalmente via npm.
+   ```bash
+   npm i -g fabroku
+   ```
+2. **Autenticar** — Faça login com sua conta GitHub.
+   ```bash
+   fabroku login
+   ```
+3. **Acessar o projeto** — Navegue até o diretório do seu projeto.
+   ```bash
+   cd meu-projeto
+   ```
+4. **Verificar arquivos** — Verifique e gere os arquivos necessários para deploy.
+   ```bash
+   fabroku verify --fix
+   ```
+5. **Commitar e push** — Envie as alterações para o GitHub.
+   ```bash
+   git add . && git commit -m "prepare deploy"
+   git push origin main
+   ```
+6. **Fazer deploy** — Dispare o deploy e acompanhe o progresso.
+   ```bash
+   fabroku deploy
+   ```
+7. **Configurar webhook (opcional)** — Se precisar de commit status no GitHub.
+   ```bash
+   fabroku webhook <appId> --setup
+   ```
+
+## Troubleshooting
+
+| Problema | Solução |
+|---|---|
+| Não autenticado | Execute `fabroku login` |
+| Token expirado ou inválido | Execute `fabroku login` novamente |
+| Timeout na autenticação (2min) | Verifique se o browser abriu e tente novamente |
+| Tipo de projeto não detectado | Use `--type frontend` ou `--type backend` |
+| Arquivos faltando para deploy | Use `fabroku verify --fix` |
+| Fixture JSON não encontrado no container | Confira se o arquivo está no repositório deployado e rode deploy antes do loaddata |
+| dumpdata sem `--output` | Informe um caminho local com `--output ./arquivo.json` |
+| requirements.txt faltando | Crie manualmente: `pip freeze > requirements.txt` |
+| Nenhum app encontrado | Verifique `git remote -v` ou use `--app <nome>` |
+| HTTP 409 no deploy | Deploy já em andamento, aguarde |
+| Webhook não funciona | Use `fabroku webhook <id> --test` para diagnosticar |
+| Deploy timeout (10min) | Verifique os logs no painel web |

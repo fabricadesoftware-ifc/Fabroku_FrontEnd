@@ -12,7 +12,7 @@
 
       <div class="mt-4 d-flex justify-center ga-3">
         <v-chip color="primary" prepend-icon="mdi-npm" variant="outlined">
-          v0.1.7
+          Última versão via npm
         </v-chip>
 
         <v-chip color="success" prepend-icon="mdi-nodejs" variant="outlined">
@@ -179,8 +179,10 @@
                         type="info"
                         variant="tonal"
                       >
-                        Para frontend estático, adicione estas variáveis de
-                        ambiente no app antes do deploy:
+                        <code>fabroku verify --fix</code> não configura isso:
+                        adicione manualmente estas variáveis de ambiente no
+                        app pelo painel Fabroku antes do deploy, para o
+                        buildpack Nginx servir a pasta certa:
                       </v-alert>
 
                       <CodeBlock class="mt-3" :code="frontendEnvExample" />
@@ -226,14 +228,20 @@
                 variant="tonal"
               >
                 A auto-detecção identifica o tipo pelo
-                <code>package.json</code> (frontend) ou <code>manage.py</code>,
-                <code>requirements.txt</code>,
-                <code>pyproject.toml</code> (backend).
+                <code>package.json</code> (frontend) ou por
+                <code>manage.py</code>, <code>requirements.txt</code>,
+                <code>setup.py</code>, <code>pyproject.toml</code>,
+                <code>Pipfile</code> (backend). Exceção: se houver
+                <code>package.json</code> e um <code>Procfile</code> que
+                mencione <code>node</code>/<code>npm</code>, é tratado como
+                backend Node, não frontend.
               </v-alert>
+
+              <FlagTable class="mt-3" :flags="verifyFlags" />
 
               <CodeBlock
                 class="mt-3"
-                :code="`fabroku verify\nfabroku verify --fix`"
+                :code="`fabroku verify\nfabroku verify --fix\nfabroku verify --type backend --fix`"
               />
             </v-card-text>
           </v-card>
@@ -509,6 +517,10 @@
         </v-card-title>
 
         <v-card-text>
+          <v-alert class="mb-4" density="compact" type="info" variant="tonal">
+            Todos os comandos <code>fabroku run *</code> fazem polling do
+            status a cada 3s por até 12 minutos antes de reportar timeout.
+          </v-alert>
           <v-card class="mb-4" variant="tonal">
             <v-card-title class="text-subtitle-1">
               <code>fabroku run migrate</code>
@@ -543,13 +555,15 @@
 
           <v-card class="mb-4" variant="tonal">
             <v-card-title class="text-subtitle-1">
-              <code>fabroku run loaddata</code>
+              <code>fabroku run loaddata &lt;fixture&gt;</code>
             </v-card-title>
 
             <v-card-text>
               <p class="mb-3">
                 Executa <code>loaddata</code> dentro do container do app
                 Django usando um fixture JSON que ja esta no deploy.
+                <code>&lt;fixture&gt;</code> é argumento posicional (caminho
+                relativo ao app), não valor de uma flag.
               </p>
 
               <FlagTable :flags="runLoaddataFlags" />
@@ -567,12 +581,12 @@
 
               <CodeBlock
                 class="mt-3"
-                :code="`# Fixture versionado na raiz do app\nfabroku run loaddata --django ./my_data.json\n\n# Especificando o app manualmente\nfabroku run loaddata --django ./my_data.json --app minha-api\n\n# Fixture dentro da pasta usada no deploy\nfabroku run loaddata --django ./fixtures/users.json --dir ./backend --manage src/manage.py`"
+                :code="`# Fixture versionado na raiz do app\nfabroku run loaddata ./my_data.json --django\n\n# Especificando o app manualmente\nfabroku run loaddata ./my_data.json --django --app minha-api\n\n# Fixture dentro da pasta usada no deploy\nfabroku run loaddata ./fixtures/users.json --django --dir ./backend --manage src/manage.py`"
               />
             </v-card-text>
           </v-card>
 
-          <v-card variant="tonal">
+          <v-card class="mb-4" variant="tonal">
             <v-card-title class="text-subtitle-1">
               <code>fabroku run dumpdata</code>
             </v-card-title>
@@ -600,6 +614,62 @@
               <CodeBlock
                 class="mt-3"
                 :code="`# Dump completo para arquivo local\nfabroku run dumpdata --django --output ./dump.json\n\n# Com filtros e flags do Django após --\nfabroku run dumpdata --django --output ./users.json -- --indent 2 auth.User\n\n# Usando app detectado por git remote e manage.py customizado\nfabroku run dumpdata --django --dir ./backend --manage src/manage.py --output ./backups/auth.json -- auth.User`"
+              />
+            </v-card-text>
+          </v-card>
+
+          <v-card variant="tonal">
+            <v-card-title class="text-subtitle-1">
+              <code>fabroku run createsuperuser</code>
+            </v-card-title>
+
+            <v-card-text>
+              <p class="mb-3">
+                Abre uma sessao interativa (via WebSocket, com fallback para
+                SSE) de <code>python manage.py createsuperuser</code> dentro
+                do container do app. A CLI faz o proxy dos prompts (usuario,
+                email, senha) direto no terminal local; a senha e digitada
+                com input oculto.
+              </p>
+
+              <FlagTable :flags="runCreatesuperuserFlags" />
+
+              <CodeBlock
+                class="mt-3"
+                :code="`fabroku run createsuperuser\nfabroku run createsuperuser --app minha-api --manage src/manage.py`"
+              />
+            </v-card-text>
+          </v-card>
+        </v-card-text>
+      </v-card>
+    </section>
+
+    <!-- Banco de Dados -->
+    <section :id="'db'" class="mb-6">
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2" color="cyan">mdi-database-lock</v-icon>
+          Banco de Dados
+        </v-card-title>
+
+        <v-card-text>
+          <v-card variant="tonal">
+            <v-card-title class="text-subtitle-1">
+              <code>fabroku db connect</code>
+            </v-card-title>
+
+            <v-card-text>
+              <p class="mb-3">
+                Abre uma sessao interativa e auditada em um PostgreSQL ou
+                PostGIS vinculado ao app (via <code>psql</code> dentro do
+                container).
+              </p>
+
+              <FlagTable :flags="dbConnectFlags" />
+
+              <CodeBlock
+                class="mt-3"
+                :code="`fabroku db connect\nfabroku db connect --app minha-api\nfabroku db connect --app minha-api --service mapas-db`"
               />
             </v-card-text>
           </v-card>
@@ -961,6 +1031,7 @@
     { id: 'procfile', label: 'Procfile', icon: 'mdi-file-cog-outline' },
     { id: 'servicos', label: 'PostGIS', icon: 'mdi-map-marker-radius' },
     { id: 'run', label: 'Run', icon: 'mdi-database-sync' },
+    { id: 'db', label: 'Banco de Dados', icon: 'mdi-database-lock' },
     { id: 'webhook', label: 'Webhook', icon: 'mdi-webhook' },
     { id: 'mcp', label: 'MCP', icon: 'mdi-robot-outline' },
     { id: 'workflow', label: 'Workflow', icon: 'mdi-map-marker-path' },
@@ -989,26 +1060,27 @@
 # Logado como: fulano
 #    API: https://api.exemplo.com
 #    Email: fulano@example.com
-# Perfil privilegiado
-# Token valido`
+#    🏭 Membro da Fábrica   (label dinâmico, só se is_fabric)
+#    🔑 Administrador       (só se is_superuser)
+#    ✅ Token válido`
 
-  // const verifyFlags = [
-  //   {
-  //     flag: '-d, --dir <path>',
-  //     desc: 'Diretório do projeto',
-  //     default: '. (atual)',
-  //   },
-  //   {
-  //     flag: '-t, --type <type>',
-  //     desc: 'Forçar tipo: frontend ou backend',
-  //     default: 'auto-detecta',
-  //   },
-  //   {
-  //     flag: '--fix',
-  //     desc: 'Gerar arquivos faltantes automaticamente',
-  //     default: 'false',
-  //   },
-  // ]
+  const verifyFlags = [
+    {
+      flag: '-d, --dir <path>',
+      desc: 'Diretório do projeto',
+      default: '. (atual)',
+    },
+    {
+      flag: '-t, --type <type>',
+      desc: 'Forçar tipo: frontend ou backend',
+      default: 'auto-detecta',
+    },
+    {
+      flag: '--fix',
+      desc: 'Gerar arquivos faltantes automaticamente',
+      default: 'false',
+    },
+  ]
 
   const frontendFiles = [
     { name: '.buildpacks', desc: 'Buildpacks Node.js + Nginx' },
@@ -1022,7 +1094,7 @@ NGINX_DEFAULT_REQUEST=index.html`
   const backendFiles = [
     { name: 'Procfile', desc: 'Processos web, worker e release' },
     { name: 'requirements.txt', desc: 'Dependências Python' },
-    { name: 'runtime.txt', desc: 'Versão do Python' },
+    { name: '.python-version', desc: 'Versão do Python (ex: python-3.13.2)' },
   ]
 
   const appsFlags = [
@@ -1174,6 +1246,42 @@ release: python manage.py migrate --noinput`
     {
       flag: '-- [args]',
       desc: 'Argumentos repassados diretamente ao Django dumpdata',
+    },
+  ]
+
+  const runCreatesuperuserFlags = [
+    {
+      flag: '-a, --app <name>',
+      desc: 'Nome ou ID do app',
+      default: 'auto-detecta via git',
+    },
+    {
+      flag: '-d, --dir <path>',
+      desc: 'Diretorio local usado para detectar o app',
+      default: '. (atual)',
+    },
+    {
+      flag: '--manage <path>',
+      desc: 'Caminho relativo do manage.py dentro do app',
+      default: 'manage.py',
+    },
+  ]
+
+  const dbConnectFlags = [
+    {
+      flag: '-a, --app <name>',
+      desc: 'Nome ou ID do app',
+      default: 'auto-detecta via git',
+    },
+    {
+      flag: '-d, --dir <path>',
+      desc: 'Diretorio local usado para detectar o app',
+      default: '. (atual)',
+    },
+    {
+      flag: '-s, --service <name>',
+      desc: 'Nome ou ID do banco, quando o app tem mais de um vinculado',
+      default: '—',
     },
   ]
 

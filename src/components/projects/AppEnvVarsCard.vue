@@ -14,6 +14,16 @@
         </v-btn>
 
         <v-btn
+          :disabled="!variables || Object.keys(variables).length === 0"
+          prepend-icon="mdi-file-export"
+          size="small"
+          variant="tonal"
+          @click="handleExportEnv"
+        >
+          Exportar .env
+        </v-btn>
+
+        <v-btn
           color="primary"
           prepend-icon="mdi-plus"
           size="small"
@@ -255,7 +265,7 @@ PORT=3000"
 <script setup lang="ts">
   import { computed, ref } from 'vue'
 
-  defineProps<{
+  const props = defineProps<{
     variables?: Record<string, string>
     saving?: boolean
   }>()
@@ -371,6 +381,34 @@ PORT=3000"
       }
     }
     return results
+  }
+
+  function formatEnvValue (value: string): string {
+    if (value === '') return '""'
+    if (!/[\s#"'\\]/.test(value)) return value
+    const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, String.raw`\"`)
+    return `"${escaped}"`
+  }
+
+  function serializeEnvContent (vars: Record<string, string>): string {
+    return Object.entries(vars)
+      .map(([key, value]) => `${key}=${formatEnvValue(value)}`)
+      .join('\n')
+  }
+
+  function handleExportEnv () {
+    if (!props.variables || Object.keys(props.variables).length === 0) return
+
+    const content = serializeEnvContent(props.variables)
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = '.env'
+    document.body.append(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
   }
 
   function handleImportEnv () {

@@ -1,6 +1,16 @@
 <template>
   <v-app>
-    <v-navigation-drawer class="sidebar-container" permanent>
+    <v-app-bar v-if="mobile" density="comfortable" elevation="1">
+      <v-app-bar-nav-icon aria-label="Abrir menu" @click="drawer = !drawer" />
+      <v-app-bar-title>Fabroku</v-app-bar-title>
+    </v-app-bar>
+
+    <v-navigation-drawer
+      v-model="drawer"
+      class="sidebar-container"
+      :permanent="!mobile"
+      :temporary="mobile"
+    >
       <div>
         <v-sheet class="d-flex align-center pr-5" elevation="0">
           <v-card
@@ -84,11 +94,22 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, onUnmounted, watch } from 'vue'
+  import { onMounted, onUnmounted, ref, watch } from 'vue'
+  import { useRoute } from 'vue-router'
+  import { useDisplay } from 'vuetify'
   import UserAvatar from '@/components/ui/UserAvatar.vue'
   import { useWebMcpTools } from '@/composables/useWebMcpTools'
   import { useAuthStore } from '@/stores'
   const authStore = useAuthStore()
+  const { mobile } = useDisplay()
+  const drawer = ref(!mobile.value)
+  const route = useRoute()
+  watch(() => route.fullPath, () => {
+    if (mobile.value) drawer.value = false
+  })
+  watch(mobile, isMobile => {
+    drawer.value = !isMobile
+  })
   const webMcpTools = useWebMcpTools()
 
   onMounted(() => {

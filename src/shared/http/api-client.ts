@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 import { environment } from '@/app/config/environment'
+import { mockAdapter } from './mock-adapter'
 
 const apiClient = axios.create({
   baseURL: environment.apiBaseUrl,
@@ -8,6 +9,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
+  ...(import.meta.env.VITE_MOCK === 'true' ? { adapter: mockAdapter } : {}),
 })
 
 let isRefreshing = false

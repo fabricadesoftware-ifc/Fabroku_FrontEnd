@@ -57,7 +57,7 @@
         block
         class="mb-2"
         color="deep-purple"
-        :disabled="status === 'DELETING' || status === 'DEPLOYING' || status === 'STARTING'"
+        :disabled="isTransientAppStatus(status)"
         :loading="redeploying"
         prepend-icon="mdi-cloud-upload"
         @click="emit('redeploy')"
@@ -158,6 +158,8 @@
 
 <script setup lang="ts">
   import { computed, ref, watch } from 'vue'
+
+  import { isTransientAppStatus } from '@/modules/applications/domain/models'
 
   const props = defineProps<{
     status?: string

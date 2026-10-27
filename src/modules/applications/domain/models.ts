@@ -12,6 +12,19 @@ export type AppStatus
     | 'STOPPING'
     | 'FAILED'
 
+// Operacao em andamento no worker (espelha TRANSIENT_APP_STATUSES do backend).
+export const TRANSIENT_APP_STATUSES: ReadonlySet<string> = new Set<AppStatus>([
+  'STARTING',
+  'STOPPING',
+  'RESTARTING',
+  'DEPLOYING',
+  'DELETING',
+])
+
+export function isTransientAppStatus (status: string | null | undefined) {
+  return TRANSIENT_APP_STATUSES.has(status ?? '')
+}
+
 export interface App {
   id?: number
   name: string

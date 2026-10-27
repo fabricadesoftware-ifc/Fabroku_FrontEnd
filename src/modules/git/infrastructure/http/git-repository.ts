@@ -10,6 +10,11 @@ export class HttpGitRepository implements GitRepository {
     const response = await this.client.get<GitRepo[]>('/git/repos')
     return response.data
   }
+
+  async getBranches (repoFullName: string): Promise<string[]> {
+    const response = await this.client.get<string[]>('/git/branches', { params: { repo: repoFullName } })
+    return response.data
+  }
 }
 
 export const gitRepository = new HttpGitRepository()

@@ -108,6 +108,7 @@ const routes: Array<[string, RegExp, Handler]> = [
   ['GET', /^\/logs\/stream\/[\w-]+\/$/, () => ({ logs: logs.slice(0, 8) })],
   ['GET', /^\/logs\/app-runtime\/$/, () => ({ lines: Array.from({ length: 30 }, (_, i) => `[${ago(30 - i)}] GET /api/health 200 ${10 + i}ms`) })],
   ['GET', /^\/logs\/(\d+)\/$/, (_c, m) => logs.find(l => l.id === Number(m[1])) ?? logs[0]],
+  ['GET', /^\/git\/branches$/, () => ['main', 'develop', 'feature/nova-home']],
   ['GET', /^\/git\/repos$/, () => [
     { id: 1, name: 'portal-api', full_name: 'exemplo/portal-api', html_url: 'https://github.com/exemplo/portal-api', description: 'API do portal', private: true, default_branch: 'main', clone_url: 'https://github.com/exemplo/portal-api.git', ssh_url: 'git@github.com:exemplo/portal-api.git' },
     { id: 2, name: 'portal-web', full_name: 'exemplo/portal-web', html_url: 'https://github.com/exemplo/portal-web', description: 'Frontend do portal', private: false, default_branch: 'main', clone_url: 'https://github.com/exemplo/portal-web.git', ssh_url: 'git@github.com:exemplo/portal-web.git' },

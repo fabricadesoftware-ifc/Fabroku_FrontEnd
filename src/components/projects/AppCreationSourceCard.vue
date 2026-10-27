@@ -57,11 +57,15 @@
 
         <div class="text-body-2 text-medium-emphasis mt-5 mb-1">Branch de Produção</div>
 
-        <v-select
+        <v-autocomplete
           v-model="selectedBranch"
           density="comfortable"
+          :disabled="!selectedRepo"
           hide-details
           :items="branchOptions"
+          :loading="branchesLoading"
+          no-data-text="Nenhuma branch encontrada"
+          placeholder="Selecione um repositório primeiro"
           prepend-inner-icon="mdi-source-branch"
           variant="outlined"
         />
@@ -105,6 +109,7 @@
     repos: GitRepo[]
     loading: boolean
     branchOptions: string[]
+    branchesLoading: boolean
   }>()
   const sourceMode = defineModel<'github' | 'manual'>('sourceMode', { required: true })
   const selectedRepo = defineModel<GitRepo | null>('selectedRepo', { required: true })

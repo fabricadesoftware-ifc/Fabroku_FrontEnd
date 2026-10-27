@@ -100,6 +100,7 @@
           v-model:selected-repo="selectedRepo"
           v-model:source-mode="sourceMode"
           :branch-options="branchOptions"
+          :branches-loading="gitStore.branchesLoading"
           :loading="gitStore.loading"
           :repos="gitStore.repos"
           @search="handleRepoSearch"
@@ -393,10 +394,13 @@ PORT=3000"
   ])
 
   const branchOptions = computed(() => {
-    if (selectedRepo.value?.default_branch) {
-      return [selectedRepo.value.default_branch]
+    const defaultBranch = selectedRepo.value?.default_branch
+    if (gitStore.branches.length === 0) {
+      // Carregando ou falhou: a branch padrão do repo ainda é uma escolha válida.
+      return defaultBranch ? [defaultBranch] : []
     }
-    return ['main', 'master', 'develop']
+    if (!defaultBranch) return gitStore.branches
+    return [defaultBranch, ...gitStore.branches.filter(branch => branch !== defaultBranch)]
   })
 
   const summaryRepo = computed(() => {
@@ -542,6 +546,7 @@ PORT=3000"
       }
       newApp.value.git = repo.clone_url
       selectedBranch.value = repo.default_branch
+      void gitStore.fetchBranches(repo.full_name)
     }
   })
 

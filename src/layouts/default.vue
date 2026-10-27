@@ -29,6 +29,10 @@
               </div>
             </div>
           </v-card>
+
+          <v-spacer />
+
+          <AdminNotificationsBell v-if="authStore.user?.is_superuser" class="mt-3" />
         </v-sheet>
 
         <v-list class="d-flex flex-column align-center px-2">
@@ -97,6 +101,7 @@
   import { onMounted, onUnmounted, ref, watch } from 'vue'
   import { useRoute } from 'vue-router'
   import { useDisplay } from 'vuetify'
+  import AdminNotificationsBell from '@/components/admin/AdminNotificationsBell.vue'
   import UserAvatar from '@/components/ui/UserAvatar.vue'
   import { useWebMcpTools } from '@/composables/useWebMcpTools'
   import { useAuthStore } from '@/stores'

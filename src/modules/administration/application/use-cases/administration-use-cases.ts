@@ -1,5 +1,6 @@
-import type { AdminUser, StorageUsage, UserQuota } from '../../domain/models'
+import type { AdminNotification, AdminUser, StorageUsage, UserQuota } from '../../domain/models'
 import type {
+  AdminNotificationRepository,
   AdminUserRepository,
   StorageRepository,
 } from '../ports/administration-repositories'
@@ -76,5 +77,53 @@ export class GetStorageUsage {
 
   execute (forceRefresh = false): Promise<StorageUsage> {
     return this.repository.getUsage(forceRefresh)
+  }
+}
+
+export class ListAdminNotifications {
+  private readonly repository: AdminNotificationRepository
+
+  constructor (repository: AdminNotificationRepository) {
+    this.repository = repository
+  }
+
+  execute (unreadOnly = false): Promise<AdminNotification[]> {
+    return this.repository.list(unreadOnly)
+  }
+}
+
+export class CountUnreadAdminNotifications {
+  private readonly repository: AdminNotificationRepository
+
+  constructor (repository: AdminNotificationRepository) {
+    this.repository = repository
+  }
+
+  execute (): Promise<number> {
+    return this.repository.unreadCount()
+  }
+}
+
+export class MarkAdminNotificationRead {
+  private readonly repository: AdminNotificationRepository
+
+  constructor (repository: AdminNotificationRepository) {
+    this.repository = repository
+  }
+
+  execute (id: number): Promise<AdminNotification> {
+    return this.repository.markRead(id)
+  }
+}
+
+export class MarkAllAdminNotificationsRead {
+  private readonly repository: AdminNotificationRepository
+
+  constructor (repository: AdminNotificationRepository) {
+    this.repository = repository
+  }
+
+  execute (): Promise<number> {
+    return this.repository.markAllRead()
   }
 }

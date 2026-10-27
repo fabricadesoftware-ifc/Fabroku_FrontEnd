@@ -41,3 +41,22 @@ export interface UserQuota {
   can_create_app: boolean
   can_create_service: boolean
 }
+
+export type AdminNotificationEvent = 'app_delete_failed' | 'service_delete_failed'
+
+export interface AdminNotification {
+  id: number
+  event_type: AdminNotificationEvent
+  event_display: string
+  level: string
+  title: string
+  message: string
+  app: number | null
+  app_name: string | null
+  project_id: string | null
+  service: number | null
+  service_name: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+  read_at: string | null
+}

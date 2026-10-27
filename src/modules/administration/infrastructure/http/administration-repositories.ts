@@ -1,8 +1,9 @@
 import type {
+  AdminNotificationRepository,
   AdminUserRepository,
   StorageRepository,
 } from '@/modules/administration/application/ports/administration-repositories'
-import type { AdminUser, StorageUsage, UserQuota } from '@/modules/administration/domain/models'
+import type { AdminNotification, AdminUser, StorageUsage, UserQuota } from '@/modules/administration/domain/models'
 import type { PaginatedResponse } from '@/shared/types/api'
 import type { AxiosInstance } from 'axios'
 import apiClient from '@/shared/http/api-client'
@@ -59,5 +60,32 @@ export class HttpStorageRepository implements StorageRepository {
   }
 }
 
+export class HttpAdminNotificationRepository implements AdminNotificationRepository {
+  constructor (private readonly client: AxiosInstance = apiClient) {}
+
+  async list (unreadOnly = false): Promise<AdminNotification[]> {
+    const response = await this.client.get<PaginatedResponse<AdminNotification>>('/admin-api/notifications/', {
+      params: unreadOnly ? { unread: '1' } : undefined,
+    })
+    return response.data.results || []
+  }
+
+  async unreadCount (): Promise<number> {
+    const response = await this.client.get<{ count: number }>('/admin-api/notifications/unread_count/')
+    return response.data.count
+  }
+
+  async markRead (id: number): Promise<AdminNotification> {
+    const response = await this.client.post<AdminNotification>(`/admin-api/notifications/${id}/read/`)
+    return response.data
+  }
+
+  async markAllRead (): Promise<number> {
+    const response = await this.client.post<{ updated: number }>('/admin-api/notifications/read_all/')
+    return response.data.updated
+  }
+}
+
 export const adminUserRepository = new HttpAdminUserRepository()
 export const storageRepository = new HttpStorageRepository()
+export const adminNotificationRepository = new HttpAdminNotificationRepository()

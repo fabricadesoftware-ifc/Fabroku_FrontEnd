@@ -35,7 +35,7 @@
         @click="emit('deploy')"
       >Deploy App</v-btn>
 
-      <p class="text-caption text-medium-emphasis text-center mt-3">Ao clicar em Deploy, você concorda com as <a class="text-primary" href="#">regras de uso</a> da plataforma.</p>
+      <p class="text-caption text-medium-emphasis text-center mt-3">Ao clicar em Deploy, você concorda com as <a class="text-primary" href="/regras" rel="noopener" target="_blank">regras de uso</a> da plataforma.</p>
     </v-card-text>
   </v-card>
 </template>

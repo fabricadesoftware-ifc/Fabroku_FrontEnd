@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 import { environment } from '@/app/config/environment'
+import { isPublicRoute } from '@/shared/public-routes'
 import { mockAdapter } from './mock-adapter'
 
 const apiClient = axios.create({
@@ -35,16 +36,11 @@ function isAuthCheckRequest (
   return request?.url?.includes('/auth/check') ?? false
 }
 
-function isCallbackPage () {
-  return ['/callback', '/callback/'].includes(window.location.pathname)
-}
-
 function shouldRedirectToLogin (
   request?: InternalAxiosRequestConfig & { _retry?: boolean },
 ) {
   return (
-    window.location.pathname !== '/'
-    && !isCallbackPage()
+    !isPublicRoute(window.location.pathname)
     && !isAuthCheckRequest(request)
   )
 }

@@ -7,6 +7,7 @@
 import { setupLayouts } from 'virtual:generated-layouts'
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
+import { isPublicRoute } from '@/shared/public-routes'
 import { useAuthStore } from '@/stores'
 
 const router = createRouter({
@@ -14,10 +15,8 @@ const router = createRouter({
   routes: setupLayouts(routes),
 })
 
-const publicRoutes = new Set(['/', '/callback', '/callback/'])
-
 router.beforeEach(async to => {
-  if (publicRoutes.has(to.path)) {
+  if (isPublicRoute(to.path)) {
     return true
   }
 

@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AccessLogsMock: typeof import('./components/logs/AccessLogsMock.vue')['default']
+    AdminNotificationsBell: typeof import('./components/admin/AdminNotificationsBell.vue')['default']
     AdminProjectDeleteDialog: typeof import('./components/admin/AdminProjectDeleteDialog.vue')['default']
     AdminProjectsPanel: typeof import('./components/admin/AdminProjectsPanel.vue')['default']
     AdminQuotaDialog: typeof import('./components/admin/AdminQuotaDialog.vue')['default']

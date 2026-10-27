@@ -135,6 +135,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/regras': RouteRecordInfo<
+      '/regras',
+      '/regras',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/settings/': RouteRecordInfo<
       '/settings/',
       '/settings',
@@ -248,6 +255,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/projects/org-permission-denied.vue': {
       routes:
         | '/projects/org-permission-denied'
+      views:
+        | never
+    }
+    'src/pages/regras.vue': {
+      routes:
+        | '/regras'
       views:
         | never
     }

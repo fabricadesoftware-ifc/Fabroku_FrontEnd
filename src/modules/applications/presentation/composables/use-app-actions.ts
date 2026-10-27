@@ -69,7 +69,12 @@ export function useAppActions (options: AppActionsOptions) {
     stopping.value = true
     try {
       const result = await stopApplication.execute(options.appId)
-      options.setApp(result)
+      if (result.task_id) {
+        // STOPPING, ou RUNNING quando o stop cancelou um redeploy.
+        applyTask(options.getApp(), result, result.status ?? 'STOPPING')
+      } else {
+        options.setApp(result)
+      }
       return result
     } finally {
       stopping.value = false
@@ -81,7 +86,7 @@ export function useAppActions (options: AppActionsOptions) {
     try {
       const result = await restartApplication.execute(options.appId)
       if (result.task_id) {
-        applyTask(options.getApp(), result, 'STARTING')
+        applyTask(options.getApp(), result, 'RESTARTING')
       } else {
         options.setApp(result)
       }

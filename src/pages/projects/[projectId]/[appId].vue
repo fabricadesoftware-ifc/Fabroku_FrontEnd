@@ -52,9 +52,7 @@
           <v-card
             v-if="
               appStore.currentApp.task_id &&
-                ['STARTING', 'DELETING', 'DEPLOYING'].includes(
-                  appStore.currentApp.status ?? '',
-                )
+                isTransientAppStatus(appStore.currentApp.status)
             "
             class="mb-4"
             :color="
@@ -73,7 +71,11 @@
                   ? "Deletando App..."
                   : appStore.currentApp.status === "DEPLOYING"
                     ? "Fazendo deploy..."
-                    : "Criando App..."
+                    : appStore.currentApp.status === "RESTARTING"
+                      ? "Reiniciando App..."
+                      : appStore.currentApp.status === "STOPPING"
+                        ? "Parando App..."
+                        : "Criando App..."
               }}
             </v-card-title>
 
@@ -217,6 +219,7 @@
   import AppProcessScaleCard from '@/components/projects/AppProcessScaleCard.vue'
   import AppServiceLinkDialog from '@/components/projects/AppServiceLinkDialog.vue'
   import { appRepository } from '@/modules/applications'
+  import { isTransientAppStatus } from '@/modules/applications/domain/models'
   import { useAppActions } from '@/modules/applications/presentation/composables/use-app-actions'
   import { useAppCommand } from '@/modules/applications/presentation/composables/use-app-command'
   import { useAppEnvironment } from '@/modules/applications/presentation/composables/use-app-environment'
@@ -322,7 +325,7 @@
     return 'Deploy Logs'
   })
   const processScaleLocked = computed(() =>
-    ['DEPLOYING', 'STARTING', 'DELETING'].includes(appStore.currentApp?.status ?? ''),
+    isTransientAppStatus(appStore.currentApp?.status),
   )
   const canManageProcesses = computed(() =>
     Boolean(authStore.user?.is_fabric || authStore.user?.is_superuser),
@@ -416,9 +419,7 @@
   let logStreamActive = false
   function shouldStreamLogs () {
     const status = appStore.currentApp?.status
-    return ['FAILED', 'ERROR', 'STARTING', 'DELETING', 'DEPLOYING'].includes(
-      status || '',
-    )
+    return status === 'FAILED' || status === 'ERROR' || isTransientAppStatus(status)
   }
 
   async function startLogStreamIfNeeded () {
@@ -469,11 +470,7 @@
   watch(
     () => appStore.currentApp?.status,
     newStatus => {
-      if (
-        newStatus === 'STARTING'
-        || newStatus === 'DELETING'
-        || newStatus === 'DEPLOYING'
-      ) {
+      if (isTransientAppStatus(newStatus)) {
         startTaskPollingIfNeeded()
       } else {
         stopTaskPolling()
@@ -569,7 +566,8 @@
   async function handleStopApp () {
     try {
       await appActions.stop()
-      await appStore.fetchApp(appId)
+      await startLogStreamIfNeeded()
+      startTaskPollingIfNeeded()
     } catch (error_) {
       console.error('Erro ao parar app:', error_)
     }

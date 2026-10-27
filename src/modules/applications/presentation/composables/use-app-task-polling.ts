@@ -2,6 +2,7 @@ import type { App, TaskStatus } from '@/modules/applications/domain/models'
 
 import { onUnmounted, ref } from 'vue'
 
+import { isTransientAppStatus } from '@/modules/applications/domain/models'
 import { usePolling } from '@/shared/composables/use-polling'
 
 type TaskCompletionHandler = (status: TaskStatus) => void | Promise<void>
@@ -15,8 +16,6 @@ interface AppTaskPollingOptions {
   timeoutMs?: number
 }
 
-const TASK_STATUSES = new Set(['STARTING', 'DELETING', 'DEPLOYING'])
-
 export function useAppTaskPolling (options: AppTaskPollingOptions) {
   const polling = usePolling()
   const disposed = ref(false)
@@ -24,7 +23,7 @@ export function useAppTaskPolling (options: AppTaskPollingOptions) {
   let pendingTimeout: ReturnType<typeof setTimeout> | null = null
 
   function isTaskStatus () {
-    return TASK_STATUSES.has(options.getApp()?.status ?? '')
+    return isTransientAppStatus(options.getApp()?.status)
   }
 
   function stop () {

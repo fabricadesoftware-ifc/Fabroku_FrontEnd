@@ -203,6 +203,16 @@
         />
       </v-col>
     </v-row>
+
+    <v-snackbar
+      color="error"
+      location="bottom right"
+      :model-value="Boolean(actionError)"
+      timeout="6000"
+      @update:model-value="value => { if (!value) actionError = '' }"
+    >
+      {{ actionError }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -230,6 +240,7 @@
   import { useRuntimeLogStream } from '@/modules/logs/presentation/composables/use-runtime-log-stream'
   import { useTaskLogStream } from '@/modules/logs/presentation/composables/use-task-log-stream'
   import { serviceRepository } from '@/modules/services/infrastructure/http/service-repository'
+  import { getHttpErrorMessage } from '@/shared/errors/http-error'
   import { useAppStore, useAuthStore, useLogStore } from '@/stores'
   import { formatStatus, getStatusColor, getStatusIcon } from '@/utils/status'
   async function diagnoseAppError () {
@@ -461,7 +472,17 @@
     }
   })
 
+  // Fora de operacao a tela nao consultava o backend: restart pela CLI, outra aba ou
+  // deploy por push so apareciam com F5. Em operacao, o polling da task ja cuida.
+  const IDLE_REFRESH_MS = 20_000
+  const idleRefresh = setInterval(() => {
+    if (document.visibilityState !== 'visible' || loading.value) return
+    if (isTransientAppStatus(appStore.currentApp?.status) || taskPolling.active.value) return
+    void appStore.fetchApp(appId).catch(() => {})
+  }, IDLE_REFRESH_MS)
+
   onUnmounted(() => {
+    clearInterval(idleRefresh)
     stopTaskPolling()
     stopRuntimeLogsPolling()
     stopLogStream()
@@ -541,6 +562,15 @@
   }
 
   // --- Controle do App ---
+  // Antes os erros das acoes (409 de operacao em andamento, 400, 502) so iam para o console:
+  // o usuario clicava e nada acontecia.
+  const actionError = ref('')
+
+  function reportActionError (error_: unknown, fallback: string) {
+    console.error(fallback, error_)
+    actionError.value = getHttpErrorMessage(error_, fallback)
+  }
+
   async function handleDeleteApp () {
     try {
       await appActions.remove()
@@ -549,7 +579,7 @@
     // Não navega imediatamente — deixa o usuário acompanhar o progresso nos logs
     // A navegação ocorre quando o watch detectar status 'RUNNING' ou 'SUCCESS'
     } catch (error_) {
-      console.error('Erro ao deletar app:', error_)
+      reportActionError(error_, 'Não foi possível excluir o app.')
     }
   }
 
@@ -559,7 +589,7 @@
       await startLogStreamIfNeeded()
       startTaskPollingIfNeeded()
     } catch (error_) {
-      console.error('Erro ao iniciar app:', error_)
+      reportActionError(error_, 'Não foi possível iniciar o app.')
     }
   }
 
@@ -569,7 +599,7 @@
       await startLogStreamIfNeeded()
       startTaskPollingIfNeeded()
     } catch (error_) {
-      console.error('Erro ao parar app:', error_)
+      reportActionError(error_, 'Não foi possível parar o app.')
     }
   }
 
@@ -579,7 +609,7 @@
       await startLogStreamIfNeeded()
       startTaskPollingIfNeeded()
     } catch (error_) {
-      console.error('Erro ao reiniciar app:', error_)
+      reportActionError(error_, 'Não foi possível reiniciar o app.')
     }
   }
 
@@ -589,7 +619,7 @@
       await startLogStreamIfNeeded()
       startTaskPollingIfNeeded()
     } catch (error_) {
-      console.error('Erro ao fazer redeploy:', error_)
+      reportActionError(error_, 'Não foi possível iniciar o redeploy.')
     }
   }
 

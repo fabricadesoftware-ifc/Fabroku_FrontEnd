@@ -33,12 +33,12 @@
         block
         class="mb-2"
         color="warning"
-        :disabled="status === 'DELETING'"
+        :disabled="status === 'DELETING' || status === 'STARTING' || status === 'STOPPING' || status === 'RESTARTING'"
         :loading="stopping"
-        prepend-icon="mdi-stop"
+        :prepend-icon="status === 'DEPLOYING' ? 'mdi-close-circle-outline' : 'mdi-stop'"
         @click="emit('stop')"
       >
-        Parar
+        {{ status === 'DEPLOYING' ? 'Cancelar deploy' : 'Parar' }}
       </v-btn>
 
       <v-btn

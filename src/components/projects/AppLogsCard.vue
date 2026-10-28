@@ -46,8 +46,8 @@
       <input
         v-model="commandInput"
         class="logs-console__input"
-        :disabled="running"
-        placeholder="python manage.py migrate"
+        :disabled="running || isTransientAppStatus(status)"
+        :placeholder="isTransientAppStatus(status) ? 'Aguarde a operação atual terminar' : 'python manage.py migrate'"
         type="text"
         @keydown.enter="submitCommand"
       >
@@ -61,6 +61,7 @@
   import { ref } from 'vue'
 
   import UnifiedLogsMock from '@/components/logs/UnifiedLogsMock.vue'
+  import { isTransientAppStatus } from '@/modules/applications/domain/models'
 
   defineProps<{
     logs: AppLog[]

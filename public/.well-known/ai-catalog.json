@@ -1,0 +1,45 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Fabroku — Fábrica de Software IFC",
+    "identifier": "fabroku.fabricadesoftware.ifc.edu.br",
+    "documentationUrl": "https://fabroku.fabricadesoftware.ifc.edu.br/llms.txt"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:fabroku.fabricadesoftware.ifc.edu.br:docs:llms",
+      "displayName": "Fabroku — índice para agentes",
+      "type": "text/markdown",
+      "url": "https://fabroku.fabricadesoftware.ifc.edu.br/llms.txt",
+      "description": "Índice curto da plataforma Fabroku (PaaS de deploy via GitHub) para LLMs e agentes.",
+      "tags": [
+        "paas",
+        "deploy",
+        "dokku",
+        "cli"
+      ],
+      "representativeQueries": [
+        "como fazer deploy de um app Django no Fabroku",
+        "como instalar a CLI do Fabroku"
+      ]
+    },
+    {
+      "identifier": "urn:air:fabroku.fabricadesoftware.ifc.edu.br:docs:cli-reference",
+      "displayName": "Fabroku — referência completa da CLI e do MCP",
+      "type": "text/markdown",
+      "url": "https://fabroku.fabricadesoftware.ifc.edu.br/llms-full.txt",
+      "description": "Referência da CLI fabroku: login, verify, deploy, apps, run migrate/loaddata/dumpdata, banco de dados, webhook, Procfile e servidores MCP local e remoto.",
+      "tags": [
+        "cli",
+        "mcp",
+        "postgres",
+        "troubleshooting"
+      ],
+      "representativeQueries": [
+        "como rodar migrations de um app no Fabroku",
+        "como conectar um cliente MCP ao Fabroku",
+        "por que meu deploy no Fabroku falhou"
+      ]
+    }
+  ]
+}

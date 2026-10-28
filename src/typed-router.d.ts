@@ -51,8 +51,8 @@ declare module 'vue-router/auto-routes' {
       { userId: ParamValue<false> },
       | never
     >,
-    '/callback/': RouteRecordInfo<
-      '/callback/',
+    '/callback': RouteRecordInfo<
+      '/callback',
       '/callback',
       Record<never, never>,
       Record<never, never>,
@@ -186,9 +186,9 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'src/pages/callback/index.vue': {
+    'src/pages/callback.vue': {
       routes:
-        | '/callback/'
+        | '/callback'
       views:
         | never
     }

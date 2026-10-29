@@ -30,15 +30,15 @@ meta:
                 </h1>
 
                 <p class="text-body-1 text-grey-lighten-2 mb-8">
-                  Hospede e gerencie seus projetos do Tecnico
+                  Hospede e gerencie seus projetos do Técnico
                 </p>
 
                 <v-btn
                   block
                   class="text-none font-weight-bold mb-4"
-                  color="#1313ec"
+                  color="primary"
                   elevation="0"
-                  prepend-icon="mdi-code-tags"
+                  prepend-icon="mdi-github"
                   rounded="lg"
                   size="x-large"
                   style="max-width: 400px; margin: 0 auto"
@@ -47,7 +47,7 @@ meta:
                   Entrar com GitHub
                 </v-btn>
 
-                <p class="text-body-2" style="color: #9d9db9">
+                <p class="text-body-2 text-text-muted">
                   O acesso é 100% via sua conta do GitHub.
                 </p>
               </v-sheet>

@@ -93,7 +93,7 @@
       <RouterView />
     </v-main>
 
-    <p class="text-background">Peraza esteve aqui (;</p>
+    <span aria-hidden="true" class="d-none">Peraza esteve aqui (;</span>
   </v-app>
 </template>
 

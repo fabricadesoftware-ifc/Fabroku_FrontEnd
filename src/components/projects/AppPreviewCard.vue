@@ -229,18 +229,14 @@
 
 <style scoped lang="scss">
 .app-preview {
-  background:
-    radial-gradient(circle at top left, rgba(var(--v-theme-primary), 0.14), transparent 34%),
-    rgba(var(--v-theme-surface), 0.98);
-  border: 1px solid rgba(var(--v-theme-primary), 0.18);
+
+  border: 2px solid rgba(var(--v-theme-primary), 0.18);
   border-radius: 10px;
   overflow: hidden;
 
   &__bar {
     align-items: center;
-    background:
-      linear-gradient(90deg, rgba(var(--v-theme-primary), 0.14), transparent 52%),
-      rgba(var(--v-theme-background), 0.72);
+
     border-bottom: 1px solid rgba(var(--v-theme-primary), 0.14);
     display: flex;
     gap: 10px;

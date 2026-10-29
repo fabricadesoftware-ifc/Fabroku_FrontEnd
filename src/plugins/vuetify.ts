@@ -19,8 +19,8 @@ export default createVuetify({
       light: {
         dark: false,
         colors: {
-          'primary': '#1313ec',
-          'primary-hover': '#0f0fb8',
+          'primary': '#4357e0',
+          'primary-hover': '#3445b8',
           'background': '#f6f6f8',
           'surface': '#ffffff',
           'text-muted': '#9d9db9',
@@ -30,8 +30,8 @@ export default createVuetify({
       dark: {
         dark: true,
         colors: {
-          'primary': '#542ab4ff',
-          'primary-hover': '#0f0fb8',
+          'primary': '#4357e0',
+          'primary-hover': '#3445b8',
           'background': '#101022',
           'surface': '#1a1a2e',
           'text-muted': '#9d9db9',

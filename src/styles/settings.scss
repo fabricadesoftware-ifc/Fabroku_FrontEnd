@@ -9,10 +9,6 @@
 //   $color-pack: false
 // );
 
-::-webkit-scrollbar{
-  display: none !important;
-}
-
 @layer vuetify-core.reset {
   ul, ol, figure, details, summary {
     padding: 0;

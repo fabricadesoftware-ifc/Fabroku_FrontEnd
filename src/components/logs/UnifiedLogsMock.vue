@@ -604,9 +604,6 @@
   --logs-terminal-bar: #1d1d35;
   --logs-text: rgba(var(--v-theme-on-surface), 0.88);
 
-  background:
-    radial-gradient(circle at top left, rgba(var(--v-theme-primary), 0.16), transparent 34%),
-    rgba(var(--v-theme-surface), 0.98);
   border: 1px solid var(--logs-border);
   border-radius: 8px;
   color: var(--logs-text);
@@ -727,15 +724,13 @@
 
   &__bar {
     align-items: center;
-    background:
-      linear-gradient(90deg, rgba(var(--v-theme-primary), 0.16), transparent 52%),
-      var(--logs-terminal-bar);
+
     border-bottom: 1px solid rgba(var(--v-theme-primary), 0.16);
     display: grid;
     gap: 12px;
     grid-template-columns: auto 1fr auto;
     min-height: 34px;
-    padding: 0 12px;
+    padding: 0 14px;
   }
 
   &__dots {

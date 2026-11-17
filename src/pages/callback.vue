@@ -77,32 +77,32 @@ meta:
 
 <template>
   <div class="callback-container">
-    <div class="callback-card">
-      <div v-if="loading" class="loading">
-        <div class="spinner" />
-        <h2>Processando autenticação...</h2>
-        <p>Aguarde enquanto validamos suas credenciais</p>
+    <v-card class="callback-card text-center" max-width="400" rounded="lg" width="100%">
+      <div v-if="loading" class="callback-state">
+        <v-progress-circular color="primary" indeterminate size="48" width="4" />
+        <h2 class="text-h6">Processando autenticação...</h2>
+        <p class="text-body-2 text-medium-emphasis">Aguarde enquanto validamos suas credenciais</p>
       </div>
 
-      <div v-else-if="error" class="error">
+      <div v-else-if="error" class="callback-state">
         <v-icon :color="getErrorColor(errorCode)" size="64">{{
           getErrorIcon(errorCode)
         }}</v-icon>
 
-        <h2 v-if="errorCode === 'user_disabled'" class="text-warning">
+        <h2 v-if="errorCode === 'user_disabled'" class="text-h6 text-warning">
           Conta Desabilitada
         </h2>
 
-        <h2 v-else-if="errorCode === 'invalid_email'">Email Não Permitido</h2>
-        <h2 v-else>Erro na autenticação</h2>
+        <h2 v-else-if="errorCode === 'invalid_email'" class="text-h6">Email Não Permitido</h2>
+        <h2 v-else class="text-h6">Erro na autenticação</h2>
 
-        <p>{{ error }}</p>
+        <p class="text-body-2 text-medium-emphasis">{{ error }}</p>
 
-        <button class="retry-button" @click="router.push('/')">
+        <v-btn class="mt-2" color="primary" @click="router.push('/')">
           Voltar ao início
-        </button>
+        </v-btn>
       </div>
-    </div>
+    </v-card>
   </div>
 </template>
 
@@ -116,61 +116,13 @@ meta:
 }
 
 .callback-card {
-  background: var(--color-background-soft);
   padding: 3rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  max-width: 400px;
-  width: 100%;
 }
 
-.loading,
-.error {
+.callback-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid var(--color-border);
-  border-top-color: var(--color-heading);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-h2 {
-  color: var(--color-heading);
-  margin: 0;
-}
-
-p {
-  color: var(--color-text);
-  margin: 0;
-}
-
-.retry-button {
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--color-heading);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: opacity 0.3s ease;
-}
-
-.retry-button:hover {
-  opacity: 0.8;
 }
 </style>

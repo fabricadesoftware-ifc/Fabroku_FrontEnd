@@ -39,7 +39,7 @@
           <v-list-item
             class="menu-item"
             link
-            prepend-icon="mdi-view-dashboard"
+            :prepend-icon="navIcon('/dashboard', 'mdi-view-dashboard', 'mdi-view-dashboard-outline')"
             rounded="lg"
             title="Dashboard"
             to="/dashboard"
@@ -48,7 +48,7 @@
           <v-list-item
             class="menu-item"
             link
-            prepend-icon="mdi-folder"
+            :prepend-icon="navIcon('/projects', 'mdi-folder', 'mdi-folder-outline')"
             rounded="lg"
             title="Projetos"
             to="/projects"
@@ -58,7 +58,7 @@
             v-if="authStore.user?.is_superuser"
             class="menu-item"
             link
-            prepend-icon="mdi-shield-crown"
+            :prepend-icon="navIcon('/admin', 'mdi-shield-crown', 'mdi-shield-crown-outline')"
             rounded="lg"
             title="Administração"
             to="/admin"
@@ -67,7 +67,7 @@
           <v-list-item
             class="menu-item"
             link
-            prepend-icon="mdi-book-open-variant-outline"
+            :prepend-icon="navIcon('/documentation', 'mdi-book-open-variant', 'mdi-book-open-variant-outline')"
             rounded="lg"
             title="Documentação"
             to="/documentation"
@@ -109,6 +109,11 @@
   const { mobile } = useDisplay()
   const drawer = ref(!mobile.value)
   const route = useRoute()
+
+  // Ícone outline por padrão; a versão preenchida marca a seção ativa.
+  function navIcon (path: string, filled: string, outline: string): string {
+    return route.path === path || route.path.startsWith(`${path}/`) ? filled : outline
+  }
   watch(() => route.fullPath, () => {
     if (mobile.value) drawer.value = false
   })

@@ -692,13 +692,17 @@
     max-width: 100%;
     padding: 6px 10px;
     text-align: left;
-    transition: background-color 0.18s ease;
+    transition: background-color 0.15s ease-out;
   }
 
   .project-name-trigger:hover,
   .project-name-trigger:focus-visible {
     background: rgba(var(--v-theme-on-surface), 0.06);
-    outline: none;
+  }
+
+  .project-name-trigger:focus-visible {
+    outline: 2px solid rgb(var(--v-theme-primary));
+    outline-offset: 2px;
   }
 
   .project-name-text {

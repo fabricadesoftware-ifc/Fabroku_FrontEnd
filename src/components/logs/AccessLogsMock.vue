@@ -717,10 +717,10 @@
 
 .access-details-slide-enter-active,
 .access-details-slide-leave-active {
-  transition: opacity 160ms ease;
+  transition: opacity 160ms ease-out;
 
   .access-details {
-    transition: transform 180ms ease;
+    transition: transform 180ms ease-out;
   }
 }
 

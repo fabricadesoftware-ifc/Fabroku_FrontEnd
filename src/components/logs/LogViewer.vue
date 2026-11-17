@@ -25,7 +25,7 @@
             </v-chip>
           </div>
 
-          <div class="log-console__subtitle">
+          <div class="log-console__subtitle tabular-nums">
             {{ visibleLines.length }} de {{ parsedLines.length }} linha(s)
           </div>
         </div>
@@ -155,7 +155,7 @@
 
         <div class="log-row__content">
           <div class="log-row__meta">
-            <span v-if="line.time" class="log-row__time">{{ line.time }}</span>
+            <span v-if="line.time" class="log-row__time tabular-nums">{{ line.time }}</span>
 
             <v-chip
               class="log-row__badge"

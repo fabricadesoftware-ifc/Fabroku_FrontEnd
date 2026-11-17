@@ -178,10 +178,10 @@
 <style scoped>
   .clickable-row {
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.15s ease-out;
   }
 
   .clickable-row:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(var(--v-theme-on-surface), 0.04);
   }
 </style>

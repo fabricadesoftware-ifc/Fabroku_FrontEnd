@@ -163,6 +163,10 @@
 }
 
 /* Estilo do botão de logout */
+.logout-button {
+  transition: background-color 0.15s ease-out;
+}
+
 .logout-button:hover {
   background-color: rgba(244, 67, 54, 0.1);
 }

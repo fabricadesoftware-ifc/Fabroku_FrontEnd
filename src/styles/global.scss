@@ -1,0 +1,66 @@
+/**
+ * src/styles/global.scss
+ *
+ * Detalhes de acabamento que valem para o app inteiro. Fica fora dos @layer do Vuetify,
+ * então vence os estilos dele sem !important.
+ */
+
+// Texto mais nítido no macOS.
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Títulos sem linha final com uma palavra só; texto corrido sem palavra órfã.
+h1, h2, h3, h4, h5, h6,
+.text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6,
+.v-card-title,
+.v-toolbar-title {
+  text-wrap: balance;
+}
+
+p,
+.v-card-text,
+.v-card-subtitle,
+.v-alert__content,
+.v-list-item-subtitle {
+  text-wrap: pretty;
+}
+
+// Números que mudam (contadores, tabelas, horários de log) não empurram o layout.
+.tabular-nums,
+.v-table td,
+.v-chip,
+.v-badge__badge,
+time {
+  font-variant-numeric: tabular-nums;
+}
+
+// Resposta tátil ao pressionar botão. A classe `static` desliga onde o movimento atrapalha.
+.v-btn {
+  transition-property: box-shadow, transform, opacity, background, scale;
+  transition-duration: 0.28s, 0.28s, 0.28s, 0.28s, 0.15s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1), cubic-bezier(0.4, 0, 0.2, 1),
+    cubic-bezier(0.4, 0, 0.2, 1), cubic-bezier(0.4, 0, 0.2, 1), ease-out;
+}
+
+.v-btn:not(.v-btn--disabled, .v-btn--loading, .static):active {
+  scale: 0.96;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-btn:active {
+    scale: none !important;
+  }
+}
+
+// Contorno sutil em fotos de avatar: preto puro no tema claro, branco puro no escuro.
+.v-avatar:has(.v-img) {
+  outline: 1px solid oklch(0 0 0 / 0.1);
+  outline-offset: -1px;
+}
+
+.v-theme--dark .v-avatar:has(.v-img),
+.v-theme--dark.v-avatar:has(.v-img) {
+  outline-color: oklch(1 0 0 / 0.1);
+}

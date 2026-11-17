@@ -23,7 +23,7 @@
       <div v-if="error" class="text-error text-caption">{{ error }}</div>
 
       <template v-else>
-        <p class="text-h6 mb-3">Total: <strong>{{ usage?.total_formatted ?? '-' }}</strong></p>
+        <p class="text-h6 mb-3">Total: <strong class="tabular-nums">{{ usage?.total_formatted ?? '-' }}</strong></p>
 
         <v-table v-if="usage?.services?.length" density="compact">
           <thead>
@@ -141,10 +141,10 @@
   .sortable-header {
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.2s;
+    transition: background-color 0.15s ease-out;
   }
 
   .sortable-header:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(var(--v-theme-on-surface), 0.04);
   }
 </style>

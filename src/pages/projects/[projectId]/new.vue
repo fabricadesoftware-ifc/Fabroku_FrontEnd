@@ -629,7 +629,7 @@ PORT=3000"
 }
 
 .app-card {
-  background-color: #1a1a2e !important;
+  background-color: rgb(var(--v-theme-surface)) !important;
   border: none !important;
 }
 </style>

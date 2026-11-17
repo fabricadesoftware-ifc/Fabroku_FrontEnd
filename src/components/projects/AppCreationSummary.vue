@@ -58,5 +58,5 @@
 </script>
 
 <style scoped>
-.app-card { background-color: #1a1a2e !important; border: none !important; }
+.app-card { background-color: rgb(var(--v-theme-surface)) !important; border: none !important; }
 </style>

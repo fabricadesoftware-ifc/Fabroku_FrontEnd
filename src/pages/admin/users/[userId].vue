@@ -226,7 +226,7 @@
 
         <v-row v-else-if="userApps.length > 0">
           <v-col v-for="app in userApps" :key="app.id" cols="12" md="4">
-            <v-card class="h-100 d-flex flex-column" hover>
+            <v-card class="h-100 d-flex flex-column">
               <v-card-title class="d-flex align-center justify-space-between">
                 <div class="d-flex align-center">
                   <v-icon class="mr-2" :color="getStatusColor(app.status)">
@@ -377,7 +377,7 @@
 <style scoped>
   .v-card[hover] {
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease-out;
   }
 
   .v-card[hover]:hover {

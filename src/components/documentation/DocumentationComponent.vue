@@ -508,6 +508,50 @@
       </v-card>
     </section>
 
+    <!-- S3 -->
+    <section :id="'s3'" class="mb-6">
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2" color="orange-darken-2">mdi-bucket-outline</v-icon>
+          Armazenamento S3 (arquivos e imagens)
+        </v-card-title>
+
+        <v-card-text>
+          <p class="mb-3">
+            O container do app é recriado a cada deploy, então arquivos salvos
+            no disco (fotos de perfil, uploads, <code>MEDIA_ROOT</code> do Django)
+            somem. Para guardar arquivos, crie um serviço
+            <strong>Armazenamento S3</strong>: o Fabroku cria um bucket só seu,
+            com uma chave que acessa apenas esse bucket, e configura as
+            variáveis no app.
+          </p>
+
+          <CodeBlock
+            :code="`S3_URL=https://CHAVE:SEGREDO@s3.fabricadesoftware.ifc.edu.br/meu-bucket\nAWS_ACCESS_KEY_ID=...\nAWS_SECRET_ACCESS_KEY=...\nAWS_STORAGE_BUCKET_NAME=meu-bucket\nAWS_S3_ENDPOINT_URL=https://s3.fabricadesoftware.ifc.edu.br\nAWS_S3_REGION_NAME=garage\nAWS_S3_ADDRESSING_STYLE=path`"
+          />
+
+          <p class="mt-4 mb-3">
+            No Django, instale <code>django-storages[s3]</code> e use:
+          </p>
+
+          <CodeBlock
+            :code="`STORAGES = {\n    'default': {'BACKEND': 'storages.backends.s3.S3Storage'},\n    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},\n}\n# O django-storages lê as variáveis AWS_* sozinho.\nAWS_QUERYSTRING_AUTH = True  # links temporários assinados`"
+          />
+
+          <v-alert class="mt-4" density="compact" type="info" variant="tonal">
+            O bucket é privado: para mostrar uma imagem, use a URL assinada que
+            o <code>django-storages</code> gera (<code>arquivo.url</code>). Cada
+            bucket tem uma cota de tamanho; ao passar dela, o envio é recusado.
+          </v-alert>
+
+          <v-alert class="mt-4" density="compact" type="warning" variant="tonal">
+            Desvincular mantém os arquivos. Excluir o serviço apaga o bucket e
+            todos os arquivos dele.
+          </v-alert>
+        </v-card-text>
+      </v-card>
+    </section>
+
     <!-- Run -->
     <section :id="'run'" class="mb-6">
       <v-card>
@@ -1108,6 +1152,7 @@
     { id: 'deploy', label: 'Deploy', icon: 'mdi-rocket-launch' },
     { id: 'procfile', label: 'Procfile', icon: 'mdi-file-cog-outline' },
     { id: 'servicos', label: 'PostGIS', icon: 'mdi-map-marker-radius' },
+    { id: 's3', label: 'Armazenamento S3', icon: 'mdi-bucket-outline' },
     { id: 'run', label: 'Run', icon: 'mdi-database-sync' },
     { id: 'db', label: 'Banco de Dados', icon: 'mdi-database-lock' },
     { id: 'webhook', label: 'Webhook', icon: 'mdi-webhook' },

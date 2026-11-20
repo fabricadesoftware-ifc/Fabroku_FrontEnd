@@ -44,6 +44,7 @@ export function useAppServices (options: AppServicesOptions) {
       postgres: 'PostgreSQL',
       postgis: 'PostGIS',
       redis: 'Redis',
+      s3: 'Armazenamento S3',
       rabbitmq: 'RabbitMQ',
     }
     return `${service.name} · ${labels[service.service_type]}`

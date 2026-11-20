@@ -49,6 +49,7 @@
     { value: 'postgres', label: 'PostgreSQL' },
     { value: 'postgis', label: 'PostGIS (geoespacial)' },
     { value: 'redis', label: 'Redis' },
+    { value: 's3', label: 'Armazenamento S3 (arquivos e imagens)' },
   ]
 
   onMounted(() => projectStore.fetchProject(projectId))

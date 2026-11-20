@@ -32,7 +32,6 @@ declare module 'vue' {
     AppServiceLinkDialog: typeof import('./components/projects/AppServiceLinkDialog.vue')['default']
     Components: typeof import('./components/index.vue')['default']
     DashboardComponent: typeof import('./components/dashboard/DashboardComponent.vue')['default']
-    DocumentationComponent: typeof import('./components/documentation/DocumentationComponent.vue')['default']
     IconCloudDemo: typeof import('./components/demo/IconCloudDemo.vue')['default']
     InteractiveIconCloud: typeof import('./components/ui/InteractiveIconCloud.vue')['default']
     Login: typeof import('./components/login/index.vue')['default']

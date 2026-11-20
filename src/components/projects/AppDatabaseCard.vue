@@ -18,7 +18,7 @@
               size="small"
               variant="flat"
             >
-              Criar banco
+              Criar serviço
             </v-btn>
           </template>
 
@@ -35,6 +35,13 @@
               subtitle="PostgreSQL com dados geoespaciais"
               title="PostGIS"
               @click="emit('create', 'postgis')"
+            />
+
+            <v-list-item
+              prepend-icon="mdi-bucket-outline"
+              subtitle="Arquivos e imagens enviados pelo app (S3)"
+              title="Armazenamento S3"
+              @click="emit('create', 's3')"
             />
           </v-list>
         </v-menu>
@@ -70,7 +77,7 @@
         <p class="mb-2">Nenhum serviço vinculado</p>
 
         <p class="text-caption">
-          Crie ou vincule PostgreSQL, PostGIS ou Redis. As variáveis de conexão
+          Crie ou vincule PostgreSQL, PostGIS, Redis ou Armazenamento S3. As variáveis de conexão
           serão sincronizadas automaticamente no app.
         </p>
       </div>
@@ -97,7 +104,7 @@
         <v-list density="compact">
           <v-list-item v-for="service in services" :key="service.id">
             <template #prepend>
-              <v-icon color="success">mdi-database-check</v-icon>
+              <v-icon color="success">{{ service.service_type === 's3' ? 'mdi-bucket-outline' : 'mdi-database-check' }}</v-icon>
             </template>
 
             <v-list-item-title class="d-flex align-center">
@@ -109,7 +116,7 @@
             </v-list-item-title>
 
             <v-list-item-subtitle>
-              Contêiner: <code>{{ service.container_name || "-" }}</code>
+              {{ service.service_type === 's3' ? 'Bucket' : 'Contêiner' }}: <code>{{ service.container_name || "-" }}</code>
             </v-list-item-subtitle>
 
             <v-list-item-subtitle v-if="service.env_key">
@@ -180,7 +187,7 @@
   }>()
 
   const emit = defineEmits<{
-    create: [serviceType: 'postgres' | 'postgis']
+    create: [serviceType: 'postgres' | 'postgis' | 's3']
     link: []
     unlink: [serviceId: number]
     delete: [serviceId: number]
@@ -192,6 +199,7 @@
     if (serviceType === 'postgres') return 'PostgreSQL'
     if (serviceType === 'postgis') return 'PostGIS'
     if (serviceType === 'redis') return 'Redis'
+    if (serviceType === 's3') return 'Armazenamento S3'
     return 'RabbitMQ'
   }
 </script>

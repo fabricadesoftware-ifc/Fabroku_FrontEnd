@@ -1,4 +1,4 @@
-export type ServiceType = 'postgres' | 'postgis' | 'redis' | 'rabbitmq'
+export type ServiceType = 'postgres' | 'postgis' | 'redis' | 'rabbitmq' | 's3'
 
 export interface Service {
   id?: number

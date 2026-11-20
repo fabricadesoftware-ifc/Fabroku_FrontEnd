@@ -1,7 +1,7 @@
 <template>
   <v-card class="h-100" variant="outlined">
     <v-card-title class="d-flex align-center">
-      <v-icon class="mr-2" color="primary">mdi-database</v-icon>
+      <v-icon class="mr-2" color="primary">{{ service.service_type === 's3' ? 'mdi-bucket-outline' : 'mdi-database' }}</v-icon>
       {{ service.name }}
     </v-card-title>
 
@@ -13,7 +13,7 @@
     </v-card-subtitle>
 
     <v-card-text>
-      <p v-if="service.container_name" class="text-caption mb-1">Contêiner: <code>{{ service.container_name }}</code></p>
+      <p v-if="service.container_name" class="text-caption mb-1">{{ service.service_type === 's3' ? 'Bucket' : 'Contêiner' }}: <code>{{ service.container_name }}</code></p>
       <p v-if="service.env_key" class="text-caption mb-1">Variável: <code>{{ service.env_key }}</code></p>
       <p v-if="service.image" class="text-caption mb-1">Imagem: <code>{{ service.image }}<template v-if="service.image_version">:{{ service.image_version }}</template></code></p>
       <p v-if="service.task_id" class="text-caption text-primary">Provisionando...</p>
@@ -61,6 +61,7 @@
       postgres: 'PostgreSQL',
       postgis: 'PostGIS',
       redis: 'Redis',
+      s3: 'Armazenamento S3',
       rabbitmq: 'RabbitMQ',
     }
     return labels[serviceType]

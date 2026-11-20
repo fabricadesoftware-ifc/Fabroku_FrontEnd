@@ -1,6 +1,17 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M261.126 140.65L164.624 307.732L256.001 466L377.028 256.5L498.001 47H315.192L261.126 140.65Z" fill="#1697F6"/>
-<path d="M135.027 256.5L141.365 267.518L231.64 111.178L268.731 47H256H14L135.027 256.5Z" fill="#AEDDFF"/>
-<path d="M315.191 47C360.935 197.446 256 466 256 466L164.624 307.732L315.191 47Z" fill="#1867C0"/>
-<path d="M268.731 47C76.0026 47 141.366 267.518 141.366 267.518L268.731 47Z" fill="#7BC6FF"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 140 140" fill="none">
+  <defs>
+    <clipPath id="nuvem">
+      <path d="M30 104 H102 A24 24 0 0 0 106 56 A34 34 0 0 0 42 50 A27 27 0 0 0 30 104 Z"/>
+    </clipPath>
+  </defs>
+  <g id="fabroku-nuvem" transform="translate(1.8 3)">
+    <g id="pecas" clip-path="url(#nuvem)">
+      <rect id="peca-topo-esq" x="0" y="0" width="64" height="74" fill="#7A89EA"/>
+      <rect id="peca-topo-dir" x="72" y="0" width="64" height="74" fill="#A997FF"/>
+      <rect id="peca-base-esq" x="0" y="80" width="64" height="50" fill="#4357E0"/>
+      <rect id="peca-base-dir" x="72" y="80" width="64" height="50" fill="#3445B8"/>
+      <polygon id="sombra" points="0,130 136,38 136,130" fill="#000000" fill-opacity="0.15"/>
+    </g>
+    <path id="seta" d="M68 50 L87 70 H76 V96 H60 V70 H49 Z" fill="#FFFFFF"/>
+  </g>
 </svg>

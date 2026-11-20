@@ -66,11 +66,13 @@
 
           <v-list-item
             class="menu-item"
+            href="https://docs.fabroku.fabricadesoftware.ifc.edu.br"
             link
-            :prepend-icon="navIcon('/documentation', 'mdi-book-open-variant', 'mdi-book-open-variant-outline')"
+            prepend-icon="mdi-book-open-variant-outline"
+            rel="noopener"
             rounded="lg"
+            target="_blank"
             title="Documentação"
-            to="/documentation"
           />
         </v-list>
       </div>

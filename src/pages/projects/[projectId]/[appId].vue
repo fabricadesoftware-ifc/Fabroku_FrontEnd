@@ -651,7 +651,7 @@
     }
   }
 
-  async function handleCreateDatabase (serviceType: 'postgres' | 'postgis') {
+  async function handleCreateDatabase (serviceType: 'postgres' | 'postgis' | 's3') {
     try {
       await appServicesState.createDatabase(serviceType)
     } catch (error_) {

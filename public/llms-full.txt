@@ -68,7 +68,7 @@ NGINX_DEFAULT_REQUEST=index.html
 **Backend (Django)**
 - `Procfile` — Processos web, worker e release
 - `requirements.txt` — Dependências Python
-- `.python-version` — Versão do Python (ex: `python-3.13.2`)
+- `.python-version` — Versão do Python, só o número (ex: `3.13`); com `python-` na frente o deploy falha
 
 A auto-detecção identifica o tipo pelo `package.json` (frontend) ou por `manage.py`, `requirements.txt`, `setup.py`, `pyproject.toml`, `Pipfile` (backend). Exceção: se houver `package.json` e um `Procfile` que mencione `node`/`npm`, é tratado como backend Node, não frontend.
 

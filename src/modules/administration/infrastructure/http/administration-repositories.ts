@@ -38,6 +38,11 @@ export class HttpAdminUserRepository implements AdminUserRepository {
     return response.data
   }
 
+  async toggleFabric (id: number): Promise<AdminUser> {
+    const response = await this.client.post<AdminUser>(`/auth/users/${id}/toggle_fabric/`)
+    return response.data
+  }
+
   async setQuota (id: number, quota: { max_apps?: number | null, max_services?: number | null }): Promise<AdminUser> {
     const response = await this.client.post<AdminUser>(`/auth/users/${id}/set_quota/`, quota)
     return response.data

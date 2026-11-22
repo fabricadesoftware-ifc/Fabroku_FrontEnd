@@ -78,6 +78,11 @@ const routes: Array<[string, RegExp, Handler]> = [
   ['GET', /^\/auth\/users\/my_quota\/$/, () => ({ max_apps: 10, max_services: 10, apps_count: 3, services_count: 2, can_create_app: true, can_create_service: true })],
   ['GET', /^\/auth\/users\/$/, () => page(users)],
   ['GET', /^\/auth\/users\/(\d+)\/$/, (_c, m) => users.find(u => u.id === Number(m[1])) ?? me],
+  ['POST', /^\/auth\/users\/(\d+)\/toggle_fabric\/$/, (_c, m) => {
+    const alvo = users.find(u => u.id === Number(m[1])) ?? me
+    alvo.is_fabric = !alvo.is_fabric
+    return alvo
+  }],
   ['POST', /^\/auth\/users\/(\d+)\/(toggle_active|toggle_admin|set_quota)\/$/, (_c, m) => users.find(u => u.id === Number(m[1])) ?? me],
   ['GET', /^\/platform\/config\/$/, () => ({ organization_name: 'Fábrica de Software', privileged_role_label: 'Fabric', regular_role_label: 'Aluno', app_domain_suffix: 'exemplo.com.br' })],
   ['GET', /^\/projects\/projects\/$/, () => page(projects)],

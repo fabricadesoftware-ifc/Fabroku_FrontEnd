@@ -79,6 +79,19 @@
               </v-btn>
 
               <v-btn
+                :color="user.is_fabric ? 'info' : 'grey'"
+                :disabled="user.is_superuser || isCurrentUser(user)"
+                :loading="togglingFabricUserId === user.id"
+                size="small"
+                variant="tonal"
+                @click="emit('toggle-fabric', user)"
+              >
+                <v-icon start>{{ user.is_fabric ? 'mdi-account-hard-hat-outline' : 'mdi-account-hard-hat' }}</v-icon>
+                {{ user.is_fabric ? `Remover de ${privilegedRoleLabel}` : `Tornar ${privilegedRoleLabel}` }}
+                <v-tooltip v-if="user.is_superuser" activator="parent" location="top">Administradores já têm todas as permissões</v-tooltip>
+              </v-btn>
+
+              <v-btn
                 :disabled="user.is_superuser"
                 icon
                 size="small"
@@ -137,6 +150,7 @@
     regularRoleLabel: string
     search: string
     togglingAdminUserId: number | null
+    togglingFabricUserId: number | null
     togglingUserId: number | null
     users: AdminUser[]
   }>()
@@ -145,6 +159,7 @@
     'edit-quota': [user: AdminUser]
     'toggle-active': [user: AdminUser]
     'toggle-admin': [user: AdminUser]
+    'toggle-fabric': [user: AdminUser]
     'update:search': [search: string]
   }>()
 

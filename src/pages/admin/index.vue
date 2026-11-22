@@ -32,11 +32,13 @@
           :regular-role-label="platformStore.regularRoleLabel"
           :search="userSearch"
           :toggling-admin-user-id="togglingAdminUserId"
+          :toggling-fabric-user-id="togglingFabricUserId"
           :toggling-user-id="togglingUserId"
           :users="adminUsersList"
           @edit-quota="openQuotaDialog"
           @toggle-active="handleToggleActive"
           @toggle-admin="handleToggleAdmin"
+          @toggle-fabric="confirmToggleFabric"
           @update:search="userSearch = $event"
         />
       </v-tabs-window-item>
@@ -66,6 +68,43 @@
       :user="quotaUser"
       @save="handleSaveQuota"
     />
+
+    <v-dialog v-model="fabricDialog" max-width="460">
+      <v-card v-if="fabricUser">
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2" color="info">mdi-account-hard-hat</v-icon>
+          {{ fabricUser.is_fabric ? `Remover de ${platformStore.privilegedRoleLabel}` : `Tornar ${platformStore.privilegedRoleLabel}` }}
+        </v-card-title>
+
+        <v-card-text>
+          <p class="mb-3"><strong>{{ fabricUser.name || fabricUser.email }}</strong></p>
+
+          <p v-if="!fabricUser.is_fabric">
+            Passa a ter limite de 5 apps e 3 serviços (em vez de 3 e 2) e pode escolher o nome e o
+            domínio dos apps.
+          </p>
+
+          <p v-else>
+            Volta ao limite de {{ platformStore.regularRoleLabel }} (3 apps e 2 serviços). Apps e
+            serviços já criados continuam, mas não dá para criar novos acima do limite.
+          </p>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="fabricDialog = false">Cancelar</v-btn>
+
+          <v-btn
+            color="info"
+            :loading="togglingFabricUserId === fabricUser.id"
+            variant="flat"
+            @click="handleToggleFabric"
+          >
+            Confirmar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -96,6 +135,9 @@
   const adminUsersLoading = adminUsers.loading
   const adminUsersList = adminUsers.users
   const togglingAdminUserId = adminUsers.togglingAdminUserId
+  const togglingFabricUserId = adminUsers.togglingFabricUserId
+  const fabricDialog = ref(false)
+  const fabricUser = ref<AdminUser | null>(null)
   const togglingUserId = adminUsers.togglingUserId
   const quotaSaving = adminUsers.quotaSaving
   const adminStorageError = adminStorage.error
@@ -152,6 +194,19 @@
   async function handleToggleAdmin (user: AdminUser) {
     if (user.id === authStore.user?.id) return
     await adminUsers.toggleAdminFor(user.id)
+  }
+
+  function confirmToggleFabric (user: AdminUser) {
+    if (user.id === authStore.user?.id || user.is_superuser) return
+    fabricUser.value = user
+    fabricDialog.value = true
+  }
+
+  async function handleToggleFabric () {
+    if (!fabricUser.value) return
+    await adminUsers.toggleFabricFor(fabricUser.value.id)
+    fabricDialog.value = false
+    fabricUser.value = null
   }
 
   function openQuotaDialog (user: AdminUser) {

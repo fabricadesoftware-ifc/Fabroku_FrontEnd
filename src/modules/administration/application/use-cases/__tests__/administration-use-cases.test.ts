@@ -27,6 +27,7 @@ function userRepository (overrides: Partial<AdminUserRepository> = {}): AdminUse
     getList: async () => [user],
     toggleActive: async () => user,
     toggleAdmin: async () => ({ ...user, is_superuser: true }),
+    toggleFabric: async () => ({ ...user, is_fabric: true }),
     setQuota: async () => user,
     getMyQuota: async () => ({
       max_apps: null,

@@ -6,6 +6,7 @@ import {
   SetUserQuota,
   ToggleActiveUser,
   ToggleAdminUser,
+  ToggleFabricUser,
 } from '@/modules/administration/application/use-cases/administration-use-cases'
 
 export function useAdminUsers (repository: AdminUserRepository) {
@@ -14,10 +15,12 @@ export function useAdminUsers (repository: AdminUserRepository) {
   const error = ref<string | null>(null)
   const togglingUserId = ref<number | null>(null)
   const togglingAdminUserId = ref<number | null>(null)
+  const togglingFabricUserId = ref<number | null>(null)
   const quotaSaving = ref(false)
   const listUsers = new ListAdminUsers(repository)
   const toggleActive = new ToggleActiveUser(repository)
   const toggleAdmin = new ToggleAdminUser(repository)
+  const toggleFabric = new ToggleFabricUser(repository)
   const setQuota = new SetUserQuota(repository)
 
   async function fetch () {
@@ -64,6 +67,17 @@ export function useAdminUsers (repository: AdminUserRepository) {
     }
   }
 
+  async function toggleFabricFor (id: number) {
+    togglingFabricUserId.value = id
+    try {
+      const updated = await toggleFabric.execute(id)
+      replaceUser(updated)
+      return updated
+    } finally {
+      togglingFabricUserId.value = null
+    }
+  }
+
   async function saveQuota (
     id: number,
     quota: { max_apps?: number | null, max_services?: number | null },
@@ -86,7 +100,9 @@ export function useAdminUsers (repository: AdminUserRepository) {
     saveQuota,
     toggleActiveFor,
     toggleAdminFor,
+    toggleFabricFor,
     togglingAdminUserId,
+    togglingFabricUserId,
     togglingUserId,
     users,
   }

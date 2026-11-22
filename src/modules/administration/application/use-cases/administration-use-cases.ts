@@ -41,6 +41,18 @@ export class ToggleAdminUser {
   }
 }
 
+export class ToggleFabricUser {
+  private readonly repository: AdminUserRepository
+
+  constructor (repository: AdminUserRepository) {
+    this.repository = repository
+  }
+
+  execute (id: number): Promise<AdminUser> {
+    return this.repository.toggleFabric(id)
+  }
+}
+
 export class SetUserQuota {
   private readonly repository: AdminUserRepository
 

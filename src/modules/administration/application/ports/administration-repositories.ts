@@ -6,6 +6,7 @@ export interface AdminUserRepository {
   getList: () => Promise<AdminUser[]>
   toggleActive: (id: number) => Promise<AdminUser>
   toggleAdmin: (id: number) => Promise<AdminUser>
+  toggleFabric: (id: number) => Promise<AdminUser>
   setQuota: (id: number, quota: { max_apps?: number | null, max_services?: number | null }) => Promise<AdminUser>
   getMyQuota: () => Promise<UserQuota>
 }
